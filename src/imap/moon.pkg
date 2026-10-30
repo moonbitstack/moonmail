@@ -1,0 +1,8 @@
+// IMAP4rev1 client (RFC 3501): tagged commands and untagged responses, kept
+// free of sockets. Literals are read and written as octet counts on the same
+// transport, so a scripted test can replay a recorded session.
+// https://www.rfc-editor.org/rfc/rfc3501
+import {
+  "moonbitstack/moonmail/sasl",
+  "moonbitlang/core/encoding/utf8",
+}

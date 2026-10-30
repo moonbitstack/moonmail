@@ -1,0 +1,7 @@
+// MAPI over HTTP (MS-OXCMAPIHTTP) and the ROP buffer framing (MS-OXCROPS): the
+// envelope and the byte layout, so a caller can build and read Exchange
+// requests. ROP payloads themselves are per-operation and are the caller's.
+// https://learn.microsoft.com/openspecs/exchange_server_protocols/
+import {
+  "moonbitlang/core/encoding/utf8",
+}

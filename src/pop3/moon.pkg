@@ -1,0 +1,7 @@
+// POP3 client (RFC 1939): the command/response dialogue a mailbox server
+// speaks, kept free of sockets so a caller supplies the transport and a test
+// can replay a recorded session.
+// https://www.rfc-editor.org/rfc/rfc1939
+import {
+  "moonbitstack/moonmail/sasl",
+}

@@ -1,0 +1,75 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/pop3"
+
+import {
+  "moonbitstack/moonmail/sasl",
+}
+
+// Values
+
+// Errors
+pub(all) suberror Pop3Error {
+  Server(msg~ : String)
+  Io(msg~ : String)
+  Protocol(msg~ : String)
+}
+
+// Types and methods
+pub struct MessageInfo {
+  number : Int32
+  size : Int32
+}
+
+pub struct Pop3 {
+  io : &Pop3Io
+  mut state : Pop3State
+}
+pub fn Pop3::apop(Self, String, String) -> Unit raise Pop3Error
+pub fn Pop3::authenticate(Self, @sasl.Mechanism, String, String) -> Unit raise Pop3Error
+pub fn Pop3::capa(Self) -> Array[String] raise Pop3Error
+pub fn Pop3::capa_names(Self) -> Array[String] raise Pop3Error
+pub fn Pop3::dele(Self, Int32) -> Unit raise Pop3Error
+pub fn Pop3::greeting(Self) -> String raise Pop3Error
+pub fn Pop3::last(Self) -> Int32 raise Pop3Error
+pub fn Pop3::list(Self) -> Array[MessageInfo] raise Pop3Error
+pub fn Pop3::list_one(Self, Int32) -> Int32 raise Pop3Error
+pub fn Pop3::new(&Pop3Io) -> Self
+pub fn Pop3::noop(Self) -> Unit raise Pop3Error
+pub fn Pop3::pass(Self, String) -> Unit raise Pop3Error
+pub fn Pop3::quit(Self) -> Unit raise Pop3Error
+pub fn Pop3::retr(Self, Int32) -> String raise Pop3Error
+pub fn Pop3::retr_bytes(Self, Int32) -> Bytes raise Pop3Error
+pub fn Pop3::rset(Self) -> Unit raise Pop3Error
+pub fn Pop3::starttls(Self) -> Unit raise Pop3Error
+pub fn Pop3::stat(Self) -> Stat raise Pop3Error
+pub fn Pop3::state(Self) -> Pop3State
+pub fn Pop3::top(Self, Int32, Int32) -> String raise Pop3Error
+pub fn Pop3::uidl(Self) -> Array[UidlEntry] raise Pop3Error
+pub fn Pop3::uidl_one(Self, Int32) -> String raise Pop3Error
+pub fn Pop3::user(Self, String) -> Unit raise Pop3Error
+
+pub(all) enum Pop3State {
+  Authorization
+  Transaction
+  Update
+} derive(Eq)
+pub fn Pop3State::equal(Self, Self) -> Bool
+pub fn Pop3State::not_equal(Self, Self) -> Bool
+
+pub struct Stat {
+  count : Int32
+  size : Int32
+}
+
+pub struct UidlEntry {
+  number : Int32
+  uid : String
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait Pop3Io {
+  fn write_line(Self, String) -> Unit raise Pop3Error
+  fn read_line(Self) -> String raise Pop3Error
+}

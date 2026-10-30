@@ -1,0 +1,61 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/smtp"
+
+import {
+  "moonbitstack/moonmail/sasl",
+}
+
+// Values
+
+// Errors
+pub(all) suberror SmtpError {
+  Server(code~ : Int32, text~ : String)
+  Io(msg~ : String)
+  Protocol(msg~ : String)
+}
+
+// Types and methods
+pub struct Reply {
+  code : Int32
+  lines : Array[String]
+}
+pub fn Reply::enhanced_status(Self) -> String
+pub fn Reply::is_ok(Self) -> Bool
+
+pub struct Smtp {
+  io : &SmtpIo
+  lmtp : Bool
+  mut greeted : Bool
+  mut mail_set : Bool
+  mut recipients : Int32
+}
+pub fn Smtp::authenticate(Self, @sasl.Mechanism, String, String) -> Unit raise SmtpError
+pub fn Smtp::bdat(Self, BytesView, Bool) -> Array[Reply] raise SmtpError
+pub fn Smtp::data(Self, BytesView) -> Array[Reply] raise SmtpError
+pub fn Smtp::ehlo(Self, String) -> Array[String] raise SmtpError
+pub fn Smtp::esmtp(&SmtpIo) -> Self
+pub fn Smtp::expn(Self, String) -> Array[String] raise SmtpError
+pub fn Smtp::greeting(Self) -> String raise SmtpError
+pub fn Smtp::helo(Self, String) -> Unit raise SmtpError
+pub fn Smtp::help(Self, String) -> Array[String] raise SmtpError
+pub fn Smtp::lmtp(&SmtpIo) -> Self
+pub fn Smtp::mail_from(Self, String) -> Unit raise SmtpError
+pub fn Smtp::mail_from_with(Self, String, Array[String]) -> Unit raise SmtpError
+pub fn Smtp::new(&SmtpIo) -> Self
+pub fn Smtp::noop(Self) -> Unit raise SmtpError
+pub fn Smtp::quit(Self) -> Unit raise SmtpError
+pub fn Smtp::rcpt_to(Self, String) -> Unit raise SmtpError
+pub fn Smtp::rcpt_to_with(Self, String, Array[String]) -> Unit raise SmtpError
+pub fn Smtp::rset(Self) -> Unit raise SmtpError
+pub fn Smtp::send(Self, String, Array[String], BytesView) -> Array[Reply] raise SmtpError
+pub fn Smtp::starttls(Self) -> Unit raise SmtpError
+pub fn Smtp::vrfy(Self, String) -> Reply raise SmtpError
+
+// Type aliases
+
+// Traits
+pub(open) trait SmtpIo {
+  fn write_line(Self, String) -> Unit raise SmtpError
+  fn write_bytes(Self, BytesView) -> Unit raise SmtpError
+  fn read_line(Self) -> String raise SmtpError
+}

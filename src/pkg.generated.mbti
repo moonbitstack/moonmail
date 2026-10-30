@@ -1,13 +1,98 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbitstack/CHANGE-ME"
+package "moonbitstack/moonmail"
 
 // Values
-pub fn greet(StringView) -> String
+pub fn decode_charset(name~ : StringView, data~ : BytesView) -> String raise Refused
+
+pub fn decode_words(StringView) -> String
+
+pub fn encode_charset(name~ : StringView, text~ : StringView) -> Bytes raise Refused
+
+pub fn encode_word(StringView, charset? : String, encoding? : WordEncoding) -> String raise Refused
+
+pub fn encode_words(StringView, charset? : String, encoding? : WordEncoding, column? : Int32, max? : Int32) -> String raise Refused
+
+pub fn parse(BytesView) -> Message
+
+pub fn qp_decode(BytesView, strict? : Bool) -> Bytes raise Refused
+
+pub fn qp_encode(BytesView) -> Bytes
+
+pub fn[T : Charset] register(name~ : String, codec~ : T) -> Unit
+
+pub fn serialize(Message) -> Bytes
 
 // Errors
+pub(all) suberror Refused {
+  Header(at~ : Int32)
+  Address(at~ : Int32)
+  Boundary(at~ : Int32)
+  Encoding(at~ : Int32)
+  Charset(name~ : String)
+} derive(Eq)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::output(Self, &Logger) -> Unit
+pub fn Refused::to_string(Self) -> String
+pub impl Show for Refused
 
 // Types and methods
+pub enum Body {
+  Leaf(Bytes)
+  Multipart(MultipartBody)
+}
+
+pub struct ContentType {
+  main : String
+  is_multipart : Bool
+  boundary : String?
+}
+
+pub struct Header {
+  name : String
+  value : String
+}
+
+pub struct Message {
+  headers : Array[Header]
+  body : Body
+}
+pub fn Message::content_type(Self) -> ContentType
+pub fn Message::decoded_header(Self, StringView) -> String?
+pub fn Message::get_header(Self, StringView) -> String?
+pub fn Message::headers_named(Self, StringView) -> Array[String]
+pub fn Message::is_multipart(Self) -> Bool
+pub fn Message::parts(Self) -> Array[Self]
+pub fn Message::payload(Self) -> Bytes
+
+pub struct MultipartBody {
+  preamble : String
+  parts : Array[Message]
+  epilogue : String
+}
+
+pub enum TransferEncoding {
+  SevenBit
+  EightBit
+  Binary
+  Base64
+  QuotedPrintable
+}
+pub fn TransferEncoding::output(Self, &Logger) -> Unit
+pub fn TransferEncoding::to_string(Self) -> String
+pub impl Show for TransferEncoding
+
+pub(all) enum WordEncoding {
+  Base64
+  QuotedPrintable
+} derive(Eq)
+pub fn WordEncoding::equal(Self, Self) -> Bool
+pub fn WordEncoding::not_equal(Self, Self) -> Bool
 
 // Type aliases
 
 // Traits
+pub(open) trait Charset {
+  fn decode(Self, BytesView) -> String raise Refused
+  fn encode(Self, StringView) -> Bytes raise Refused
+}

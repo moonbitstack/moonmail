@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/dkim"
+
+import {
+  "moonbitstack/mooncrypt/rsa",
+}
+
+// Values
+pub fn body_hash(BytesView, Canon) -> String
+
+pub fn canon_body(BytesView, Canon) -> Bytes
+
+pub fn canonicalize_header(String, String, Canon) -> String
+
+pub fn sign(BytesView, @rsa.PrivateKey, SignOptions) -> String
+
+pub fn verify(BytesView, @rsa.PublicKey) -> Bool
+
+// Errors
+pub(all) suberror DkimError {
+  MissingSignature
+  Malformed(msg~ : String)
+}
+
+// Types and methods
+pub(all) enum Canon {
+  Simple
+  Relaxed
+} derive(Eq)
+pub fn Canon::equal(Self, Self) -> Bool
+pub fn Canon::not_equal(Self, Self) -> Bool
+
+pub struct SignOptions {
+  domain : String
+  selector : String
+  headers : Array[String]
+  header_canon : Canon
+  body_canon : Canon
+}
+pub fn SignOptions::new(domain~ : String, selector~ : String, headers~ : Array[String], header_canon? : Canon, body_canon? : Canon) -> Self
+
+// Type aliases
+
+// Traits

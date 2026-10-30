@@ -1,0 +1,83 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/imap"
+
+import {
+  "moonbitstack/moonmail/sasl",
+}
+
+// Values
+
+// Errors
+pub(all) suberror ImapError {
+  Server(status~ : String, text~ : String)
+  Io(msg~ : String)
+  Protocol(msg~ : String)
+}
+
+// Types and methods
+pub struct Imap {
+  io : &ImapIo
+  mut tag_no : Int32
+  mut selected : String?
+}
+pub fn Imap::append(Self, String, BytesView) -> Unit raise ImapError
+pub fn Imap::append_with(Self, String, Array[String], BytesView) -> Unit raise ImapError
+pub fn Imap::authenticate(Self, @sasl.Mechanism, String, String) -> Unit raise ImapError
+pub fn Imap::capability(Self) -> Array[String] raise ImapError
+pub fn Imap::close(Self) -> Unit raise ImapError
+pub fn Imap::copy(Self, String, String) -> Unit raise ImapError
+pub fn Imap::create_mailbox(Self, String) -> Unit raise ImapError
+pub fn Imap::delete_mailbox(Self, String) -> Unit raise ImapError
+pub fn Imap::enable(Self, String) -> Array[String] raise ImapError
+pub fn Imap::examine(Self, String) -> Mailbox raise ImapError
+pub fn Imap::expunge(Self) -> Array[String] raise ImapError
+pub fn Imap::fetch(Self, String, String) -> Array[String] raise ImapError
+pub fn Imap::greeting(Self) -> String raise ImapError
+pub fn Imap::idle_once(Self) -> Array[String] raise ImapError
+pub fn Imap::list(Self, String, String) -> Array[String] raise ImapError
+pub fn Imap::login(Self, String, String) -> Unit raise ImapError
+pub fn Imap::logout(Self) -> Unit raise ImapError
+pub fn Imap::move_to(Self, String, String) -> Unit raise ImapError
+pub fn Imap::namespaces(Self) -> Array[String] raise ImapError
+pub fn Imap::new(&ImapIo) -> Self
+pub fn Imap::noop(Self) -> Unit raise ImapError
+pub fn Imap::rename_mailbox(Self, String, String) -> Unit raise ImapError
+pub fn Imap::search(Self, String) -> Array[Int32] raise ImapError
+pub fn Imap::select(Self, String) -> Mailbox raise ImapError
+pub fn Imap::selected_mailbox(Self) -> String?
+pub fn Imap::starttls(Self) -> Unit raise ImapError
+pub fn Imap::status(Self, String, Array[String]) -> Status raise ImapError
+pub fn Imap::store(Self, String, String, String) -> Unit raise ImapError
+pub fn Imap::subscribe(Self, String) -> Unit raise ImapError
+pub fn Imap::uid_copy(Self, String, String) -> Unit raise ImapError
+pub fn Imap::uid_expunge(Self, String) -> Array[String] raise ImapError
+pub fn Imap::uid_fetch(Self, String, String) -> Array[String] raise ImapError
+pub fn Imap::uid_move(Self, String, String) -> Unit raise ImapError
+pub fn Imap::uid_search(Self, String) -> Array[Int32] raise ImapError
+pub fn Imap::uid_store(Self, String, String, String) -> Unit raise ImapError
+pub fn Imap::unselect(Self) -> Unit raise ImapError
+pub fn Imap::unsubscribe(Self, String) -> Unit raise ImapError
+
+pub struct Mailbox {
+  exists : Int32
+  recent : Int32
+}
+
+pub struct Status {
+  mailbox : String
+  messages : Int32
+  recent : Int32
+  uid_next : Int32
+  uid_validity : Int32
+  unseen : Int32
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait ImapIo {
+  fn write_line(Self, String) -> Unit raise ImapError
+  fn write_bytes(Self, BytesView) -> Unit raise ImapError
+  fn read_line(Self) -> String raise ImapError
+  fn read_exact(Self, Int32) -> Bytes raise ImapError
+}

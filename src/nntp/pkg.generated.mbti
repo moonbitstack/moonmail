@@ -1,0 +1,61 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/nntp"
+
+// Values
+
+// Errors
+pub(all) suberror NntpError {
+  Server(code~ : Int32, text~ : String)
+  Io(msg~ : String)
+  Protocol(msg~ : String)
+}
+
+// Types and methods
+pub struct Group {
+  count : Int32
+  first : Int32
+  last : Int32
+  name : String
+}
+
+pub struct Nntp {
+  io : &NntpIo
+  mut posting : Bool
+}
+pub fn Nntp::article(Self, String) -> String raise NntpError
+pub fn Nntp::authinfo(Self, String, String) -> Unit raise NntpError
+pub fn Nntp::body(Self, String) -> String raise NntpError
+pub fn Nntp::capabilities(Self) -> Array[String] raise NntpError
+pub fn Nntp::date(Self) -> String raise NntpError
+pub fn Nntp::greeting(Self) -> String raise NntpError
+pub fn Nntp::group(Self, String) -> Group raise NntpError
+pub fn Nntp::hdr(Self, String, String) -> Array[String] raise NntpError
+pub fn Nntp::head(Self, String) -> String raise NntpError
+pub fn Nntp::help(Self) -> Array[String] raise NntpError
+pub fn Nntp::ihave(Self, String, BytesView) -> Unit raise NntpError
+pub fn Nntp::list_active(Self) -> Array[String] raise NntpError
+pub fn Nntp::list_active_group(Self, String) -> Array[String] raise NntpError
+pub fn Nntp::list_newsgroups(Self) -> Array[String] raise NntpError
+pub fn Nntp::listgroup(Self, String) -> Array[String] raise NntpError
+pub fn Nntp::mode_reader(Self) -> Unit raise NntpError
+pub fn Nntp::new(&NntpIo) -> Self
+pub fn Nntp::newgroups(Self, String, String) -> Array[String] raise NntpError
+pub fn Nntp::newnews(Self, String, String) -> Array[String] raise NntpError
+pub fn Nntp::over(Self, String) -> Array[String] raise NntpError
+pub fn Nntp::post(Self, BytesView) -> Unit raise NntpError
+pub fn Nntp::quit(Self) -> Unit raise NntpError
+pub fn Nntp::slave(Self) -> Unit raise NntpError
+pub fn Nntp::stat(Self, String) -> String raise NntpError
+
+pub struct Reply {
+  code : Int32
+  lines : Array[String]
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait NntpIo {
+  fn write_line(Self, String) -> Unit raise NntpError
+  fn read_line(Self) -> String raise NntpError
+}

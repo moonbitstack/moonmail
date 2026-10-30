@@ -1,6 +1,15 @@
-// Everything this repository does, in one run: `moon run src/examples/tour`.
+// A tour of moonmail, runnable: `moon run src/examples/tour`.
 pkgtype(kind: "executable")
 
 import {
-  "moonbitstack/CHANGE-ME",
+  "moonbitstack/moonmail",
+  "moonbitstack/moonmail/pop3",
+  "moonbitstack/moonmail/smtp",
+  "moonbitstack/moonmail/nntp",
+  "moonbitstack/moonmail/imap",
+  "moonbitstack/moonmail/jmap",
+  "moonbitstack/moonmail/mapi",
+  "moonbitstack/moonmail/dkim",
+  "moonbitstack/mooncrypt/rsa",
+  "moonbitlang/core/encoding/utf8",
 }

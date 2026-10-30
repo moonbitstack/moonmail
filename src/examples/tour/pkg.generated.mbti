@@ -1,11 +1,18 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbitstack/CHANGE-ME/examples/tour"
+package "moonbitstack/moonmail/examples/tour"
 
 // Values
 
 // Errors
 
 // Types and methods
+type ImapScript
+
+type NntpScript
+
+type Scripted
+
+type SmtpScript
 
 // Type aliases
 

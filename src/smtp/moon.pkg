@@ -1,0 +1,8 @@
+// SMTP (RFC 5321) and LMTP (RFC 2033): the dialogue a client has with a relay,
+// kept free of sockets so a caller supplies the transport.
+// https://www.rfc-editor.org/rfc/rfc5321
+// https://www.rfc-editor.org/rfc/rfc2033
+import {
+  "moonbitstack/moonmail/sasl",
+  "moonbitlang/core/encoding/utf8",
+}

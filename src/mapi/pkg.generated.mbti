@@ -1,0 +1,155 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/mapi"
+
+// Values
+pub fn decode_logon_response(BytesView, Int32) -> LogonResponse raise MapiError
+
+pub fn decode_one(BytesView) -> Rop raise MapiError
+
+pub fn decode_rop_response_header(BytesView) -> RopResponseHeader raise MapiError
+
+pub let pid_tag_body : Int32
+
+pub let pid_tag_client_submit_time : Int32
+
+pub let pid_tag_content_count : Int32
+
+pub let pid_tag_display_name : Int32
+
+pub let pid_tag_display_to : Int32
+
+pub let pid_tag_email_address : Int32
+
+pub let pid_tag_entry_id : Int32
+
+pub let pid_tag_folder_type : Int32
+
+pub let pid_tag_message_class : Int32
+
+pub let pid_tag_message_delivery_time : Int32
+
+pub let pid_tag_message_size : Int32
+
+pub let pid_tag_parent_folder_id : Int32
+
+pub let pid_tag_sender_name : Int32
+
+pub let pid_tag_subject : Int32
+
+pub fn prop_tag(Int32, Int32) -> Int32
+
+pub let pt_binary : Int32
+
+pub let pt_boolean : Int32
+
+pub let pt_i2 : Int32
+
+pub let pt_i8 : Int32
+
+pub let pt_long : Int32
+
+pub let pt_string8 : Int32
+
+pub let pt_systime : Int32
+
+pub let pt_unicode : Int32
+
+pub let rop_get_contents_table : Int32
+
+pub let rop_get_hierarchy_table : Int32
+
+pub let rop_get_properties_specific : Int32
+
+pub fn rop_get_properties_specific_request(Int32, Bool, Array[Int32]) -> Bytes
+
+pub fn rop_get_table_request(Int32, Int32, Int32) -> Bytes
+
+pub let rop_logon : Int32
+
+pub let rop_open_folder : Int32
+
+pub fn rop_open_folder_request(Int32, Int32, Int64) -> Bytes
+
+pub let rop_open_message : Int32
+
+pub fn rop_open_message_request(Int32, Int32, Int32, Int64, Int64, Int32) -> Bytes
+
+pub let rop_query_rows : Int32
+
+pub fn rop_query_rows_request(Int32, Int32, Bool, Int32) -> Bytes
+
+pub let rop_release : Int32
+
+pub fn rop_release_request(Int32) -> Bytes
+
+pub let rop_set_columns : Int32
+
+pub fn rop_set_columns_request(Int32, Int32, Array[Int32]) -> Bytes
+
+pub let rop_set_properties : Int32
+
+pub fn rop_size(BytesView) -> Int32 raise MapiError
+
+pub let rop_submit_message : Int32
+
+// Errors
+pub(all) suberror MapiError {
+  Protocol(msg~ : String)
+  Truncated(msg~ : String)
+}
+
+// Types and methods
+pub struct LogonRequest {
+  output_handle : Int32
+  logon_flags : Int32
+  open_flags : Int32
+  store_state : Int32
+  essdn : String
+}
+pub fn LogonRequest::encode(Self) -> Bytes
+pub fn LogonRequest::new(String) -> Self
+
+pub struct LogonResponse {
+  header : RopResponseHeader
+  logon_flags : Int32
+  store_state : Int32
+  folder_ids : Array[Int64]
+}
+
+pub struct MapiHttpRequest {
+  request_type : RequestType
+  request_id : String
+  body : Bytes
+}
+pub fn MapiHttpRequest::headers(Self) -> Array[(String, String)]
+pub fn MapiHttpRequest::new(RequestType, String, BytesView) -> Self
+
+pub(all) enum RequestType {
+  Connect
+  Execute
+  Disconnect
+}
+
+pub struct Rop {
+  rop_id : Int32
+  logon_id : Int32
+  data : Bytes
+}
+
+pub struct RopBuffer {
+  rops : Array[Rop]
+}
+pub fn RopBuffer::add(Self, Int32, Int32, BytesView) -> Unit
+pub fn RopBuffer::count(Self) -> Int32
+pub fn RopBuffer::encode(Self) -> Bytes
+pub fn RopBuffer::new() -> Self
+
+pub struct RopResponseHeader {
+  rop_id : Int32
+  handle_index : Int32
+  return_value : Int32
+}
+
+// Type aliases
+
+// Traits

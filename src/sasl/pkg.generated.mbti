@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/sasl"
+
+// Values
+pub fn challenge_of(String) -> String
+
+// Errors
+pub(all) suberror SaslError {
+  Unsupported(mechanism~ : String)
+  Protocol(msg~ : String)
+}
+
+// Types and methods
+pub struct Client {
+  mechanism : Mechanism
+  username : String
+  secret : String
+  mut step : Int32
+}
+pub fn Client::initial(Self) -> String
+pub fn Client::mechanism_name(Self) -> String
+pub fn Client::new(Mechanism, String, String) -> Self
+pub fn Client::respond(Self, String) -> String raise SaslError
+
+pub(all) enum Mechanism {
+  Plain
+  Login
+  CramMd5
+  Xoauth2
+}
+pub fn Mechanism::name(Self) -> String
+
+// Type aliases
+
+// Traits
