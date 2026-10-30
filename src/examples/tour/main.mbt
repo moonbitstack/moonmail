@@ -228,8 +228,8 @@ fn main {
   // The transfer encoding on its own: high octets become =XY, and decoding
   // turns them back. Round-tripping is the only safe way to show both.
   let greeting = @utf8.encode("Café ☕ — naïve")[:]
-  let encoded = @moonmail.qp_encode(greeting)
-  let decoded = @moonmail.qp_decode(encoded[:]) catch { _ => b"" }
+  let encoded = @qp.encode(greeting)
+  let decoded = @qp.decode(encoded[:]) catch { _ => b"" }
   println("--- quoted-printable")
   println("encoded      -> \{@utf8.decode_lossy(encoded[:])}")
   println("round trip   -> \{@utf8.decode_lossy(decoded[:])}")
@@ -237,25 +237,25 @@ fn main {
   // ------------------------------------------------------- encoded words
   //
   // RFC 2047: a header that is not plain ASCII is written as encoded words.
-  let words = @moonmail.encode_words("Grüße aus München") catch { _ => "" }
+  let words = @moonmime.encode_words("Grüße aus München") catch { _ => "" }
   println("--- encoded words")
   println("encoded      -> \{words}")
-  println("decoded      -> \{@moonmail.decode_words(words[:])}")
+  println("decoded      -> \{@moonmime.decode_words(words[:])}")
 
   // ----------------------------------------------------------- charsets
   //
   // Non-UTF-8 bodies. Encoding refuses what a set cannot hold, decoding never
   // does, so a stray octet costs a character and not the whole part.
-  let latin = @moonmail.encode_charset(name="iso-8859-1", text="é") catch {
+  let latin = @moonmime.encode_charset(name="iso-8859-1", text="é") catch {
     _ => b""
   }
-  let back = @moonmail.decode_charset(name="iso-8859-1", data=latin[:]) catch {
+  let back = @moonmime.decode_charset(name="iso-8859-1", data=latin[:]) catch {
     _ => ""
   }
   println("--- charsets")
   println("iso-8859-1   -> \{latin.length()} octet, back to \{back}")
   let refused = try {
-    let _ = @moonmail.encode_charset(name="us-ascii", text="é")
+    let _ = @moonmime.encode_charset(name="us-ascii", text="é")
     false
   } catch {
     _ => true

@@ -116,7 +116,7 @@ pub fn Message::headers_named(
 /// The first value of `name` with any RFC 2047 encoded words resolved to text.
 pub fn Message::decoded_header(self : Message, name : StringView) -> String? {
   match self.get_header(name) {
-    Some(value) => Some(decode_words(value[:]))
+    Some(value) => Some(@moonmime.decode_words(value[:]))
     None => None
   }
 }
@@ -421,7 +421,7 @@ fn decode_body(body : BytesView, te : TransferEncoding) -> Bytes {
       @base64.decode(strip_whitespace(@utf8.decode_lossy(body)), padding=true) catch {
         _ => body.to_owned()
       }
-    QuotedPrintable => qp_decode(body) catch { _ => body.to_owned() }
+    QuotedPrintable => @qp.decode(body) catch { _ => body.to_owned() }
     _ => body.to_owned()
   }
 }
@@ -441,7 +441,7 @@ fn strip_whitespace(s : StringView) -> String {
 fn encode_body(payload : BytesView, te : TransferEncoding) -> Bytes {
   match te {
     Base64 => @utf8.encode(wrap_lines(@base64.encode(payload), 76))
-    QuotedPrintable => qp_encode(payload)
+    QuotedPrintable => @qp.encode(payload)
     _ => payload.to_owned()
   }
 }

@@ -1,12 +1,12 @@
 // The email message model: reading RFC 5322 into a tree, holding it, and writing
-// it back out — with the encodings the MIME parts use. Everything here is bytes
-// in, data out: no sockets, no files, and no state held between calls beyond the
-// charset registry.
+// it back out. Quoted-printable, encoded words and charsets come from moonmime.
+// Everything here is bytes in, data out: no sockets, no files, no state.
 // https://www.rfc-editor.org/rfc/rfc5322
 // https://www.rfc-editor.org/rfc/rfc2045
 // https://www.rfc-editor.org/rfc/rfc2047
 import {
   "moonbitstack/moonbase/base64",
   "moonbitstack/moonmime",
+  "moonbitstack/moonmime/qp",
   "moonbitlang/core/encoding/utf8",
 }

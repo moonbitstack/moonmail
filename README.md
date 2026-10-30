@@ -28,12 +28,12 @@ moon run src/examples/tour
   case-insensitive lookup, repeated headers kept in order, `Content-Type` with
   its boundary (media types parsed by `moonmime`), multipart bodies split into
   their parts.
-- **Transfer encodings** — `qp_encode` / `qp_decode` for quoted-printable, and
-  base64, 7bit, 8bit and binary bodies handled by `parse`.
-- **Encoded words** — RFC 2047 `encode_word` / `encode_words` / `decode_words`,
-  both the `B` and `Q` forms, splitting long text on character boundaries.
-- **Charsets / SASL** — UTF-8, US-ASCII and ISO-8859-1 out of the box (`register`
-  adds more); `@moonmail/sasl` gives PLAIN, LOGIN, CRAM-MD5 and XOAUTH2.
+- **Transfer encodings** — quoted-printable, base64, 7bit, 8bit and binary
+  bodies, decoded by `parse` and written by `serialize`. Quoted-printable,
+  RFC 2047 encoded words and charsets come from
+  [moonmime](https://github.com/moonbitstack/moonmime) (`moonmime/qp`,
+  `encode_words`, `decode_words`, `Charset`), which HTTP uses too.
+- **SASL** — `@moonmail/sasl` gives PLAIN, LOGIN, CRAM-MD5 and XOAUTH2.
 - **POP3** (`@moonmail/pop3`) — RFC 1939 state machine, dot-unstuffed replies,
   `USER`/`PASS`, `APOP`, SASL `AUTH`, `STLS`, `CAPA`, `TOP`, `UIDL`, `LAST`,
   and `retr_bytes` for a body kept as octets.

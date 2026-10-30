@@ -2,23 +2,7 @@
 package "moonbitstack/moonmail"
 
 // Values
-pub fn decode_charset(name~ : StringView, data~ : BytesView) -> String raise Refused
-
-pub fn decode_words(StringView) -> String
-
-pub fn encode_charset(name~ : StringView, text~ : StringView) -> Bytes raise Refused
-
-pub fn encode_word(StringView, charset? : String, encoding? : WordEncoding) -> String raise Refused
-
-pub fn encode_words(StringView, charset? : String, encoding? : WordEncoding, column? : Int32, max? : Int32) -> String raise Refused
-
 pub fn parse(BytesView) -> Message
-
-pub fn qp_decode(BytesView, strict? : Bool) -> Bytes raise Refused
-
-pub fn qp_encode(BytesView) -> Bytes
-
-pub fn[T : Charset] register(name~ : String, codec~ : T) -> Unit
 
 pub fn serialize(Message) -> Bytes
 
@@ -82,17 +66,6 @@ pub fn TransferEncoding::output(Self, &Logger) -> Unit
 pub fn TransferEncoding::to_string(Self) -> String
 pub impl Show for TransferEncoding
 
-pub(all) enum WordEncoding {
-  Base64
-  QuotedPrintable
-} derive(Eq)
-pub fn WordEncoding::equal(Self, Self) -> Bool
-pub fn WordEncoding::not_equal(Self, Self) -> Bool
-
 // Type aliases
 
 // Traits
-pub(open) trait Charset {
-  fn decode(Self, BytesView) -> String raise Refused
-  fn encode(Self, StringView) -> Bytes raise Refused
-}

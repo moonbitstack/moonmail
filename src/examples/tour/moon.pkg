@@ -3,6 +3,8 @@ pkgtype(kind: "executable")
 
 import {
   "moonbitstack/moonmail",
+  "moonbitstack/moonmime",
+  "moonbitstack/moonmime/qp",
   "moonbitstack/moonmail/pop3",
   "moonbitstack/moonmail/smtp",
   "moonbitstack/moonmail/nntp",
