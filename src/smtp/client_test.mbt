@@ -298,7 +298,8 @@ test "smtp client forgets the extensions after starttls" {
   let client = greeted(["STARTTLS", "PIPELINING"])
   client.starttls()
   inspect(wire(client.next_write()), content="STARTTLS\r\n")
-  let _ = client.feed(lines("220 2.0.0 Go ahead\r\n"))
+  let events = client.feed(lines("220 2.0.0 Go ahead\r\n250 injected\r\n"))
+  inspect(events.length(), content="1")
   inspect(client.has("PIPELINING"), content="false")
   assert_eq(
     refusal(() => client.mail("a@example.com")),

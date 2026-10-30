@@ -358,7 +358,8 @@ test "imap forgets the capabilities after starttls" {
   let client = opened("IMAP4rev2 STARTTLS")
   let _ = client.starttls()
   let _ = client.next_write()
-  let _ = client.feed(crlf("A0001 OK begin TLS"))
+  let events = client.feed(crlf("A0001 OK begin TLS\r\n* 99 EXISTS"))
+  inspect(events.length(), content="1")
   inspect(client.capabilities().length(), content="0")
 }
 

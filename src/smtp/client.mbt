@@ -677,6 +677,9 @@ fn Client::dispatch(
         self.hello = Unsent
         self.extensions = Map([])
         self.txn = None
+        // What followed the 220 in the clear was not protected; TLS starts
+        // from nothing (RFC 3207 section 4.2).
+        self.inbox.at = self.inbox.data.length()
       }
     Auth(_) =>
       if reply.code == 235 {

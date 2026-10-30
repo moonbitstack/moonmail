@@ -706,7 +706,13 @@ fn Client::dispatch(
             self.planned = Authenticated
           }
         Deselect => if status is Ok { self.state = Authenticated }
-        StartTls => if status is Ok { self.capabilities = [] }
+        StartTls =>
+          if status is Ok {
+            // What followed the OK in the clear was not protected; TLS
+            // starts from nothing (RFC 9051 section 6.2.1).
+            self.capabilities = []
+            self.at = self.buffer.length()
+          }
         Idle => self.idling = None
         Logout => self.state = Logout
         Plain => ()
