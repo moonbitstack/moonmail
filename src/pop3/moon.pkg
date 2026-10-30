@@ -3,5 +3,6 @@
 // can replay a recorded session.
 // https://www.rfc-editor.org/rfc/rfc1939
 import {
+  "moonbitstack/moonbase/base64",
   "moonbitstack/moonmail/sasl",
 }

@@ -12,6 +12,7 @@ pub(all) suberror ImapError {
   Server(status~ : String, text~ : String)
   Io(msg~ : String)
   Protocol(msg~ : String)
+  Sasl(@sasl.Refused)
 }
 
 // Types and methods
@@ -22,7 +23,7 @@ pub struct Imap {
 }
 pub fn Imap::append(Self, String, BytesView) -> Unit raise ImapError
 pub fn Imap::append_with(Self, String, Array[String], BytesView) -> Unit raise ImapError
-pub fn Imap::authenticate(Self, @sasl.Mechanism, String, String) -> Unit raise ImapError
+pub fn Imap::authenticate(Self, &@sasl.Mechanism) -> Unit raise ImapError
 pub fn Imap::capability(Self) -> Array[String] raise ImapError
 pub fn Imap::close(Self) -> Unit raise ImapError
 pub fn Imap::copy(Self, String, String) -> Unit raise ImapError

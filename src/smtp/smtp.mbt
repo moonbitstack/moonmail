@@ -8,6 +8,8 @@ pub(all) suberror SmtpError {
   Server(code~ : Int32, text~ : String)
   Io(msg~ : String)
   Protocol(msg~ : String)
+  /// The SASL mechanism refused to go on.
+  Sasl(@sasl.Refused)
 }
 
 ///|
@@ -63,34 +65,38 @@ pub fn Smtp::starttls(self : Smtp) -> Unit raise SmtpError {
 }
 
 ///|
-/// Authenticate with SASL (RFC 4954). When the mechanism has a first response it
-/// rides on the command line; a `334` is answered with `@sasl`'s next step.
+/// Authenticate with SASL (RFC 4954). A first response rides on the command
+/// line, `=` when it is empty; each `334` is answered with the mechanism's next
+/// step. When the mechanism refuses to go on, the exchange is cancelled with `*`
+/// and its refusal raised.
 pub fn Smtp::authenticate(
   self : Smtp,
-  mechanism : @sasl.Mechanism,
-  username : String,
-  secret : String,
+  mechanism : &@sasl.Mechanism,
 ) -> Unit raise SmtpError {
   self.require_greeted()
-  let sasl = @sasl.Client::new(mechanism, username, secret)
-  let initial = sasl.initial()
-  let line = if initial.is_empty() {
-    "AUTH " + sasl.mechanism_name()
-  } else {
-    "AUTH " + sasl.mechanism_name() + " " + initial
+  let line = match mechanism.start() {
+    None => "AUTH " + mechanism.name()
+    Some(data) if data.is_empty() => "AUTH " + mechanism.name() + " ="
+    Some(data) => "AUTH " + mechanism.name() + " " + @base64.encode(data[:])
   }
   self.io.write_line(line)
   let mut reply = self.read_reply()
   while reply.code == 334 {
-    let challenge = strip_code(last_line(reply))
-    let answer = sasl.respond(challenge) catch {
-      _ => raise SmtpError::Protocol(msg="SASL challenge failed")
+    let answer = @sasl.respond(mechanism, strip_code(last_line(reply))) catch {
+      refused => {
+        self.io.write_line("*")
+        let _ = self.read_reply()
+        raise Sasl(refused)
+      }
     }
     self.io.write_line(answer)
     reply = self.read_reply()
   }
   if reply.code != 235 {
     raise SmtpError::Server(code=reply.code, text=last_line(reply))
+  }
+  mechanism.finish() catch {
+    refused => raise Sasl(refused)
   }
 }
 

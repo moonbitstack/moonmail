@@ -12,6 +12,7 @@ pub(all) suberror Pop3Error {
   Server(msg~ : String)
   Io(msg~ : String)
   Protocol(msg~ : String)
+  Sasl(@sasl.Refused)
 }
 
 // Types and methods
@@ -25,7 +26,7 @@ pub struct Pop3 {
   mut state : Pop3State
 }
 pub fn Pop3::apop(Self, String, String) -> Unit raise Pop3Error
-pub fn Pop3::authenticate(Self, @sasl.Mechanism, String, String) -> Unit raise Pop3Error
+pub fn Pop3::authenticate(Self, &@sasl.Mechanism) -> Unit raise Pop3Error
 pub fn Pop3::capa(Self) -> Array[String] raise Pop3Error
 pub fn Pop3::capa_names(Self) -> Array[String] raise Pop3Error
 pub fn Pop3::dele(Self, Int32) -> Unit raise Pop3Error

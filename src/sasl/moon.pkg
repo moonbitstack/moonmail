@@ -1,13 +1,20 @@
-// SASL (RFC 4422) mechanisms that mail speaks: PLAIN, LOGIN, CRAM-MD5 and
-// XOAUTH2. Kept as a small challenge/response machine so SMTP, IMAP and POP3
-// can share it.
+// SASL (RFC 4422) client mechanisms: PLAIN, LOGIN, CRAM-MD5, XOAUTH2,
+// OAUTHBEARER and SCRAM-SHA-256, with the SASLprep profile SCRAM needs.
+// Mechanisms are a trait, so SMTP, IMAP and POP3 take any of them.
 // https://www.rfc-editor.org/rfc/rfc4422
 // https://www.rfc-editor.org/rfc/rfc4616
 // https://www.rfc-editor.org/rfc/rfc2195
+// https://www.rfc-editor.org/rfc/rfc7628
+// https://www.rfc-editor.org/rfc/rfc7677
+// https://www.rfc-editor.org/rfc/rfc4013
 import {
   "moonbitstack/moonbase/base64",
   "moonbitstack/mooncrypt/hash/md5",
+  "moonbitstack/mooncrypt/hash/sha2",
+  "moonbitstack/mooncrypt/kdf/pbkdf2",
   "moonbitstack/mooncrypt/mac/hmac",
   "moonbitstack/mooncrypt/spec",
+  "moonbitstack/moonucd/normalize",
   "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/string",
 }

@@ -1,35 +1,95 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbitstack/moonmail/sasl"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
-pub fn challenge_of(String) -> String
+pub fn prep(StringView, unassigned? : Bool) -> String raise Refused
+
+pub fn respond(&Mechanism, StringView) -> String raise Refused
 
 // Errors
-pub(all) suberror SaslError {
-  Unsupported(mechanism~ : String)
-  Protocol(msg~ : String)
-}
+pub(all) suberror Refused {
+  Prep(Char)
+  Malformed(String)
+  Server(String)
+  Signature
+} derive(Eq, @debug.Debug)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
-pub struct Client {
-  mechanism : Mechanism
-  username : String
-  secret : String
-  mut step : Int32
+pub struct CramMd5 {
+  // private fields
 }
-pub fn Client::initial(Self) -> String
-pub fn Client::mechanism_name(Self) -> String
-pub fn Client::new(Mechanism, String, String) -> Self
-pub fn Client::respond(Self, String) -> String raise SaslError
+pub fn CramMd5::finish(Self) -> Unit raise Refused
+pub fn CramMd5::name(Self) -> String
+pub fn CramMd5::new(String, String) -> Self
+pub fn CramMd5::start(Self) -> Bytes?
+pub fn CramMd5::step(Self, BytesView) -> Bytes raise Refused
+pub impl Mechanism for CramMd5
 
-pub(all) enum Mechanism {
-  Plain
-  Login
-  CramMd5
-  Xoauth2
+pub struct Login {
+  // private fields
 }
-pub fn Mechanism::name(Self) -> String
+pub fn Login::finish(Self) -> Unit raise Refused
+pub fn Login::name(Self) -> String
+pub fn Login::new(String, String) -> Self
+pub fn Login::start(Self) -> Bytes?
+pub fn Login::step(Self, BytesView) -> Bytes raise Refused
+pub impl Mechanism for Login
+
+pub struct OAuthBearer {
+  // private fields
+}
+pub fn OAuthBearer::error(Self) -> String?
+pub fn OAuthBearer::finish(Self) -> Unit raise Refused
+pub fn OAuthBearer::name(Self) -> String
+pub fn OAuthBearer::new(String, username? : String, host? : String, port? : Int32) -> Self
+pub fn OAuthBearer::start(Self) -> Bytes?
+pub fn OAuthBearer::step(Self, BytesView) -> Bytes raise Refused
+pub impl Mechanism for OAuthBearer
+
+pub struct Plain {
+  // private fields
+}
+pub fn Plain::finish(Self) -> Unit raise Refused
+pub fn Plain::name(Self) -> String
+pub fn Plain::new(String, String, authzid? : String) -> Self
+pub fn Plain::start(Self) -> Bytes?
+pub fn Plain::step(Self, BytesView) -> Bytes raise Refused
+pub impl Mechanism for Plain
+
+pub struct ScramSha256 {
+  // private fields
+}
+pub fn ScramSha256::finish(Self) -> Unit raise Refused
+pub fn ScramSha256::name(Self) -> String
+pub fn ScramSha256::new(String, String, nonce~ : String) -> Self raise Refused
+pub fn ScramSha256::start(Self) -> Bytes?
+pub fn ScramSha256::step(Self, BytesView) -> Bytes raise Refused
+pub impl Mechanism for ScramSha256
+
+pub struct XOAuth2 {
+  // private fields
+}
+pub fn XOAuth2::error(Self) -> String?
+pub fn XOAuth2::finish(Self) -> Unit raise Refused
+pub fn XOAuth2::name(Self) -> String
+pub fn XOAuth2::new(String, String) -> Self
+pub fn XOAuth2::start(Self) -> Bytes?
+pub fn XOAuth2::step(Self, BytesView) -> Bytes raise Refused
+pub impl Mechanism for XOAuth2
 
 // Type aliases
 
 // Traits
+pub(open) trait Mechanism {
+  fn name(Self) -> String
+  fn start(Self) -> Bytes?
+  fn step(Self, BytesView) -> Bytes raise Refused
+  fn finish(Self) -> Unit raise Refused = _
+}

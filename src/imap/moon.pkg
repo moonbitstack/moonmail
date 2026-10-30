@@ -3,6 +3,7 @@
 // transport, so a scripted test can replay a recorded session.
 // https://www.rfc-editor.org/rfc/rfc3501
 import {
+  "moonbitstack/moonbase/base64",
   "moonbitstack/moonmail/sasl",
   "moonbitlang/core/encoding/utf8",
 }

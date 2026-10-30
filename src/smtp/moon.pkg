@@ -3,6 +3,7 @@
 // https://www.rfc-editor.org/rfc/rfc5321
 // https://www.rfc-editor.org/rfc/rfc2033
 import {
+  "moonbitstack/moonbase/base64",
   "moonbitstack/moonmail/sasl",
   "moonbitlang/core/encoding/utf8",
 }

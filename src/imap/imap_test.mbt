@@ -152,7 +152,7 @@ test "imap authenticates with sasl" {
   )
   let client = @imap.Imap::new(script as &@imap.ImapIo)
   let _ = client.greeting() catch { _ => "" }
-  client.authenticate(@sasl.Mechanism::Plain, "tim", "tanstaaftanstaaf") catch {
+  client.authenticate(@sasl.Plain::new("tim", "tanstaaftanstaaf")) catch {
     _ => ()
   }
   inspect(script.sent[0], content="A001 AUTHENTICATE PLAIN")
@@ -371,4 +371,41 @@ test "imap manages mailboxes and enables an extension" {
   inspect(script.sent[3], content="A004 SUBSCRIBE Archive")
   inspect(script.sent[4], content="A005 UNSUBSCRIBE Old")
   inspect(script.sent[5], content="A006 ENABLE CONDSTORE")
+}
+
+///|
+test "imap authenticates with scram-sha-256" {
+  let script = Scripted::new(
+    [
+      "* OK ready", "+ ", "+ cj1yT3ByTkdmd0ViZVJXZ2JORWtxTyVodllEcFdVYTJSYVRDQWZ1eEZJbGopaE5sRiRrMCxzPVcyMlphSjBTTlk3c29Fc1VFamI2Z1E9PSxpPTQwOTY=",
+      "+ dj02cnJpVFJCaTIzV3BSUi93dHVwK21NaFVaVW4vZEI1bkxUSlJzamw5NUc0PQ==", "A001 OK done",
+    ],
+    [],
+  )
+  let client = @imap.Imap::new(script as &@imap.ImapIo)
+  let _ = client.greeting() catch { _ => "" }
+  client.authenticate(
+    @sasl.ScramSha256::new("user", "pencil", nonce="rOprNGfwEbeRWgbNEkqO"),
+  )
+  inspect(script.sent[0], content="A001 AUTHENTICATE SCRAM-SHA-256")
+  inspect(
+    script.sent[1],
+    content="biwsbj11c2VyLHI9ck9wck5HZndFYmVSV2diTkVrcU8=",
+  )
+  inspect(script.sent[3], content="")
+}
+
+///|
+test "imap cancels a mechanism that refuses" {
+  let script = Scripted::new(["* OK ready", "+ !!", "A001 BAD cancelled"], [])
+  let client = @imap.Imap::new(script as &@imap.ImapIo)
+  let _ = client.greeting() catch { _ => "" }
+  let raised = try {
+    client.authenticate(@sasl.Login::new("u", "p"))
+    None
+  } catch {
+    e => Some(e)
+  }
+  inspect(raised is Some(@imap.Sasl(Malformed(_))), content="true")
+  inspect(script.sent[1], content="*")
 }

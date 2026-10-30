@@ -33,7 +33,9 @@ moon run src/examples/tour
   RFC 2047 encoded words and charsets come from
   [moonmime](https://github.com/moonbitstack/moonmime) (`moonmime/qp`,
   `encode_words`, `decode_words`, `Charset`), which HTTP uses too.
-- **SASL** — `@moonmail/sasl` gives PLAIN, LOGIN, CRAM-MD5 and XOAUTH2.
+- **SASL** (`@moonmail/sasl`) — PLAIN, LOGIN, CRAM-MD5, XOAUTH2, OAUTHBEARER
+  (RFC 7628) and SCRAM-SHA-256 (RFC 7677) with SASLprep (RFC 4013). A
+  mechanism is a trait: one you write goes to `authenticate` like these.
 - **POP3** (`@moonmail/pop3`) — RFC 1939 state machine, dot-unstuffed replies,
   `USER`/`PASS`, `APOP`, SASL `AUTH`, `STLS`, `CAPA`, `TOP`, `UIDL`, `LAST`,
   and `retr_bytes` for a body kept as octets.
@@ -89,6 +91,21 @@ try {
 
 `@smtp.Smtp::lmtp(connection as &@smtp.SmtpIo)` is the same client; after `DATA`
 it reads one reply per accepted recipient.
+
+## SASL
+
+`authenticate` on SMTP, IMAP and POP3 takes any `&@sasl.Mechanism`; the
+protocol does the base64 and the cancelling.
+
+```moonbit
+// SCRAM never sends the password, and refuses a server that cannot prove it
+// holds the salted key. The nonce is fresh random printable ASCII each time.
+smtp.authenticate(@sasl.ScramSha256::new("alice", "secret", nonce~))
+imap.authenticate(@sasl.OAuthBearer::new(token, username="alice@example.com"))
+```
+
+A mechanism of your own implements `name`, `start` and `step`, and `finish`
+when it expects proof from the server.
 
 ## NNTP
 

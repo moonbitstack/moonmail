@@ -12,6 +12,7 @@ pub(all) suberror SmtpError {
   Server(code~ : Int32, text~ : String)
   Io(msg~ : String)
   Protocol(msg~ : String)
+  Sasl(@sasl.Refused)
 }
 
 // Types and methods
@@ -29,7 +30,7 @@ pub struct Smtp {
   mut mail_set : Bool
   mut recipients : Int32
 }
-pub fn Smtp::authenticate(Self, @sasl.Mechanism, String, String) -> Unit raise SmtpError
+pub fn Smtp::authenticate(Self, &@sasl.Mechanism) -> Unit raise SmtpError
 pub fn Smtp::bdat(Self, BytesView, Bool) -> Array[Reply] raise SmtpError
 pub fn Smtp::data(Self, BytesView) -> Array[Reply] raise SmtpError
 pub fn Smtp::ehlo(Self, String) -> Array[String] raise SmtpError

@@ -20,6 +20,8 @@ pub(all) suberror Pop3Error {
   Server(msg~ : String)
   Io(msg~ : String)
   Protocol(msg~ : String)
+  /// The SASL mechanism refused to go on.
+  Sasl(@sasl.Refused)
 }
 
 ///|
@@ -114,40 +116,57 @@ pub fn Pop3::apop(
 }
 
 ///|
-/// SASL authentication (RFC 5034): `AUTH`, answer each `+` challenge, then the
-/// `+OK` that moves the dialogue into the transaction state.
+/// SASL authentication (RFC 5034): `AUTH`, the mechanism's first response on
+/// the first `+` when it has one and its next step on every other, then the
+/// `+OK` that moves the dialogue into the transaction state. When the mechanism
+/// refuses to go on, the exchange is cancelled with `*` and its refusal raised.
 pub fn Pop3::authenticate(
   self : Pop3,
-  mechanism : @sasl.Mechanism,
-  username : String,
-  secret : String,
+  mechanism : &@sasl.Mechanism,
 ) -> Unit raise Pop3Error {
   self.require_state(Pop3State::Authorization)
-  let sasl = @sasl.Client::new(mechanism, username, secret)
-  self.io.write_line("AUTH " + sasl.mechanism_name())
-  let mut first = true
+  self.io.write_line("AUTH " + mechanism.name())
+  let mut pending = mechanism.start()
+  let mut refused = None
   let mut done = false
   while !done {
     let line = self.io.read_line()
     let view = line[:]
     if view.length() > 0 && view[0] == '-' {
+      if refused is Some(e) {
+        raise Sasl(e)
+      }
       raise Pop3Error::Server(msg=line)
     } else if starts_with_ok(line) {
       done = true
     } else if view.length() > 0 && view[0] == '+' {
-      let challenge = @sasl.challenge_of(line)
-      let answer = if first && !sasl.initial().is_empty() {
-        sasl.initial()
-      } else {
-        sasl.respond(challenge) catch {
-          _ => raise Pop3Error::Protocol(msg="SASL challenge failed")
+      match pending {
+        Some(data) => {
+          pending = None
+          self.io.write_line(@base64.encode(data[:]))
+        }
+        None => {
+          let challenge = if view.length() >= 2 && view[1] == ' ' {
+            view[2:]
+          } else {
+            view[1:]
+          }
+          self.io.write_line(
+            @sasl.respond(mechanism, challenge) catch {
+              e => {
+                refused = Some(e)
+                "*"
+              }
+            },
+          )
         }
       }
-      first = false
-      self.io.write_line(answer)
     } else {
       raise Pop3Error::Protocol(msg="unexpected reply: " + line)
     }
+  }
+  mechanism.finish() catch {
+    e => raise Sasl(e)
   }
   self.state = Pop3State::Transaction
 }

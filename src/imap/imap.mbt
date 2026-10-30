@@ -8,6 +8,8 @@ pub(all) suberror ImapError {
   Server(status~ : String, text~ : String)
   Io(msg~ : String)
   Protocol(msg~ : String)
+  /// The SASL mechanism refused to go on.
+  Sasl(@sasl.Refused)
 }
 
 ///|
@@ -68,45 +70,63 @@ pub fn Imap::starttls(self : Imap) -> Unit raise ImapError {
 }
 
 ///|
-/// SASL authentication (RFC 3501 `AUTHENTICATE`): each `+` continuation is
-/// answered with `@sasl`'s next step, until the tagged completion.
+/// SASL authentication (RFC 3501 `AUTHENTICATE`). The first `+` continuation
+/// takes the mechanism's first response when it has one; every other one is
+/// answered with its next step. When the mechanism refuses to go on, the
+/// exchange is cancelled with `*` and its refusal raised.
 pub fn Imap::authenticate(
   self : Imap,
-  mechanism : @sasl.Mechanism,
-  username : String,
-  secret : String,
+  mechanism : &@sasl.Mechanism,
 ) -> Unit raise ImapError {
-  let sasl = @sasl.Client::new(mechanism, username, secret)
   let tag = self.next_tag()
-  self.io.write_line(tag + " AUTHENTICATE " + sasl.mechanism_name())
-  let mut first = true
+  self.io.write_line(tag + " AUTHENTICATE " + mechanism.name())
+  let mut pending = mechanism.start()
+  let mut refused = None
   let mut status = ""
-  let mut done = false
-  while !done {
+  while status == "" {
     let line = self.read_logical_line()
     let view = line[:]
     if view.length() > 0 && view[0] == '+' {
-      let challenge = @sasl.challenge_of(line)
-      let answer = if first && !sasl.initial().is_empty() {
-        sasl.initial()
-      } else {
-        sasl.respond(challenge) catch {
-          _ => raise ImapError::Protocol(msg="SASL challenge failed")
+      match pending {
+        Some(data) => {
+          pending = None
+          self.io.write_line(@base64.encode(data[:]))
         }
+        None =>
+          self.io.write_line(
+            @sasl.respond(mechanism, continuation(line)) catch {
+              e => {
+                refused = Some(e)
+                "*"
+              }
+            },
+          )
       }
-      first = false
-      self.io.write_line(answer)
     } else if view.length() > tag.length() &&
       starts_with(view, tag) &&
       view[tag.length()] == ' ' {
       status = line
-      done = true
-    } else {
-      // An untagged response; not part of the authentication.
     }
+  }
+  if refused is Some(e) {
+    raise Sasl(e)
   }
   if !status_ok(status) {
     raise ImapError::Server(status~, text=status)
+  }
+  mechanism.finish() catch {
+    e => raise Sasl(e)
+  }
+}
+
+///|
+/// The challenge on a continuation line: what follows the `+` and its space.
+fn continuation(line : String) -> StringView {
+  let view = line[:]
+  if view.length() >= 2 && view[1] == ' ' {
+    view[2:]
+  } else {
+    view[1:]
   }
 }
 

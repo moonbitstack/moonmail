@@ -168,7 +168,7 @@ test "pop3 authenticates with sasl" {
   let script = Scripted::new(["+OK ready", "+ ", "+OK maildrop locked"])
   let client = @pop3.Pop3::new(script as &@pop3.Pop3Io)
   let _ = client.greeting() catch { _ => "" }
-  client.authenticate(@sasl.Mechanism::Plain, "tim", "tanstaaftanstaaf") catch {
+  client.authenticate(@sasl.Plain::new("tim", "tanstaaftanstaaf")) catch {
     _ => ()
   }
   inspect(script.sent[0], content="AUTH PLAIN")
@@ -277,4 +277,24 @@ test "pop3 top with zero lines returns only the headers" {
   let head = client.top(1, 0) catch { _ => "" }
   inspect(head, content="From: alice@example.com\r\nSubject: Hello\r\n")
   inspect(script.sent[2], content="TOP 1 0")
+}
+
+///|
+test "pop3 refuses a scram success without the server signature" {
+  let script = Scripted::new([
+    "+OK ready", "+ ", "+ cj1yT3ByTkdmd0ViZVJXZ2JORWtxTyVodllEcFdVYTJSYVRDQWZ1eEZJbGopaE5sRiRrMCxzPVcyMlphSjBTTlk3c29Fc1VFamI2Z1E9PSxpPTQwOTY=",
+    "+OK in",
+  ])
+  let client = @pop3.Pop3::new(script as &@pop3.Pop3Io)
+  let _ = client.greeting() catch { _ => "" }
+  let raised = try {
+    client.authenticate(
+      @sasl.ScramSha256::new("user", "pencil", nonce="rOprNGfwEbeRWgbNEkqO"),
+    )
+    None
+  } catch {
+    e => Some(e)
+  }
+  inspect(raised is Some(@pop3.Sasl(Signature)), content="true")
+  inspect(client.state() == @pop3.Pop3State::Authorization, content="true")
 }

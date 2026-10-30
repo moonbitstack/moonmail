@@ -144,7 +144,7 @@ test "smtp authenticates with plain in one line" {
   let client = @smtp.Smtp::esmtp(script as &@smtp.SmtpIo)
   let _ = client.greeting() catch { _ => "" }
   let _ = client.ehlo("c") catch { _ => [] }
-  client.authenticate(@sasl.Mechanism::Plain, "tim", "tanstaaftanstaaf") catch {
+  client.authenticate(@sasl.Plain::new("tim", "tanstaaftanstaaf")) catch {
     _ => ()
   }
   inspect(script.sent[1], content="AUTH PLAIN AHRpbQB0YW5zdGFhZnRhbnN0YWFm")
@@ -158,7 +158,7 @@ test "smtp authenticates with login over two steps" {
   let client = @smtp.Smtp::esmtp(script as &@smtp.SmtpIo)
   let _ = client.greeting() catch { _ => "" }
   let _ = client.ehlo("c") catch { _ => [] }
-  client.authenticate(@sasl.Mechanism::Login, "tim", "tanstaaftanstaaf") catch {
+  client.authenticate(@sasl.Login::new("tim", "tanstaaftanstaaf")) catch {
     _ => ()
   }
   inspect(script.sent[1], content="AUTH LOGIN")
@@ -332,4 +332,78 @@ test "smtp reads an enhanced status code off the reply" {
   inspect(replies.length(), content="1")
   inspect(replies[0].enhanced_status(), content="2.0.0")
   inspect(replies[0].is_ok(), content="true")
+}
+
+///|
+test "smtp authenticates with scram-sha-256 and checks the server" {
+  let script = Scripted::new([
+    "220 ready", "250 ok", "334 cj1yT3ByTkdmd0ViZVJXZ2JORWtxTyVodllEcFdVYTJSYVRDQWZ1eEZJbGopaE5sRiRrMCxzPVcyMlphSjBTTlk3c29Fc1VFamI2Z1E9PSxpPTQwOTY=",
+    "334 dj02cnJpVFJCaTIzV3BSUi93dHVwK21NaFVaVW4vZEI1bkxUSlJzamw5NUc0PQ==", "235 ok",
+  ])
+  let client = @smtp.Smtp::esmtp(script as &@smtp.SmtpIo)
+  let _ = client.greeting() catch { _ => "" }
+  let _ = client.ehlo("c") catch { _ => [] }
+  client.authenticate(
+    @sasl.ScramSha256::new("user", "pencil", nonce="rOprNGfwEbeRWgbNEkqO"),
+  )
+  inspect(
+    script.sent[1],
+    content="AUTH SCRAM-SHA-256 biwsbj11c2VyLHI9ck9wck5HZndFYmVSV2diTkVrcU8=",
+  )
+  inspect(
+    script.sent[2],
+    content="Yz1iaXdzLHI9ck9wck5HZndFYmVSV2diTkVrcU8laHZZRHBXVWEyUmFUQ0FmdXhGSWxqKWhObEYkazAscD1kSHpiWmFwV0lrNGpVaE4rVXRlOXl0YWc5empmTUhnc3FtbWl6N0FuZFZRPQ==",
+  )
+  inspect(script.sent[3], content="")
+}
+
+///|
+test "smtp cancels when the server signature is wrong" {
+  let script = Scripted::new([
+    "220 ready", "250 ok", "334 cj1yT3ByTkdmd0ViZVJXZ2JORWtxTyVodllEcFdVYTJSYVRDQWZ1eEZJbGopaE5sRiRrMCxzPVcyMlphSjBTTlk3c29Fc1VFamI2Z1E9PSxpPTQwOTY=",
+    "334 dj1BQUFBVFJCaTIzV3BSUi93dHVwK21NaFVaVW4vZEI1bkxUSlJzamw5NUc0PQ==", "501 cancelled",
+  ])
+  let client = @smtp.Smtp::esmtp(script as &@smtp.SmtpIo)
+  let _ = client.greeting() catch { _ => "" }
+  let _ = client.ehlo("c") catch { _ => [] }
+  let raised = try {
+    client.authenticate(
+      @sasl.ScramSha256::new("user", "pencil", nonce="rOprNGfwEbeRWgbNEkqO"),
+    )
+    None
+  } catch {
+    e => Some(e)
+  }
+  inspect(raised is Some(@smtp.Sasl(Signature)), content="true")
+  inspect(script.sent[3], content="*")
+}
+
+///|
+/// EXTERNAL (RFC 4422 appendix A) with no authorization identity: a mechanism
+/// from outside the package whose first response is empty.
+struct External {}
+
+///|
+impl @sasl.Mechanism for External with fn name(_self) {
+  "EXTERNAL"
+}
+
+///|
+impl @sasl.Mechanism for External with fn start(_self) {
+  Some(b"")
+}
+
+///|
+impl @sasl.Mechanism for External with fn step(_self, _challenge) {
+  b""
+}
+
+///|
+test "smtp sends an empty first response as =" {
+  let script = Scripted::new(["220 ready", "250 ok", "235 ok"])
+  let client = @smtp.Smtp::esmtp(script as &@smtp.SmtpIo)
+  let _ = client.greeting() catch { _ => "" }
+  let _ = client.ehlo("c") catch { _ => [] }
+  client.authenticate(External::{ })
+  inspect(script.sent[1], content="AUTH EXTERNAL =")
 }
