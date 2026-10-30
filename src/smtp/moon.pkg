@@ -1,7 +1,15 @@
-// SMTP (RFC 5321) and LMTP (RFC 2033): the dialogue a client has with a relay,
-// kept free of sockets so a caller supplies the transport.
+// SMTP (RFC 5321) and LMTP (RFC 2033), client and server, as state machines
+// with no I/O: octets in, replies and requests out. The extensions are
+// PIPELINING, SIZE, 8BITMIME, BINARYMIME, CHUNKING, SMTPUTF8, DSN,
+// ENHANCEDSTATUSCODES, STARTTLS and AUTH.
 // https://www.rfc-editor.org/rfc/rfc5321
 // https://www.rfc-editor.org/rfc/rfc2033
+// https://www.rfc-editor.org/rfc/rfc2920
+// https://www.rfc-editor.org/rfc/rfc3030
+// https://www.rfc-editor.org/rfc/rfc3207
+// https://www.rfc-editor.org/rfc/rfc3461
+// https://www.rfc-editor.org/rfc/rfc4954
+// https://www.rfc-editor.org/rfc/rfc6531
 import {
   "moonbitstack/moonbase/base64",
   "moonbitstack/moonmail/sasl",

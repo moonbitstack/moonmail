@@ -12,8 +12,6 @@ type NntpScript
 
 type Scripted
 
-type SmtpScript
-
 // Type aliases
 
 // Traits

@@ -2,61 +2,166 @@
 package "moonbitstack/moonmail/smtp"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitstack/moonmail/sasl",
 }
 
 // Values
+pub let limits : Limits
 
 // Errors
-pub(all) suberror SmtpError {
-  Server(code~ : Int32, text~ : String)
-  Io(msg~ : String)
-  Protocol(msg~ : String)
-  Sasl(@sasl.Refused)
-}
+pub(all) suberror Refused {
+  Malformed(String)
+  Exceeded(limit~ : Int32, got~ : Int32)
+  Order(String)
+  Unsupported(String)
+} derive(Eq, @debug.Debug)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
-pub struct Reply {
+pub(all) enum Body {
+  SevenBit
+  EightBit
+  Binary
+} derive(Eq, @debug.Debug)
+pub fn Body::equal(Self, Self) -> Bool
+pub fn Body::not_equal(Self, Self) -> Bool
+pub fn Body::to_repr(Self) -> @debug.Repr
+
+pub struct Client {
+  // private fields
+}
+pub fn Client::auth(Self, &@sasl.Mechanism) -> Unit raise Refused
+pub fn Client::bdat(Self, BytesView, last? : Bool) -> Unit raise Refused
+pub fn Client::data(Self, BytesView) -> Unit raise Refused
+pub fn Client::ehlo(Self, String) -> Unit raise Refused
+pub fn Client::expn(Self, String) -> Unit raise Refused
+pub fn Client::extensions(Self) -> Map[String, String]
+pub fn Client::feed(Self, BytesView) -> Array[Event] raise Refused
+pub fn Client::has(Self, String) -> Bool
+pub fn Client::helo(Self, String) -> Unit raise Refused
+pub fn Client::help(Self, topic? : String) -> Unit raise Refused
+pub fn Client::mail(Self, String, size? : Int32, body? : Body, utf8? : Bool, ret? : Ret, envid? : String, auth? : String) -> Unit raise Refused
+pub fn Client::new(lmtp? : Bool, limits? : Limits) -> Self
+pub fn Client::next_write(Self) -> Bytes?
+pub fn Client::noop(Self) -> Unit
+pub fn Client::quit(Self) -> Unit
+pub fn Client::rcpt(Self, String, notify? : Array[Notify], orcpt? : String) -> Unit raise Refused
+pub fn Client::rset(Self) -> Unit
+pub fn Client::send(Self, String, Array[String], BytesView) -> Unit raise Refused
+pub fn Client::starttls(Self) -> Unit raise Refused
+pub fn Client::vrfy(Self, String) -> Unit raise Refused
+
+pub(all) enum Command {
+  Greeting
+  Hello(String)
+  StartTls
+  Auth(String)
+  Mail(String)
+  Rcpt(String)
+  Data
+  Bdat(Int32)
+  Delivery(String)
+  Rset
+  Noop
+  Vrfy(String)
+  Expn(String)
+  Help
+  Quit
+} derive(Eq, @debug.Debug)
+pub fn Command::equal(Self, Self) -> Bool
+pub fn Command::not_equal(Self, Self) -> Bool
+pub fn Command::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Event {
+  Reply(Command, Reply)
+  Sasl(@sasl.Refused)
+} derive(Eq, @debug.Debug)
+pub fn Event::equal(Self, Self) -> Bool
+pub fn Event::not_equal(Self, Self) -> Bool
+pub fn Event::to_repr(Self) -> @debug.Repr
+
+type Hello
+
+type Inbox
+
+pub(all) struct Limits {
+  line : Int32
+  recipients : Int32
+  size : Int32
+} derive(Eq, @debug.Debug)
+pub fn Limits::equal(Self, Self) -> Bool
+pub fn Limits::new(line? : Int32, recipients? : Int32, size? : Int32) -> Self
+pub fn Limits::not_equal(Self, Self) -> Bool
+pub fn Limits::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Notify {
+  Success
+  Failure
+  Delay
+} derive(Eq, @debug.Debug)
+pub fn Notify::equal(Self, Self) -> Bool
+pub fn Notify::not_equal(Self, Self) -> Bool
+pub fn Notify::to_repr(Self) -> @debug.Repr
+
+type Pending
+
+type Phase
+
+pub(all) struct Reply {
   code : Int32
   lines : Array[String]
-}
-pub fn Reply::enhanced_status(Self) -> String
+} derive(Eq, @debug.Debug)
+pub fn Reply::encode(Self) -> Bytes
+pub fn Reply::equal(Self, Self) -> Bool
 pub fn Reply::is_ok(Self) -> Bool
+pub fn Reply::new(Int32, StringView) -> Self
+pub fn Reply::not_equal(Self, Self) -> Bool
+pub fn Reply::status(Self) -> String?
+pub fn Reply::text(Self) -> String
+pub fn Reply::to_repr(Self) -> @debug.Repr
 
-pub struct Smtp {
-  io : &SmtpIo
-  lmtp : Bool
-  mut greeted : Bool
-  mut mail_set : Bool
-  mut recipients : Int32
+pub(all) enum Request {
+  Hello(String, extended~ : Bool)
+  StartTls
+  Auth(String, Bytes?)
+  Response(Bytes)
+  Mail(String, Map[String, String?])
+  Rcpt(String, Map[String, String?])
+  Data(Bytes)
+  Vrfy(String)
+  Expn(String)
+  Rset
+  Quit
+} derive(Eq, @debug.Debug)
+pub fn Request::equal(Self, Self) -> Bool
+pub fn Request::not_equal(Self, Self) -> Bool
+pub fn Request::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Ret {
+  Full
+  Headers
+} derive(Eq, @debug.Debug)
+pub fn Ret::equal(Self, Self) -> Bool
+pub fn Ret::not_equal(Self, Self) -> Bool
+pub fn Ret::to_repr(Self) -> @debug.Repr
+
+pub struct Server {
+  // private fields
 }
-pub fn Smtp::authenticate(Self, &@sasl.Mechanism) -> Unit raise SmtpError
-pub fn Smtp::bdat(Self, BytesView, Bool) -> Array[Reply] raise SmtpError
-pub fn Smtp::data(Self, BytesView) -> Array[Reply] raise SmtpError
-pub fn Smtp::ehlo(Self, String) -> Array[String] raise SmtpError
-pub fn Smtp::esmtp(&SmtpIo) -> Self
-pub fn Smtp::expn(Self, String) -> Array[String] raise SmtpError
-pub fn Smtp::greeting(Self) -> String raise SmtpError
-pub fn Smtp::helo(Self, String) -> Unit raise SmtpError
-pub fn Smtp::help(Self, String) -> Array[String] raise SmtpError
-pub fn Smtp::lmtp(&SmtpIo) -> Self
-pub fn Smtp::mail_from(Self, String) -> Unit raise SmtpError
-pub fn Smtp::mail_from_with(Self, String, Array[String]) -> Unit raise SmtpError
-pub fn Smtp::new(&SmtpIo) -> Self
-pub fn Smtp::noop(Self) -> Unit raise SmtpError
-pub fn Smtp::quit(Self) -> Unit raise SmtpError
-pub fn Smtp::rcpt_to(Self, String) -> Unit raise SmtpError
-pub fn Smtp::rcpt_to_with(Self, String, Array[String]) -> Unit raise SmtpError
-pub fn Smtp::rset(Self) -> Unit raise SmtpError
-pub fn Smtp::send(Self, String, Array[String], BytesView) -> Array[Reply] raise SmtpError
-pub fn Smtp::starttls(Self) -> Unit raise SmtpError
-pub fn Smtp::vrfy(Self, String) -> Reply raise SmtpError
+pub fn Server::accept(Self) -> Unit raise Refused
+pub fn Server::challenge(Self, BytesView) -> Unit raise Refused
+pub fn Server::closed(Self) -> Bool
+pub fn Server::feed(Self, BytesView) -> Unit
+pub fn Server::new(String, lmtp? : Bool, starttls? : Bool, auth? : Array[String], greeting? : String, limits? : Limits) -> Self
+pub fn Server::next(Self) -> Request?
+pub fn Server::next_write(Self) -> Bytes?
+pub fn Server::reply(Self, Int32, String) -> Unit raise Refused
+
+type Txn
 
 // Type aliases
 
 // Traits
-pub(open) trait SmtpIo {
-  fn write_line(Self, String) -> Unit raise SmtpError
-  fn write_bytes(Self, BytesView) -> Unit raise SmtpError
-  fn read_line(Self) -> String raise SmtpError
-}

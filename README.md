@@ -39,10 +39,10 @@ moon run src/examples/tour
 - **POP3** (`@moonmail/pop3`) — RFC 1939 state machine, dot-unstuffed replies,
   `USER`/`PASS`, `APOP`, SASL `AUTH`, `STLS`, `CAPA`, `TOP`, `UIDL`, `LAST`,
   and `retr_bytes` for a body kept as octets.
-- **SMTP / LMTP** (`@moonmail/smtp`) — RFC 5321 sending, RFC 2033 LMTP
-  (per-recipient `DATA` replies), RFC 4954 `AUTH`, RFC 3207 `STARTTLS`, RFC 3030
-  `BDAT` chunking, DSN parameters, `VRFY`/`EXPN`/`HELP`, and RFC 3463 enhanced
-  status codes off any reply.
+- **SMTP / LMTP** (`@moonmail/smtp`) — client and server as state machines
+  with no I/O, RFC 5321 and RFC 2033: `PIPELINING` groups, `SIZE`, `8BITMIME`,
+  `BINARYMIME` and `CHUNKING`, `SMTPUTF8`, DSN parameters, `STARTTLS`, SASL
+  `AUTH`, and RFC 3463 enhanced status codes off any reply.
 - **NNTP** (`@moonmail/nntp`) — RFC 3977 news: groups, articles, posting,
   `LISTGROUP`, `OVER`/`HDR`, `NEWGROUPS`/`NEWNEWS`, `AUTHINFO`, `CAPABILITIES`.
 - **IMAP** (`@moonmail/imap`) — RFC 3501: tagged/untagged, literals,
@@ -78,29 +78,54 @@ try {
 
 ## SMTP / LMTP
 
+The client queues commands and refuses, when they are queued, the ones that are
+out of sequence or need an extension the server did not announce. Octets go
+out through `next_write` and come back through `feed`, which reports each reply
+with the command it answers.
+
 ```moonbit
-let smtp = @smtp.Smtp::new(connection as &@smtp.SmtpIo)
-try {
-  let _ = smtp.greeting()
-  let _ = smtp.ehlo("client.example")
-  let queued = smtp.send("alice@example.com", ["bob@example.com"], raw[:])
-} catch {
-  _ => ()
+let smtp = @smtp.Client::new()
+smtp.ehlo("client.example")
+// ... write smtp.next_write(), feed the server's octets until the EHLO reply
+smtp.send("alice@example.com", ["bob@example.com"], raw[:])
+smtp.quit()
+for event in smtp.feed(octets) {
+  match event {
+    Reply(Rcpt(to), reply) if !reply.is_ok() => println("refused: " + to)
+    _ => ()
+  }
 }
 ```
 
-`@smtp.Smtp::lmtp(connection as &@smtp.SmtpIo)` is the same client; after `DATA`
-it reads one reply per accepted recipient.
+The server answers syntax, sequence, limits, the `354` and the chunk replies
+itself, and hands the application what it decides:
+
+```moonbit
+let server = @smtp.Server::new("mx.example", auth=["PLAIN"])
+server.feed(octets)
+while server.next() is Some(request) {
+  match request {
+    Rcpt(to, _) if !known(to) => server.reply(550, "5.1.1 No such user")
+    Data(message) => { store(message); server.accept() }
+    Rset | Quit => ()
+    _ => server.accept()
+  }
+}
+// write server.next_write() back to the client
+```
+
+`lmtp=true` on either side speaks LMTP, where the message gets one reply per
+accepted recipient.
 
 ## SASL
 
-`authenticate` on SMTP, IMAP and POP3 takes any `&@sasl.Mechanism`; the
-protocol does the base64 and the cancelling.
+SMTP's `auth` and IMAP's and POP3's `authenticate` take any
+`&@sasl.Mechanism`; the protocol does the base64 and the cancelling.
 
 ```moonbit
 // SCRAM never sends the password, and refuses a server that cannot prove it
 // holds the salted key. The nonce is fresh random printable ASCII each time.
-smtp.authenticate(@sasl.ScramSha256::new("alice", "secret", nonce~))
+smtp.auth(@sasl.ScramSha256::new("alice", "secret", nonce~))
 imap.authenticate(@sasl.OAuthBearer::new(token, username="alice@example.com"))
 ```
 
@@ -158,9 +183,9 @@ let uids = imap.uid_search("UNSEEN")
 let events = imap.idle_once()          // announces IDLE, collects, says DONE
 
 // SMTP: chunk the body instead of using DATA, and ask for delivery status.
-smtp.mail_from_with("alice@example.com", ["SIZE=1234", "BODY=8BITMIME"])
-smtp.rcpt_to_with("bob@example.com", ["NOTIFY=SUCCESS,FAILURE"])
-let replies = smtp.bdat(chunk[:], true)   // LAST closes the transaction
+smtp.mail("alice@example.com", size=1234, body=Binary)
+smtp.rcpt("bob@example.com", notify=[Success, Failure])
+smtp.bdat(chunk[:], last=true)   // LAST ends the transaction
 
 // JMAP: create a draft and read back the id the server gave it.
 let email_set = @jmap.email_set("acct1", "c1")

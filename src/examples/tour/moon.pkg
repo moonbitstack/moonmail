@@ -13,5 +13,6 @@ import {
   "moonbitstack/moonmail/mapi",
   "moonbitstack/moonmail/dkim",
   "moonbitstack/mooncrypt/rsa",
+  "moonbitlang/core/debug",
   "moonbitlang/core/encoding/utf8",
 }

@@ -83,38 +83,88 @@ impl @pop3.Pop3Io for Scripted with fn read_line(self) -> String raise @pop3.Pop
 }
 
 ///|
-/// An in-memory SMTP/LMTP relay.
-struct SmtpScript {
-  inbox : Array[String]
-  sent : Array[String]
-}
-
-///|
-fn SmtpScript::new(lines : Array[String]) -> SmtpScript {
-  let inbox : Array[String] = []
-  let n = lines.length()
-  for i in 0..<n {
-    inbox.push(lines[n - 1 - i])
+/// Run an SMTP client against an SMTP server in memory until neither has
+/// anything to send, answering each request with `decide`, and collect what
+/// the client reports.
+fn converse(
+  client : @smtp.Client,
+  server : @smtp.Server,
+  decide : (@smtp.Server, @smtp.Request) -> Unit raise @smtp.Refused,
+) -> Array[@smtp.Event] raise @smtp.Refused {
+  let events = []
+  let mut moved = true
+  while moved {
+    moved = false
+    if server.next_write() is Some(data) {
+      events.append(client.feed(data))
+      moved = true
+    }
+    if client.next_write() is Some(data) {
+      server.feed(data)
+      moved = true
+    }
+    while server.next() is Some(request) {
+      decide(server, request)
+      moved = true
+    }
   }
-  { inbox, sent: [], }
+  events
 }
 
 ///|
-impl @smtp.SmtpIo for SmtpScript with fn write_line(self, line) -> Unit raise @smtp.SmtpError {
-  self.sent.push(line)
-}
-
-///|
-impl @smtp.SmtpIo for SmtpScript with fn write_bytes(_self, bytes) -> Unit raise @smtp.SmtpError {
-  let _ = bytes
-}
-
-///|
-impl @smtp.SmtpIo for SmtpScript with fn read_line(self) -> String raise @smtp.SmtpError {
-  match self.inbox.pop() {
-    Some(line) => line
-    None => raise @smtp.SmtpError::Io(msg="tour smtp script ended")
+fn accept_all(
+  server : @smtp.Server,
+  request : @smtp.Request,
+) -> Unit raise @smtp.Refused {
+  match request {
+    Rset | Quit => ()
+    _ => server.accept()
   }
+}
+
+///|
+/// The sending side against a relay: hello, a whole transaction in one call,
+/// and goodbye. LMTP is the same client with `lmtp=true`, where the message
+/// gets one reply per recipient.
+fn smtp_tour(raw : Bytes) -> Unit raise @smtp.Refused {
+  let relay = @smtp.Server::new("relay.example")
+  let smtp = @smtp.Client::new()
+  smtp.ehlo("client.example")
+  let _ = converse(smtp, relay, accept_all)
+  smtp.send("alice@example.com", ["bob@example.com"], raw[:])
+  smtp.quit()
+  let replies = converse(smtp, relay, accept_all)
+  println("--- smtp")
+  println("extensions   -> \{smtp.extensions().length()}")
+  println("pipelining   -> \{smtp.has("PIPELINING")}")
+  println("replies      -> \{replies.length()}")
+  let lmtp_server = @smtp.Server::new("lmtp.example", lmtp=true)
+  let lmtp = @smtp.Client::new(lmtp=true)
+  lmtp.ehlo("client.example")
+  let _ = converse(lmtp, lmtp_server, accept_all)
+  lmtp.send(
+    "alice@example.com",
+    ["bob@example.com", "carol@example.com"],
+    raw[:],
+  )
+  let deliveries = converse(lmtp, lmtp_server, (server, request) => {
+    match request {
+      Rcpt(to, _) if to.has_prefix("carol") =>
+        server.reply(550, "5.1.1 No such user")
+      _ => accept_all(server, request)
+    }
+  }).filter(event => event is Reply(Delivery(_), _))
+  println("lmtp replies -> \{deliveries.length()}")
+  let chunked = @smtp.Server::new("relay.example")
+  let bdat = @smtp.Client::new()
+  bdat.ehlo("client.example")
+  let _ = converse(bdat, chunked, accept_all)
+  let body = @utf8.encode("Subject: Hi\r\n\r\n")
+  bdat.mail("alice@example.com", size=body.length(), body=Binary)
+  bdat.rcpt("bob@example.com", notify=[Success, Failure])
+  bdat.bdat(body[:], last=true)
+  let chunks = converse(bdat, chunked, accept_all)
+  println("bdat replies -> \{chunks.length()}")
 }
 
 ///|
@@ -320,39 +370,9 @@ fn main {
   println("commands sent -> \{script.sent.length()}")
 
   // --------------------------------------------------------------- smtp
-  //
-  // The sending side: say hello, then sender, recipients and body. LMTP is the
-  // same client via `Smtp::lmtp`, where the final reply is per recipient.
-  let smtp_script = SmtpScript::new([
-    "220 relay ready", "250-relay greets you", "250-SIZE 10240000", "250 HELP", "250 sender ok",
-    "250 recipient ok", "354 go ahead", "250 queued as XYZ", "221 bye",
-  ])
-  let smtp = @smtp.Smtp::esmtp(smtp_script as &@smtp.SmtpIo)
-  let _ = smtp.greeting() catch { _ => "" }
-  let caps = smtp.ehlo("client.example") catch { _ => [] }
-  let queued = smtp.send("alice@example.com", ["bob@example.com"], raw[:]) catch {
-    _ => []
+  smtp_tour(raw) catch {
+    e => println("smtp tour stopped: " + @debug.to_string(e))
   }
-  let _ = smtp.quit() catch { _ => () }
-  println("--- smtp")
-  println("capabilities -> \{caps.length()}")
-  println("queued       -> \{queued.length() > 0 && queued[0].code == 250}")
-
-  let lmtp_script = SmtpScript::new([
-    "220 lmtp ready", "250 lmtp greets", "250 sender ok", "250 rcpt ok", "250 rcpt ok",
-    "354 go ahead", "250 delivered", "550 no such user",
-  ])
-  let lmtp = @smtp.Smtp::lmtp(lmtp_script as &@smtp.SmtpIo)
-  let _ = lmtp.greeting() catch { _ => "" }
-  let _ = lmtp.ehlo("client.example") catch { _ => [] }
-  let delivered = lmtp.send(
-    "alice@example.com",
-    ["bob@example.com", "carol@example.com"],
-    raw[:],
-  ) catch {
-    _ => []
-  }
-  println("lmtp replies -> \{delivered.length()}")
 
   // --------------------------------------------------------------- nntp
   let nntp_script = NntpScript::new([
@@ -503,22 +523,6 @@ fn main {
   //
   // The smaller pieces each protocol grew: CHUNKING and DSN on SMTP, single
   // message UIDL and readable CAPA names on POP3, overview rows on NNTP.
-  let bdat_script = SmtpScript::new([
-    "220 ready", "250 greets", "250 sender ok", "250 rcpt ok", "250 2.0.0 chunk ok",
-  ])
-  let bdat = @smtp.Smtp::esmtp(bdat_script as &@smtp.SmtpIo)
-  let _ = bdat.greeting() catch { _ => "" }
-  let _ = bdat.ehlo("client.example") catch { _ => [] }
-  let _ = bdat.mail_from_with("alice@example.com", ["SIZE=19"]) catch {
-    _ => ()
-  }
-  let _ = bdat.rcpt_to_with("bob@example.com", ["NOTIFY=SUCCESS,FAILURE"]) catch {
-    _ => ()
-  }
-  let chunks = bdat.bdat(@utf8.encode("Subject: Hi\r\n\r\n")[:], true) catch {
-    _ => []
-  }
-
   let pop_script = Scripted::new([
     "+OK ready", "+OK password required", "+OK logged in", "+OK capability list follows",
     "TOP", "UIDL", "SASL PLAIN LOGIN", ".", "+OK 2 200",
@@ -539,9 +543,6 @@ fn main {
   let rows = news.over("1-2") catch { _ => [] }
 
   println("--- extensions")
-  println("bdat replies -> \{chunks.length()}")
-  println("dsn rcpt     -> \{bdat_script.sent[2]}")
-  println("bdat verb    -> \{bdat_script.sent[3]}")
   println("pop3 caps    -> \{caps.length()}, uid \{uid}")
   println("over rows    -> \{rows.length()}")
 
