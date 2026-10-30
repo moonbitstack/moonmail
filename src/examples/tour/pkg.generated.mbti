@@ -6,8 +6,6 @@ package "moonbitstack/moonmail/examples/tour"
 // Errors
 
 // Types and methods
-type ImapScript
-
 type NntpScript
 
 type Scripted

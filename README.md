@@ -45,11 +45,10 @@ moon run src/examples/tour
   `AUTH`, and RFC 3463 enhanced status codes off any reply.
 - **NNTP** (`@moonmail/nntp`) — RFC 3977 news: groups, articles, posting,
   `LISTGROUP`, `OVER`/`HDR`, `NEWGROUPS`/`NEWNEWS`, `AUTHINFO`, `CAPABILITIES`.
-- **IMAP** (`@moonmail/imap`) — RFC 3501: tagged/untagged, literals,
-  `SELECT`/`EXAMINE`, `LIST`, `FETCH`, `SEARCH`, `STORE`, `COPY`/`MOVE`,
-  `APPEND`, `AUTHENTICATE`, `STARTTLS`, plus `STATUS`, the `UID` forms of every
-  command, `EXPUNGE`/`UID EXPUNGE`, `CLOSE`/`UNSELECT`, mailbox management,
-  `ENABLE` and one round of `IDLE`.
+- **IMAP** (`@moonmail/imap`) — IMAP4rev2 client with no I/O (RFC 9051) that
+  also speaks to IMAP4rev1 servers: the response grammar with literals and
+  response codes, pipelined UID commands, `IDLE`, `CONDSTORE`, `LITERAL+`,
+  `SASL-IR`, and modified UTF-7 names toward rev1 servers.
 - **JMAP** (`@moonmail/jmap`) — RFC 8620/8621: the session, request body and
   method responses as JSON; `Email/set`, `Mailbox/set` and
   `EmailSubmission/set` with their result parsing, `Identity/get`,
@@ -147,15 +146,21 @@ try {
 
 ## IMAP
 
+Each command returns its tag number; `feed` reports untagged responses as
+`Data` and each completion as `Done` with that number.
+
 ```moonbit
-let imap = @imap.Imap::new(connection as &@imap.ImapIo)
-try {
-  let _ = imap.greeting()
-  imap.login("alice", "secret")
-  let box = imap.select("INBOX")
-  let hits = imap.search("UNSEEN")
-} catch {
-  _ => ()
+let imap = @imap.Client::new()
+let _ = imap.login("alice", "secret")
+let _ = imap.select("INBOX")
+let fetch = imap.fetch("1:*", "(FLAGS BODY.PEEK[HEADER])", uid=true)
+// ... write imap.next_write(), feed the server's octets
+for event in imap.feed(octets) {
+  match event {
+    Data(Fetch(n, items)) => println(n.to_string() + " " + items.length().to_string())
+    Done(tag, No, _, text) if tag == fetch => println("fetch failed: " + text)
+    _ => ()
+  }
 }
 ```
 
@@ -176,11 +181,12 @@ let signature = @dkim.sign(raw[:], private_key, options)
 The pieces a caller reaches for once the simple path works:
 
 ```moonbit
-// IMAP: ask about a mailbox without selecting it, address messages by UID,
-// and take one round of IDLE.
-let status = imap.status("INBOX", ["MESSAGES", "UIDNEXT", "UIDVALIDITY"])
-let uids = imap.uid_search("UNSEEN")
-let events = imap.idle_once()          // announces IDLE, collects, says DONE
+// IMAP: ask about a mailbox without selecting it, wait for changes, and
+// store flags only where nothing changed them since (CONDSTORE).
+let _ = imap.status("INBOX", ["MESSAGES", "UIDNEXT", "UIDVALIDITY"])
+let _ = imap.idle()                    // changes arrive as Data until done()
+imap.done()
+let _ = imap.store("1:5", "+FLAGS (\\Seen)", uid=true, unchangedsince=modseq)
 
 // SMTP: chunk the body instead of using DATA, and ask for delivery status.
 smtp.mail("alice@example.com", size=1234, body=Binary)

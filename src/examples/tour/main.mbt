@@ -198,44 +198,49 @@ impl @nntp.NntpIo for NntpScript with fn read_line(self) -> String raise @nntp.N
 }
 
 ///|
-/// An in-memory IMAP server; this walk-through has no literals.
-struct ImapScript {
-  lines : Array[String]
-  sent : Array[String]
-}
-
-///|
-fn ImapScript::new(lines : Array[String]) -> ImapScript {
-  let l : Array[String] = []
-  let n = lines.length()
-  for i in 0..<n {
-    l.push(lines[n - 1 - i])
+/// A client session against a recorded server: the server's lines go in one
+/// by one, and the client's writes in between are dropped.
+fn imap_tour() -> Unit raise @imap.Refused {
+  let imap = @imap.Client::new()
+  let events = []
+  let replay = (text : String) => {
+    let _ = imap.next_write()
+    events.append(imap.feed(@utf8.encode(text + "\r\n")))
   }
-  { lines: l, sent: [], }
-}
-
-///|
-impl @imap.ImapIo for ImapScript with fn write_line(self, line) -> Unit raise @imap.ImapError {
-  self.sent.push(line)
-}
-
-///|
-impl @imap.ImapIo for ImapScript with fn write_bytes(_self, bytes) -> Unit raise @imap.ImapError {
-  let _ = bytes
-}
-
-///|
-impl @imap.ImapIo for ImapScript with fn read_line(self) -> String raise @imap.ImapError {
-  match self.lines.pop() {
-    Some(line) => line
-    None => raise @imap.ImapError::Io(msg="tour imap script ended")
+  replay("* OK [CAPABILITY IMAP4rev2 IDLE AUTH=PLAIN] ready")
+  let _ = imap.login("alice", "secret")
+  replay("A0001 OK LOGIN completed")
+  let _ = imap.select("INBOX")
+  replay("* 5 EXISTS")
+  replay("* OK [UIDVALIDITY 77] UIDs valid")
+  replay("A0002 OK [READ-WRITE] SELECT completed")
+  let _ = imap.search("UNSEEN", uid=true)
+  replay("* ESEARCH (TAG \"A0003\") UID ALL 101:103")
+  replay("A0003 OK SEARCH completed")
+  let _ = imap.fetch("1", "(FLAGS BODY[HEADER.FIELDS (SUBJECT)])")
+  replay("* 1 FETCH (FLAGS (\\Seen) BODY[HEADER.FIELDS (SUBJECT)] {13}")
+  replay("Subject: hi\r\n)")
+  replay("A0004 OK FETCH completed")
+  let _ = imap.idle()
+  replay("+ idling")
+  replay("* 6 EXISTS")
+  imap.done()
+  replay("A0005 OK IDLE terminated")
+  let _ = imap.logout()
+  replay("* BYE logging out")
+  replay("A0006 OK LOGOUT completed")
+  println("--- imap")
+  println("responses    -> \{events.length()}")
+  println("state        -> \{@debug.to_string(imap.state())}")
+  for event in events {
+    if event is Data(Fetch(n, items)) {
+      let subject = items
+        .get("BODY[HEADER.FIELDS (SUBJECT)]")
+        .bind(v => v.text())
+        .unwrap_or("")
+      println("fetch \{n}      -> \{subject.trim()}")
+    }
   }
-}
-
-///|
-impl @imap.ImapIo for ImapScript with fn read_exact(_self, n) -> Bytes raise @imap.ImapError {
-  let _ = n
-  raise @imap.ImapError::Io(msg="tour imap script has no literals")
 }
 
 ///|
@@ -393,41 +398,9 @@ fn main {
   println("article len  -> \{article.length()}")
 
   // --------------------------------------------------------------- imap
-  let imap_script = ImapScript::new([
-    "* OK ready", "A001 OK LOGIN completed", "* 5 EXISTS", "* 0 RECENT", "A002 OK SELECT completed",
-    "* SEARCH 1 3 5", "A003 OK SEARCH completed", "* STATUS \"INBOX\" (MESSAGES 5 RECENT 0 UIDNEXT 6 UIDVALIDITY 77 UNSEEN 2)",
-    "A004 OK STATUS completed", "* SEARCH 101 103 105", "A005 OK SEARCH completed",
-    "+ idling", "* 6 EXISTS", "A006 OK IDLE terminated", "A007 OK LOGOUT completed",
-  ])
-  let imap = @imap.Imap::new(imap_script as &@imap.ImapIo)
-  let _ = imap.greeting() catch { _ => "" }
-  let _ = imap.login("alice", "secret") catch { _ => () }
-  let mut exists = 0
-  let _ = try {
-    exists = imap.select("INBOX").exists
-  } catch {
-    _ => ()
+  imap_tour() catch {
+    e => println("imap tour stopped: " + @debug.to_string(e))
   }
-  let hits = imap.search("ALL") catch { _ => [] }
-  let mut messages = 0
-  let mut uid_validity = 0
-  let _ = try {
-    let status = imap.status("INBOX", ["MESSAGES", "UIDNEXT", "UIDVALIDITY"])
-    messages = status.messages
-    uid_validity = status.uid_validity
-  } catch {
-    _ => ()
-  }
-  let uids = imap.uid_search("UNSEEN") catch { _ => [] }
-  // IDLE for one round: hand back the events that arrived, then say DONE.
-  let events = imap.idle_once() catch { _ => [] }
-  let _ = imap.logout() catch { _ => () }
-  println("--- imap")
-  println("exists       -> \{exists}")
-  println("search hits  -> \{hits.length()}")
-  println("status       -> \{messages} messages, uidvalidity \{uid_validity}")
-  println("uid hits     -> \{uids.length()}")
-  println("idle events  -> \{events.length()}")
 
   // --------------------------------------------------------------- jmap
   //

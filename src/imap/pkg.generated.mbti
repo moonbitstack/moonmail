@@ -2,83 +2,155 @@
 package "moonbitstack/moonmail/imap"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitstack/moonmail/sasl",
 }
 
 // Values
+pub let limits : Limits
 
 // Errors
-pub(all) suberror ImapError {
-  Server(status~ : String, text~ : String)
-  Io(msg~ : String)
-  Protocol(msg~ : String)
-  Sasl(@sasl.Refused)
-}
+pub(all) suberror Refused {
+  Malformed(String)
+  Exceeded(limit~ : Int32, got~ : Int32)
+  Order(String)
+  Unsupported(String)
+} derive(Eq, @debug.Debug)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
-pub struct Imap {
-  io : &ImapIo
-  mut tag_no : Int32
-  mut selected : String?
+pub struct Client {
+  // private fields
 }
-pub fn Imap::append(Self, String, BytesView) -> Unit raise ImapError
-pub fn Imap::append_with(Self, String, Array[String], BytesView) -> Unit raise ImapError
-pub fn Imap::authenticate(Self, &@sasl.Mechanism) -> Unit raise ImapError
-pub fn Imap::capability(Self) -> Array[String] raise ImapError
-pub fn Imap::close(Self) -> Unit raise ImapError
-pub fn Imap::copy(Self, String, String) -> Unit raise ImapError
-pub fn Imap::create_mailbox(Self, String) -> Unit raise ImapError
-pub fn Imap::delete_mailbox(Self, String) -> Unit raise ImapError
-pub fn Imap::enable(Self, String) -> Array[String] raise ImapError
-pub fn Imap::examine(Self, String) -> Mailbox raise ImapError
-pub fn Imap::expunge(Self) -> Array[String] raise ImapError
-pub fn Imap::fetch(Self, String, String) -> Array[String] raise ImapError
-pub fn Imap::greeting(Self) -> String raise ImapError
-pub fn Imap::idle_once(Self) -> Array[String] raise ImapError
-pub fn Imap::list(Self, String, String) -> Array[String] raise ImapError
-pub fn Imap::login(Self, String, String) -> Unit raise ImapError
-pub fn Imap::logout(Self) -> Unit raise ImapError
-pub fn Imap::move_to(Self, String, String) -> Unit raise ImapError
-pub fn Imap::namespaces(Self) -> Array[String] raise ImapError
-pub fn Imap::new(&ImapIo) -> Self
-pub fn Imap::noop(Self) -> Unit raise ImapError
-pub fn Imap::rename_mailbox(Self, String, String) -> Unit raise ImapError
-pub fn Imap::search(Self, String) -> Array[Int32] raise ImapError
-pub fn Imap::select(Self, String) -> Mailbox raise ImapError
-pub fn Imap::selected_mailbox(Self) -> String?
-pub fn Imap::starttls(Self) -> Unit raise ImapError
-pub fn Imap::status(Self, String, Array[String]) -> Status raise ImapError
-pub fn Imap::store(Self, String, String, String) -> Unit raise ImapError
-pub fn Imap::subscribe(Self, String) -> Unit raise ImapError
-pub fn Imap::uid_copy(Self, String, String) -> Unit raise ImapError
-pub fn Imap::uid_expunge(Self, String) -> Array[String] raise ImapError
-pub fn Imap::uid_fetch(Self, String, String) -> Array[String] raise ImapError
-pub fn Imap::uid_move(Self, String, String) -> Unit raise ImapError
-pub fn Imap::uid_search(Self, String) -> Array[Int32] raise ImapError
-pub fn Imap::uid_store(Self, String, String, String) -> Unit raise ImapError
-pub fn Imap::unselect(Self) -> Unit raise ImapError
-pub fn Imap::unsubscribe(Self, String) -> Unit raise ImapError
+pub fn Client::append(Self, String, BytesView, flags? : Array[String], date? : String) -> Int32 raise Refused
+pub fn Client::authenticate(Self, &@sasl.Mechanism) -> Int32 raise Refused
+pub fn Client::capabilities(Self) -> Array[String]
+pub fn Client::capability(Self) -> Int32
+pub fn Client::close(Self) -> Int32 raise Refused
+pub fn Client::copy(Self, String, String, uid? : Bool) -> Int32 raise Refused
+pub fn Client::create(Self, String) -> Int32 raise Refused
+pub fn Client::delete(Self, String) -> Int32 raise Refused
+pub fn Client::done(Self) -> Unit raise Refused
+pub fn Client::enable(Self, Array[String]) -> Int32 raise Refused
+pub fn Client::examine(Self, String, condstore? : Bool) -> Int32 raise Refused
+pub fn Client::expunge(Self) -> Int32 raise Refused
+pub fn Client::feed(Self, BytesView) -> Array[Event] raise Refused
+pub fn Client::fetch(Self, String, String, uid? : Bool, changedsince? : Int64) -> Int32 raise Refused
+pub fn Client::has(Self, String) -> Bool
+pub fn Client::idle(Self) -> Int32 raise Refused
+pub fn Client::list(Self, String, String) -> Int32 raise Refused
+pub fn Client::login(Self, String, String) -> Int32 raise Refused
+pub fn Client::logout(Self) -> Int32
+pub fn Client::move_to(Self, String, String, uid? : Bool) -> Int32 raise Refused
+pub fn Client::namespaces(Self) -> Int32 raise Refused
+pub fn Client::new(limits? : Limits) -> Self
+pub fn Client::next_write(Self) -> Bytes?
+pub fn Client::noop(Self) -> Int32
+pub fn Client::rename(Self, String, String) -> Int32 raise Refused
+pub fn Client::search(Self, String, uid? : Bool) -> Int32 raise Refused
+pub fn Client::select(Self, String, condstore? : Bool) -> Int32 raise Refused
+pub fn Client::starttls(Self) -> Int32 raise Refused
+pub fn Client::state(Self) -> State
+pub fn Client::status(Self, String, Array[String]) -> Int32 raise Refused
+pub fn Client::store(Self, String, String, uid? : Bool, unchangedsince? : Int64) -> Int32 raise Refused
+pub fn Client::subscribe(Self, String) -> Int32 raise Refused
+pub fn Client::uid_expunge(Self, String) -> Int32 raise Refused
+pub fn Client::unselect(Self) -> Int32 raise Refused
+pub fn Client::unsubscribe(Self, String) -> Int32 raise Refused
 
-pub struct Mailbox {
-  exists : Int32
-  recent : Int32
-}
+pub(all) enum Code {
+  Alert
+  Capability(Array[String])
+  PermanentFlags(Array[String])
+  ReadOnly
+  ReadWrite
+  TryCreate
+  UidNext(Int64)
+  UidValidity(Int64)
+  HighestModseq(Int64)
+  NoModseq
+  Modified(String)
+  AppendUid(Int64, String)
+  CopyUid(Int64, String, String)
+  Closed
+  Other(String, String?)
+} derive(Eq, @debug.Debug)
+pub fn Code::equal(Self, Self) -> Bool
+pub fn Code::not_equal(Self, Self) -> Bool
+pub fn Code::to_repr(Self) -> @debug.Repr
 
-pub struct Status {
-  mailbox : String
-  messages : Int32
-  recent : Int32
-  uid_next : Int32
-  uid_validity : Int32
-  unseen : Int32
-}
+pub(all) enum Event {
+  Data(Response)
+  Done(Int32, Status, Code?, String)
+  Sasl(@sasl.Refused)
+} derive(Eq, @debug.Debug)
+pub fn Event::equal(Self, Self) -> Bool
+pub fn Event::not_equal(Self, Self) -> Bool
+pub fn Event::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Limits {
+  line : Int32
+  literal : Int32
+} derive(Eq, @debug.Debug)
+pub fn Limits::equal(Self, Self) -> Bool
+pub fn Limits::new(line? : Int32, literal? : Int32) -> Self
+pub fn Limits::not_equal(Self, Self) -> Bool
+pub fn Limits::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Response {
+  Condition(String, Code?, String)
+  Capability(Array[String])
+  Enabled(Array[String])
+  Flags(Array[String])
+  Exists(Int64)
+  Expunge(Int64)
+  List(flags~ : Array[String], delimiter~ : String?, name~ : String)
+  Status(String, Map[String, Int64])
+  Esearch(tag~ : String?, uid~ : Bool, items~ : Map[String, Value])
+  Search(Array[Int64], modseq~ : Int64?)
+  Fetch(Int64, Map[String, Value])
+  Namespace(Value, Value, Value)
+  Other(String, Array[Value])
+} derive(Eq, @debug.Debug)
+pub fn Response::equal(Self, Self) -> Bool
+pub fn Response::not_equal(Self, Self) -> Bool
+pub fn Response::to_repr(Self) -> @debug.Repr
+
+pub(all) enum State {
+  NotAuthenticated
+  Authenticated
+  Selected(String)
+  Logout
+} derive(Eq, @debug.Debug)
+pub fn State::equal(Self, Self) -> Bool
+pub fn State::not_equal(Self, Self) -> Bool
+pub fn State::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Status {
+  Ok
+  No
+  Bad
+} derive(Eq, @debug.Debug)
+pub fn Status::equal(Self, Self) -> Bool
+pub fn Status::not_equal(Self, Self) -> Bool
+pub fn Status::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Value {
+  Nil
+  Number(Int64)
+  Atom(String)
+  Text(Bytes)
+  List(Array[Value])
+} derive(Eq, @debug.Debug)
+pub fn Value::equal(Self, Self) -> Bool
+pub fn Value::list(Self) -> Array[Self]?
+pub fn Value::not_equal(Self, Self) -> Bool
+pub fn Value::number(Self) -> Int64?
+pub fn Value::text(Self) -> String?
+pub fn Value::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
 // Traits
-pub(open) trait ImapIo {
-  fn write_line(Self, String) -> Unit raise ImapError
-  fn write_bytes(Self, BytesView) -> Unit raise ImapError
-  fn read_line(Self) -> String raise ImapError
-  fn read_exact(Self, Int32) -> Bytes raise ImapError
-}
