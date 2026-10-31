@@ -10,8 +10,8 @@ pub(all) struct Mailbox {
   name : String
   role : String?
   parent_id : String?
-  total : Int
-  unread : Int
+  total : Int32
+  unread : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -75,14 +75,13 @@ fn one_address(json : Json) -> String? {
 fn string_list(json : Json, name : String) -> Array[String] {
   let out : Array[String] = []
   match optional(json, name) {
-    Some(Json::Array(entries)) => {
+    Some(Json::Array(entries)) =>
       for entry in entries {
         match entry {
           Json::String(value) => out.push(value)
           _ => ()
         }
       }
-    }
     _ => ()
   }
   out
@@ -90,7 +89,10 @@ fn string_list(json : Json, name : String) -> Array[String] {
 
 ///|
 /// The mailboxes in a `Mailbox/get` answer.
-pub fn mailboxes(response : Response, tag : String) -> Array[Mailbox] raise Refused {
+pub fn mailboxes(
+  response : Response,
+  tag : String,
+) -> Array[Mailbox] raise Refused {
   let answer = response.answer(tag)
   let out : Array[Mailbox] = []
   for entry in items(answer.args, "list") {
@@ -108,7 +110,10 @@ pub fn mailboxes(response : Response, tag : String) -> Array[Mailbox] raise Refu
 
 ///|
 /// The ids an `Email/query` answer lists, in the order the server sorted them.
-pub fn email_ids(response : Response, tag : String) -> Array[String] raise Refused {
+pub fn email_ids(
+  response : Response,
+  tag : String,
+) -> Array[String] raise Refused {
   let answer = response.answer(tag)
   string_list(answer.args, "ids")
 }
@@ -145,7 +150,10 @@ fn field_or_null(json : Json, name : String) -> Json {
 
 ///|
 /// The identities an `Identity/get` answer lists.
-pub fn identities(response : Response, tag : String) -> Array[Identity] raise Refused {
+pub fn identities(
+  response : Response,
+  tag : String,
+) -> Array[Identity] raise Refused {
   let answer = response.answer(tag)
   let out : Array[Identity] = []
   for entry in items(answer.args, "list") {

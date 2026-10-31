@@ -31,9 +31,7 @@ pub extend Refused with Debug::{to_repr}
 /// Read a JSON document, or refuse it as a whole: a JMAP body that does not
 /// parse has no partial reading worth keeping.
 fn reads(body : String) -> Json raise Refused {
-  try {
-    @json.parse(body[:])
-  } catch {
+  @json.parse(body[:]) catch {
     _ => raise Refused::Malformed(at="document")
   }
 }
@@ -82,7 +80,7 @@ fn text_opt(json : Json, name : String) -> String? {
 }
 
 ///|
-fn int(json : Json, name : String) -> Int {
+fn int(json : Json, name : String) -> Int32 {
   match optional(json, name) {
     Some(Json::Number(value, ..)) => value.to_int()
     _ => 0
@@ -112,7 +110,7 @@ fn strings(values : Array[String]) -> Json {
 }
 
 ///|
-fn number(value : Int) -> Json {
+fn number(value : Int32) -> Json {
   Json::number(value.to_double(), repr=value.to_string())
 }
 

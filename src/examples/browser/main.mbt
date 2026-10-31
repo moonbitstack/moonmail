@@ -28,9 +28,7 @@ fn main {
 
 ///|
 fn read(text : String) -> Json? {
-  try {
-    Some(@json.parse(text[:]))
-  } catch {
+  Some(@json.parse(text[:])) catch {
     _ => None
   }
 }
@@ -44,7 +42,10 @@ fn ok(value : Json) -> String {
 fn fail(kind : String, message : String) -> String {
   object([
     ("ok", Json::boolean(false)),
-    ("error", object([("kind", Json::string(kind)), ("message", Json::string(message))])),
+    (
+      "error",
+      object([("kind", Json::string(kind)), ("message", Json::string(message))]),
+    ),
   ]).stringify()
 }
 
@@ -100,14 +101,13 @@ fn list(input : Json, name : String) -> Array[String] {
   match input {
     Json::Object(map) =>
       match map.get(name) {
-        Some(Json::Array(values)) => {
+        Some(Json::Array(values)) =>
           for value in values {
             match value {
               Json::String(item) => out.push(item)
               _ => ()
             }
           }
-        }
         _ => ()
       }
     _ => ()
@@ -116,7 +116,7 @@ fn list(input : Json, name : String) -> Array[String] {
 }
 
 ///|
-fn int(input : Json, name : String, fallback : Int) -> Int {
+fn int(input : Json, name : String, fallback : Int32) -> Int32 {
   match input {
     Json::Object(map) =>
       match map.get(name) {
@@ -128,7 +128,9 @@ fn int(input : Json, name : String, fallback : Int) -> Int {
 }
 
 ///|
-fn addresses(values : Array[String]) -> Array[@moonmail.Address] raise @moonmail.Refused {
+fn addresses(
+  values : Array[String],
+) -> Array[@moonmail.Address] raise @moonmail.Refused {
   let out : Array[@moonmail.Address] = []
   for value in values {
     out.push(@moonmail.parse_address(value[:]))
@@ -155,9 +157,7 @@ fn compose(input : Json) -> String {
     let attachments : Array[@moonmail.Attachment] = []
     match field(input, "image") {
       Some(image) => {
-        let carried = try {
-          Some(@base64.decode(text(image, "data").unwrap_or("")))
-        } catch {
+        let carried = Some(@base64.decode(text(image, "data").unwrap_or(""))) catch {
           _ => None
         }
         match carried {
@@ -183,29 +183,36 @@ fn compose(input : Json) -> String {
     match field(input, "attachments") {
       Some(Json::Array(items)) =>
         for item in items {
-          let bytes = try {
-            Some(@base64.decode(text(item, "data").unwrap_or("")))
-          } catch {
+          let bytes = Some(@base64.decode(text(item, "data").unwrap_or(""))) catch {
             _ => None
           }
           match bytes {
             Some(data) =>
               if data.length() > 0 {
                 let name = text(item, "name").unwrap_or("attachment")
-                let kind = text(item, "type").unwrap_or("application/octet-stream")
+                let kind = text(item, "type").unwrap_or(
+                  "application/octet-stream",
+                )
                 // `id` is what makes a part inline: give it one and the picture
                 // is shown by `cid:`; leave it out and the file is an attachment.
                 match text(item, "cid") {
                   Some(cid) =>
                     attachments.push(
                       @moonmail.Attachment::new(
-                        name, data, media_type=kind, inline=true, id=cid,
+                        name,
+                        data,
+                        media_type=kind,
+                        inline=true,
+                        id=cid,
                       ),
                     )
                   None =>
                     attachments.push(
                       @moonmail.Attachment::new(
-                        name, data, media_type=kind, inline=flag(item, "inline"),
+                        name,
+                        data,
+                        media_type=kind,
+                        inline=flag(item, "inline"),
                       ),
                     )
                 }
@@ -308,9 +315,10 @@ fn request(input : Json) -> String {
         text(input, "mailbox").unwrap_or(""),
         int(input, "limit", 20),
       )
-    "get" => request.email_get(account, list(input, "ids"), [
-      "id", "subject", "from", "receivedAt", "preview", "keywords",
-    ])
+    "get" =>
+      request.email_get(account, list(input, "ids"), [
+        "id", "subject", "from", "receivedAt", "preview", "keywords",
+      ])
     "draft" => {
       let draft = @jmap.Draft::new(
         to=list(input, "to"),
@@ -331,7 +339,12 @@ fn request(input : Json) -> String {
       )
     _ => return fail("op", "there is no JMAP operation called " + op)
   }
-  ok(object([("tag", Json::string(tag)), ("body", Json::string(request.to_string()))]))
+  ok(
+    object([
+      ("tag", Json::string(tag)),
+      ("body", Json::string(request.to_string())),
+    ]),
+  )
 }
 
 ///|

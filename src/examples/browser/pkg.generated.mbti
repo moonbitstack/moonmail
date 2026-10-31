@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbitstack/moonmail/engine"
+package "moonbitstack/moonmail/examples/browser"
 
 // Values
 pub fn engine_call(String, String) -> String

@@ -13,9 +13,5 @@ import {
 }
 
 options(
-  link: {
-    "js": {
-      "exports": ["engine_call"],
-    },
-  },
+  link: { "js": { "exports": [ "engine_call" ] } },
 )

@@ -59,20 +59,19 @@ pub fn Request::using_capability(self : Request, capability : String) -> Unit {
 /// Append a call and answer its tag: `c0`, `c1`, and so on.
 pub fn Request::call(self : Request, name : String, args : Json) -> String {
   let tag = "c" + self.calls.length().to_string()
-  self.calls.push({ name, args, tag })
+  self.calls.push({ name, args, tag, })
   tag
 }
 
 ///|
 pub fn Request::to_json(self : Request) -> Json {
   let calls = self.calls.map(fn(call) {
-    Json::array([
-      Json::string(call.name),
-      call.args,
-      Json::string(call.tag),
-    ])
+    Json::array([Json::string(call.name), call.args, Json::string(call.tag)])
   })
-  object([("using", strings(self.capabilities)), ("methodCalls", Json::array(calls))])
+  object([
+    ("using", strings(self.capabilities)),
+    ("methodCalls", Json::array(calls)),
+  ])
 }
 
 ///|
@@ -90,7 +89,9 @@ pub fn Request::mailbox_get(self : Request, account : String) -> String {
       ("accountId", Json::string(account)),
       (
         "properties",
-        strings(["id", "name", "role", "parentId", "totalEmails", "unreadEmails"]),
+        strings([
+          "id", "name", "role", "parentId", "totalEmails", "unreadEmails",
+        ]),
       ),
     ]),
   )
@@ -110,7 +111,7 @@ pub fn Request::email_query(
   self : Request,
   account : String,
   mailbox : String,
-  limit : Int,
+  limit : Int32,
 ) -> String {
   self.call(
     "Email/query",
@@ -162,8 +163,12 @@ pub(all) struct Draft {
 }
 
 ///|
-pub fn Draft::new(to~ : Array[String], subject~ : String, text~ : String) -> Draft {
-  { from: None, to, cc: [], bcc: [], subject, text }
+pub fn Draft::new(
+  to~ : Array[String],
+  subject~ : String,
+  text~ : String,
+) -> Draft {
+  { from: None, to, cc: [], bcc: [], subject, text, }
 }
 
 ///|
@@ -193,10 +198,16 @@ pub fn Request::email_set_draft(
     (
       "textBody",
       Json::array([
-        object([("partId", Json::string("body")), ("type", Json::string("text/plain"))]),
+        object([
+          ("partId", Json::string("body")),
+          ("type", Json::string("text/plain")),
+        ]),
       ]),
     ),
-    ("bodyValues", object([("body", object([("value", Json::string(draft.text))]))])),
+    (
+      "bodyValues",
+      object([("body", object([("value", Json::string(draft.text))]))]),
+    ),
     ("to", address_list(draft.to)),
   ]
   if !draft.cc.is_empty() {
@@ -206,8 +217,7 @@ pub fn Request::email_set_draft(
     properties.push(("bcc", address_list(draft.bcc)))
   }
   match draft.from {
-    Some(from) =>
-      properties.push(("from", Json::array([addressed(from)])))
+    Some(from) => properties.push(("from", Json::array([addressed(from)])))
     None => ()
   }
   self.call(

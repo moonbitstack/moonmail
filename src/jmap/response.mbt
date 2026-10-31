@@ -43,7 +43,9 @@ pub fn Response::parse(body : String) -> Response raise Refused {
       raise Refused::Failed(
         call="request",
         kind=text_opt(document, "type").unwrap_or("about:blank"),
-        description=text_opt(document, "detail").unwrap_or("the server sent no methodResponses"),
+        description=text_opt(document, "detail").unwrap_or(
+          "the server sent no methodResponses",
+        ),
       )
     Some(_) => ()
   }
@@ -64,9 +66,12 @@ pub fn Response::parse(body : String) -> Response raise Refused {
       Json::String(tag) => tag
       _ => raise Refused::WrongType(name="methodTag")
     }
-    invocations.push({ name, args: parts[1], tag })
+    invocations.push({ name, args: parts[1], tag, })
   }
-  { invocations, session_state: text_opt(document, "sessionState").unwrap_or("") }
+  {
+    invocations,
+    session_state: text_opt(document, "sessionState").unwrap_or(""),
+  }
 }
 
 ///|
@@ -84,7 +89,10 @@ pub fn Response::invocation(self : Response, tag : String) -> Invocation? {
 /// `type` and `description` in their arguments (RFC 8620 section 3.6.2), and a
 /// client that treats them as data would silently show an empty mailbox
 /// instead of a refused password.
-pub fn Response::answer(self : Response, tag : String) -> Invocation raise Refused {
+pub fn Response::answer(
+  self : Response,
+  tag : String,
+) -> Invocation raise Refused {
   let invocation = match self.invocation(tag) {
     Some(invocation) => invocation
     None => raise Refused::Missing(name=tag)

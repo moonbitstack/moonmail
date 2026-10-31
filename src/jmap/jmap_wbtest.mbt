@@ -60,8 +60,14 @@ test "url: resolves paths, directories and absolute urls" {
     resolve("https://h.example.com/a/b/jmap", "c"),
     "https://h.example.com/a/b/c",
   )
-  assert_eq(resolve(discovery, "//cdn.example.com/x"), "https://cdn.example.com/x")
-  assert_eq(resolve(discovery, "https://other.example/x"), "https://other.example/x")
+  assert_eq(
+    resolve(discovery, "//cdn.example.com/x"),
+    "https://cdn.example.com/x",
+  )
+  assert_eq(
+    resolve(discovery, "https://other.example/x"),
+    "https://other.example/x",
+  )
 }
 
 ///|
@@ -157,7 +163,7 @@ test "error: a refused call is an error, not an empty list" {
     let _ = mailboxes(response, "c0")
     None
   } catch {
-    Refused::Failed(kind=kind, ..) => Some(kind)
+    Refused::Failed(kind~, ..) => Some(kind)
     _ => None
   }
   assert_eq(refusal, Some("forbidden"))
@@ -174,9 +180,7 @@ test "submission: the created id comes back by its creation id" {
 
 ///|
 fn document_of(request : Request) -> Json {
-  try {
-    @json.parse(request.to_string()[:])
-  } catch {
+  @json.parse(request.to_string()[:]) catch {
     _ => Json::null()
   }
 }
@@ -241,7 +245,8 @@ test "request-level error: a problem document keeps its type" {
     let _ = Response::parse(body)
     None
   } catch {
-    Refused::Failed(kind=kind, description=detail, ..) => Some(kind + " / " + detail)
+    Refused::Failed(kind~, description=detail, ..) =>
+      Some(kind + " / " + detail)
     _ => None
   }
   assert_eq(

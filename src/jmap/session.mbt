@@ -41,7 +41,7 @@ pub fn discovery_url(base : String) -> String {
 }
 
 ///|
-fn scheme_end(url : String) -> Int? {
+fn scheme_end(url : String) -> Int32? {
   if url.has_prefix("https://") {
     Some(8)
   } else if url.has_prefix("http://") {
@@ -66,7 +66,7 @@ fn origin_of(url : String) -> String? {
 }
 
 ///|
-fn last_slash(text : String) -> Int? {
+fn last_slash(text : String) -> Int32? {
   let mut i = text.length() - 1
   while i >= 0 {
     if text.get_char(i) == Some('/') {

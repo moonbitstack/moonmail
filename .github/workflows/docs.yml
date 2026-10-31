@@ -1,0 +1,69 @@
+name: Docs
+
+# The site in docs/: the API page is generated from the package interfaces, so a
+# change to an interface without a matching page fails here, and the writing
+# desk calls moonmail itself, compiled to JavaScript by this workflow and never
+# committed.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install moon
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: the desk's engine
+        run: bash scripts/build_engine.sh
+
+      - name: the API page matches the interfaces
+        run: |
+          python3 scripts/gen_api.py
+          git diff --exit-code -- docs/
+
+      - name: the pages are self-contained
+        run: python3 scripts/check_docs.py
+
+      - name: setup pages
+        if: github.event_name == 'push'
+        uses: actions/configure-pages@v6
+
+      - name: upload pages artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-26.04
+    steps:
+      - name: deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
