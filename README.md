@@ -154,6 +154,38 @@ for box in @jmap.mailboxes(answer, tag) {
 A server that does not speak JMAP cannot be reached from a page, whatever the
 client does; for those, use `@moonmail/net` from a native program or a relay.
 
+## The writing desk, and the post office beside it
+
+The desk at [moonbitstack.github.io/moonmail/desk.html](https://moonbitstack.github.io/moonmail/desk.html)
+writes a letter with this library and then has to send it. A page cannot: no
+Web API opens a TCP connection, so the three socket protocols are out of reach
+of the tab the letter was written in.
+
+Two ways remain, and the desk offers both:
+
+- **JMAP** — JSON over HTTPS, so the page fetches the server itself. Nothing to
+  install, but only a server that speaks JMAP can be reached.
+- **Local office** — the page hands the letter to `127.0.0.1`, and a small
+  server there opens the SMTP, IMAP or POP3 connection. Works with any
+  provider; needs that server to be running.
+
+```mermaid
+flowchart LR
+  page["writing desk<br/>(a page, no socket)"]
+  desk["moonmail<br/>composes the MIME"]
+  jmap["JMAP server<br/>HTTPS · no helper"]
+  office["local post office<br/>127.0.0.1:12000"]
+  smtp["SMTP · IMAP · POP3"]
+  page --> desk
+  desk -->|"jmap.request"| jmap
+  desk -->|"compose"| office
+  office -->|"@moonmail/net"| smtp
+```
+
+The office is a plugin, not part of the library: it lives on the `postoffice`
+branch, and `moon run src/postoffice` serves the page and the three endpoints
+it calls.
+
 ## Over a socket
 
 `@moonmail/net` carries the state machines over moonnet. `StartTls` refuses a
