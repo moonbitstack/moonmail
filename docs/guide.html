@@ -632,16 +632,17 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
         <figure class="code">
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">moonbit</span>
-          <pre><code>let raw = @fs.read_file("welcome.eml")
-let message = @moonmail.Message::parse(raw)
+          <pre><code>let message = @moonmail.Message::parse(raw[:])
 
-println(message.subject)
-println(message.message_id)
-println(message.text())</code></pre>
+println(message.subject().unwrap_or("(no subject)"))
+println(message.message_id().unwrap_or("(no id)"))
+println(message.text().unwrap_or(""))
+println(@debug.to_string(message.from()))</code></pre>
         </figure>
         <div class="out"><span class="out__k">out</span><pre>Welcome aboard
 &lt;8f2c41@example.com&gt;
-Thanks for signing up — your first letter is inside.</pre></div>
+Thanks for signing up — your first letter is inside.
+[{ name: Some("Leo"), address: "leo@example.com" }]</pre></div>
         <p class="step__p">Parsing is lenient by default: a boundary that never closes ends the parts instead of failing. Pass <code>strict=true</code> when you would rather see the error than a repaired letter.</p>
       </section>
 
@@ -655,7 +656,7 @@ Thanks for signing up — your first letter is inside.</pre></div>
           <span class="code__lang">moonbit</span>
           <pre><code>fn walk(part : @moonmail.Message, depth : Int) -&gt; Unit {
   let pad = "  ".repeat(depth)
-  println("\{pad}\{part.content_type}")
+  println("\{pad}\{part.content_type().essence}")
   match part.body {
     Leaf(bytes) =&gt; println("\{pad}  \{bytes.length()} bytes")
     Multipart(parts) =&gt; parts.each(fn(p) { walk(p, depth + 1) })
@@ -668,12 +669,12 @@ walk(message, 0)</code></pre>
         <div class="out"><span class="out__k">out</span><pre>multipart/mixed
   multipart/alternative
     text/plain
-      182 bytes
+      54 bytes
     text/html
-      402 bytes
-  application/pdf
-    91240 bytes</pre></div>
-        <p class="step__p">When you do not want to walk it yourself, <code>message.attachments</code> collects every leaf that is not the body, already decoded and named.</p>
+      61 bytes
+  image/jpeg
+    3 bytes</pre></div>
+        <p class="step__p">When you do not want to walk it yourself, <code>message.attachments()</code> collects every leaf that is not the body, already decoded and named.</p>
       </section>
 
       <!-- 04 -->
@@ -685,27 +686,23 @@ walk(message, 0)</code></pre>
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">moonbit</span>
           <pre><code>let reply = @moonmail.Message::new(
-  from=@moonmail.Mailbox::{ name: Some("Leo"), address: "leo@example.com" },
-  to=[@moonmail.Address::Mailbox(
-    @moonmail.Mailbox::{ name: None, address: "you@example.com" },
-  )],
+  from=@moonmail.Mailbox::new("leo@example.com", name="Leo"),
+  to=[Mailbox(@moonmail.Mailbox::new("you@example.com"))],
   subject="Re: Welcome aboard",
   text="Thanks — the lake photo was mine.",
-  attachments=[@moonmail.Attachment::{
-    name: "lake.jpg",
-    media_type: "image/jpeg",
-    data: @fs.read_file("lake.jpg"),
-    inline: false,
-    id: None,
-  }],
+  attachments=[
+    @moonmail.Attachment::new("lake.jpg", lake, media_type="image/jpeg"),
+  ],
 )
 
-@fs.write_file("reply.eml", reply.encode())</code></pre>
+let wire = reply.encode()</code></pre>
         </figure>
-        <div class="out"><span class="out__k">out</span><pre>reply.eml · 91744 bytes
+        <div class="out"><span class="out__k">out</span><pre>wire · 520 bytes
 multipart/mixed
-  multipart/alternative → text/plain, text/html
-  image/jpeg · lake.jpg · attachment</pre></div>
+  text/plain
+    35 bytes
+  image/jpeg
+    3 bytes</pre></div>
         <p class="step__p">Encoding folds at 78 columns and writes CRLF. Pass <code>utf8=true</code> to write non-ASCII headers in place (RFC 6532) instead of as encoded words.</p>
       </section>
 
@@ -717,21 +714,30 @@ multipart/mixed
         <figure class="code code--b">
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">moonbit</span>
-          <pre><code>let signature = @dkim.sign(
-  raw,
-  key=@dkim.Key::Ed25519(key),
+          <pre><code>let key = @ed25519.PrivateKey::of_secret(seed[:])
+
+let signature = @dkim.sign(
+  raw[:],
+  Ed25519(key),
   domain="example.com",
   selector="moon",
 )
 
-let signed = @bytes.concat([signature.to_bytes(), b"\r\n", raw])
+let signed = @utf8.encode(signature + "\r\n" + @utf8.decode_lossy(raw[:]))
+
 let verdicts = @dkim.verify(
-  signed,
-  lookup=fn(d) { @dns.txt("moon._domainkey.\{d}") },
-  now=1730000000,
+  signed[:],
+  name =&gt; {
+    if name == "moon._domainkey.example.com" {
+      Some(record)
+    } else {
+      None
+    }
+  },
+  now=0,
 )</code></pre>
         </figure>
-        <div class="out"><span class="out__k">out</span><pre>Pass(domain="example.com", selector="moon")</pre></div>
+        <div class="out"><span class="out__k">out</span><pre>[Pass(domain="example.com", selector="moon")]</pre></div>
         <p class="step__p">Change one character of the body and the same call returns <b>Fail</b>; keep the body but rewrite a signed header and it fails too. <code>lookup</code> is where you do the DNS — this package never reaches for a resolver.</p>
       </section>
 
@@ -744,13 +750,15 @@ let verdicts = @dkim.verify(
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">moonbit</span>
           <pre><code>let mechanism = @sasl.ScramSha256::new(
-  user="leo@example.com",
-  password=password,
+  "leo@example.com",
+  password,
   nonce="f3a91c7d2b",
 )
 
 // when the server offers nothing better
-let plain = @sasl.Plain::new("leo@example.com", password)</code></pre>
+let plain = @sasl.Plain::new("leo@example.com", password)
+
+println(mechanism.name())</code></pre>
         </figure>
         <p class="step__p">SCRAM needs a nonce and this package will not invent one: randomness is your call, so a test can pin it. Everything else — the three round trips, the server signature check — is inside the mechanism.</p>
         <div class="note">
@@ -767,24 +775,18 @@ let plain = @sasl.Plain::new("leo@example.com", password)</code></pre>
         <figure class="code code--b">
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">moonbit</span>
-          <pre><code>let mut client = @smtp.Client::new()
+          <pre><code>let client = @smtp.Client::new()
+ignore(client.feed(b"220 mail.example.com ESMTP\r\n"))
 client.ehlo("laptop.local")
-client.auth(mechanism)
-client.send("leo@example.com", ["you@example.com"], reply.encode())
+ignore(client.next_write())
+ignore(client.feed(b"250-mail.example.com\r\n250-8BITMIME\r\n250 SIZE 10240000\r\n"))
 
-while client.next_write() is Some(out) {
-  conn.write(out)
-  for event in client.feed(conn.read()) {
-    match event {
-      Reply(_, r) if r.is_ok() =&gt; ()
-      Reply(cmd, r) =&gt; abort("\{cmd}: \{r.text()}")
-      Sasl(e) =&gt; abort("\{e}")
-    }
-  }
-}</code></pre>
+client.send("leo@example.com", ["you@example.com"], wire)</code></pre>
         </figure>
-        <div class="out"><span class="out__k">out</span><pre>250 2.0.0 Ok: queued as 4F2C1A7B</pre></div>
-        <p class="step__p"><b>send</b> is the shortcut: it adds <code>SIZE</code>, <code>BODY=8BITMIME</code> and <code>SMTPUTF8</code> by itself, but only for extensions the server actually announced at EHLO.</p>
+        <div class="out"><span class="out__k">out</span><pre>MAIL FROM:&lt;leo@example.com&gt; SIZE=208 BODY=8BITMIME
+RCPT TO:&lt;you@example.com&gt;
+DATA</pre></div>
+        <p class="step__p"><b>send</b> is the shortcut: it fills in <code>SIZE</code>, <code>BODY=8BITMIME</code> and, when the payload needs it, <code>SMTPUTF8</code> — but only for extensions the server actually announced at EHLO.</p>
       </section>
 
       <!-- 08 -->
@@ -795,15 +797,18 @@ while client.next_write() is Some(out) {
         <figure class="code">
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">moonbit</span>
-          <pre><code>test "a greeting is enough to start" {
-  let client = @smtp.Client::new()
-  client.feed(b"220 mail.example.com ESMTP\r\n")
-  client.ehlo("test.local")
+          <pre><code>let client = @smtp.Client::new()
+ignore(client.feed(b"220 mail.example.com ESMTP\r\n"))
+client.ehlo("test.local")
 
-  assert_eq(client.next_write(), Some(b"EHLO test.local\r\n"))
-}</code></pre>
+match client.next_write() {
+  Some(out) =&gt; println(@utf8.decode_lossy(out))
+  None =&gt; ()
+}
+println(client.pending())</code></pre>
         </figure>
-        <div class="out"><span class="out__k">out</span><pre>Total tests: 1, passed: 1, failed: 0.</pre></div>
+        <div class="out"><span class="out__k">out</span><pre>EHLO test.local
+1</pre></div>
         <p class="step__p">IMAP adds tags — every command returns its number and every <b>Done</b> carries it back. POP3 adds <b>pending</b>, which is all the back-pressure that protocol needs. <code>moonmail/net</code> is the only package that owns a socket; everything above it is pure.</p>
         <div class="next">
           <a href="api.html">

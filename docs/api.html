@@ -377,7 +377,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
 }
 .slip{
   position:relative;background:var(--paper);
-  padding:14px 40px 14px 34px;margin-bottom:11px;
+  padding:16px 40px 15px 34px;margin-bottom:11px;
   border:1px solid color-mix(in srgb,var(--paper-ink) 7%,transparent);
   box-shadow:var(--shadow-sm);
   transform:rotate(var(--r,0));
@@ -419,6 +419,9 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
 }
 .rows code i{font-style:normal;color:var(--paper-green)}
 .rows span{font:500 11px/1.5 var(--font-ui);color:var(--paper-ink-2)}
+.rows--one li{grid-template-columns:1fr;padding:4px 0}
+.sig + .sig{margin-top:6px}
+.sig + .rows{margin-top:8px}
 .verdict{
   margin:8px 0 0;padding:7px 10px;
   background:color-mix(in srgb,var(--paper-green) 7%,transparent);
@@ -637,13 +640,15 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
         <input id="strain" type="search" placeholder="type to filter, e.g. starttls" aria-label="Filter the catalogue" autocomplete="off">
       </div>
       <ul class="rail__list">
-        <li class="rail__item"><a class="rail__tag" href="#root" style="--tilt:-.9deg"><span class="rail__no">01</span><span class="rail__name">moonmail</span><span class="rail__count">13</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#dkim" style="--tilt:.7deg"><span class="rail__no">02</span><span class="rail__name">dkim</span><span class="rail__count">6</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#sasl" style="--tilt:-.5deg"><span class="rail__no">03</span><span class="rail__name">sasl</span><span class="rail__count">9</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#smtp" style="--tilt:.9deg"><span class="rail__no">04</span><span class="rail__name">smtp</span><span class="rail__count">13</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#imap" style="--tilt:-.7deg"><span class="rail__no">05</span><span class="rail__name">imap</span><span class="rail__count">11</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#pop3" style="--tilt:.6deg"><span class="rail__no">06</span><span class="rail__name">pop3</span><span class="rail__count">5</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#net" style="--tilt:-.8deg"><span class="rail__no">07</span><span class="rail__name">net</span><span class="rail__count">4</span></a></li>
+
+        <li class="rail__item"><a class="rail__tag" href="#root" style="--tilt:-.7deg"><span class="rail__no">01</span><span class="rail__name">moonmail</span><span class="rail__count">12</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#dkim" style="--tilt:.6deg"><span class="rail__no">02</span><span class="rail__name">dkim</span><span class="rail__count">7</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#sasl" style="--tilt:-.5deg"><span class="rail__no">03</span><span class="rail__name">sasl</span><span class="rail__count">10</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#smtp" style="--tilt:.55deg"><span class="rail__no">04</span><span class="rail__name">smtp</span><span class="rail__count">12</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#imap" style="--tilt:-.6deg"><span class="rail__no">05</span><span class="rail__name">imap</span><span class="rail__count">10</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#pop3" style="--tilt:.5deg"><span class="rail__no">06</span><span class="rail__name">pop3</span><span class="rail__count">8</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#net" style="--tilt:-.45deg"><span class="rail__no">07</span><span class="rail__name">net</span><span class="rail__count">6</span></a></li>
+      
       </ul>
       <div class="rail__plumb" aria-hidden="true">
         <svg viewBox="0 0 13 20"><path d="M6.5 0 8 2v10l2 2v6H3v-6l2-2V2Z"/></svg>
@@ -652,12 +657,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
     </aside>
 
     <main class="content">
-      <div class="howto">
-        <span class="howto__k">how to read</span>
-        <p>A <b>card</b> is a package. A <b>slip</b> under it is one thing the package exposes: a type, a trait, a function, or a small group of methods that belong together. Signatures are written as they are published — <b>~</b> marks a labelled argument, <b>?</b> an optional one.</p>
-      </div>
 
-      <!-- ============ 01 root ============ -->
       <section class="pkg" id="root" data-pkg="root">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:-.7deg">
@@ -674,106 +674,107 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <span class="chip chip--spec">RFC 5322</span>
               <span class="chip chip--spec">RFC 2045</span>
               <span class="chip chip--spec">RFC 6532</span>
-              <span class="chip chip--count">13 entries</span>
+              <span class="chip chip--count">12 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
-          <article class="slip" style="--r:-.25deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">pub(all) struct</span> <b>Mailbox</b> { name : <i>String?</i>; address : <i>String</i> }</code>
-            <p class="note">One address. <b>name</b> is the display name when the letter carried one — <code>“Leo” &lt;leo@example.com&gt;</code> — and none otherwise.</p>
-          </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Address</b> { Mailbox(<i>Mailbox</i>); Group(name~ : <i>String</i>, members~ : <i>Array[Mailbox]</i>) }</code>
-            <p class="note">A single mailbox, or a named group. Groups survive a parse and are written back as written.</p>
-          </article>
-
-          <article class="slip" style="--r:-.18deg">
-            <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">pub fn</span> <b>parse_address</b>(<i>StringView</i>) -&gt; <i>Address</i> <span class="k">raise</span> <i>Refused</i></code>
-            <code class="sig"><span class="k">pub fn</span> <b>parse_addresses</b>(<i>StringView</i>) -&gt; <i>Array[Address]</i> <span class="k">raise</span> <i>Refused</i></code>
-            <p class="note">Read a header line into addresses. Quoted local parts, comments and obsolete routes are accepted; anything else raises with the offset it gave up at.</p>
-          </article>
-
-          <article class="slip" style="--r:.28deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">pub struct</span> <b>Headers</b></code>
-            <ul class="rows">
-              <li><code><b>new</b>() -&gt; <i>Headers</i></code><span>An empty table.</span></li>
-              <li><code><b>get</b>(name) -&gt; <i>String?</i></code><span>The first value, unfolded, or none.</span></li>
-              <li><code><b>all</b>(name) -&gt; <i>Array[String]</i></code><span>Every value in the order it arrived.</span></li>
-              <li><code><b>add</b> / <b>set</b> / <b>remove</b></code><span>Append, replace in place, drop every value.</span></li>
-              <li><code><b>iter</b>()</code><span>Walk the table in wire order, names as received.</span></li>
-            </ul>
-            <p class="note">Ordered, case-insensitive on the name, multi-valued. Values are stored with their folding removed.</p>
-          </article>
-
           <article class="slip" style="--r:-.22deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Body</b> { Leaf(<i>Bytes</i>); Multipart(<i>Array[Message]</i>); Embedded(<i>Message</i>) }</code>
-            <ul class="rows">
-              <li><code>Leaf</code><span>Content with its transfer encoding already undone.</span></li>
-              <li><code>Multipart</code><span>Parts in order; the boundary lives in <b>Content-Type</b>.</span></li>
-              <li><code>Embedded</code><span>A whole letter inside a letter, <b>message/rfc822</b>.</span></li>
-            </ul>
-          </article>
-
-          <article class="slip" style="--r:.16deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">pub(all) struct</span> <b>Message</b> { headers : <i>Headers</i>; body : <i>Body</i> }</code>
-            <p class="note">A part is a message too, so the type nests without a second shape for “part”.</p>
-          </article>
-
-          <article class="slip" style="--r:-.3deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><b>Message::parse</b>(<i>BytesView</i>, strict? : <i>Bool</i>) -&gt; <i>Message</i> <span class="k">raise</span> <i>Refused</i></code>
-            <p class="note">Read a letter from its bytes. Lenient by default: a missing boundary ends the parts instead of failing. <b>strict</b> turns every such recovery into a raise.</p>
+            <code class="sig"><span class="k">fn</span> <b>encode_addresses</b>(<i>ArrayView</i>[<i>Address</i>], utf8? : <i>Bool</i>) -&gt; <i>String</i></code>
           </article>
-
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>format_date</b>(@moondate.<i>Moment</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>parse_address</b>(<i>StringView</i>) -&gt; <i>Address</i> raise <i>Refused</i></code>
+          </article>
           <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><b>Message::encode</b>(<i>Self</i>, utf8? : <i>Bool</i>) -&gt; <i>Bytes</i></code>
-            <p class="note">Write the letter back with CRLF line endings, folded at 78 columns. <b>utf8</b> writes non-ASCII in place; without it every such header becomes an encoded word.</p>
-            <p class="verdict"><b>Round trip.</b> Parse then encode, then parse again, gives the same tree — and encoding that tree a second time gives the same bytes.</p>
+            <code class="sig"><span class="k">fn</span> <b>parse_addresses</b>(<i>StringView</i>) -&gt; <i>Array</i>[<i>Address</i>] raise <i>Refused</i></code>
           </article>
-
-          <article class="slip" style="--r:-.14deg">
-            <span class="slip__kind kind--fn">readers</span>
-            <code class="sig"><b>subject</b> · <b>from</b> · <b>to</b> · <b>cc</b> · <b>bcc</b> · <b>reply_to</b> · <b>date</b> · <b>message_id</b> · <b>content_type</b> · <b>text</b> · <b>html</b> · <b>attachments</b></code>
-            <p class="note">Each reads one header and hands back a typed value: addresses are decoded, <b>date</b> is a date-time, <b>content_type</b> is a media type. <b>text</b> and <b>html</b> pick the best part for the charset actually declared; <b>attachments</b> walks the tree and collects the leaves that are not the body.</p>
-          </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><b>Message::new</b>(from~ : <i>Mailbox</i>, to~ : <i>Array[Address]</i>, subject~ : <i>String</i>, text? : <i>String</i>, html? : <i>String</i>, attachments? : <i>Array[Attachment]</i>, cc? : <i>Array[Address]</i>, date? : <i>DateTime</i>, message_id? : <i>String</i>) -&gt; <i>Message</i></code>
-            <p class="note">Build a letter and let it choose the nesting: plain text alone stays flat, text with HTML becomes <b>alternative</b>, and anything with attachments becomes <b>mixed</b> — or <b>related</b> when the attachments are inline and referenced by id.</p>
-          </article>
-
-          <article class="slip" style="--r:-.26deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">pub(all) struct</span> <b>Attachment</b> { name : <i>String</i>; media_type : <i>String</i>; data : <i>Bytes</i>; inline : <i>Bool</i>; id : <i>String?</i> }</code>
-            <p class="note"><b>inline</b> keeps the part inside the body; <b>id</b> is the content id an HTML part refers to.</p>
-          </article>
-
-          <article class="slip" style="--r:.12deg">
-            <span class="slip__kind kind--type">suberror</span>
-            <code class="sig"><span class="k">pub(all) suberror</span> <b>Refused</b> { Header(at~ : <i>Int</i>); Address(at~ : <i>Int</i>); Boundary(at~ : <i>Int</i>); Encoding(at~ : <i>Int</i>); Charset(name~ : <i>String</i>) }</code>
-            <p class="note">Every failure carries where it happened. <b>at</b> is a byte offset into the input, so a parser can point at the line that broke.</p>
-          </article>
-
           <article class="slip" style="--r:-.2deg">
-            <span class="slip__kind kind--trait">trait</span>
-            <code class="sig"><span class="k">pub(open) trait</span> <b>Charset</b></code>
-            <p class="note">UTF-8, US-ASCII and ISO-8859-1 are built in. Anything else is yours to add: implement the trait and hand the instance to the parser. A charset nobody registered raises <b>Refused.Charset</b>.</p>
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>parse_date</b>(<i>StringView</i>) -&gt; @moondate.<i>Moment</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Address</b> { <b>Mailbox</b>(<i>Mailbox</i>); <b>Group</b>(name~ : <i>String</i>, members~ : <i>Array</i>[<i>Mailbox</i>]) }</code>
+            <code class="sig"><span class="k">fn</span> <b>Address::encode</b>(<i>Self</i>, utf8? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Address::mailboxes</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Mailbox</i>]</code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Attachment</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>name</b> : <i>String</i></code></li>
+              <li><code><b>media_type</b> : <i>String</i></code></li>
+              <li><code><b>data</b> : <i>Bytes</i></code></li>
+              <li><code><b>inline</b> : <i>Bool</i></code></li>
+              <li><code><b>id</b> : <i>String</i>?</code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>Attachment::new</b>(<i>String</i>, <i>Bytes</i>, media_type? : <i>String</i>, inline? : <i>Bool</i>, id? : <i>String</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Body</b> { <b>Leaf</b>(<i>Bytes</i>); <b>Multipart</b>(<i>Array</i>[<i>Message</i>]); <b>Embedded</b>(<i>Message</i>) }</code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Headers</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::add</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::all</b>(<i>Self</i>, <i>StringView</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::get</b>(<i>Self</i>, <i>StringView</i>) -&gt; <i>String</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::iter</b>(<i>Self</i>) -&gt; <i>Iter</i>[(<i>String</i>, <i>String</i>)]</code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::length</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::new</b>() -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::remove</b>(<i>Self</i>, <i>StringView</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Headers::set</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Mailbox</b> { <b>name</b> : <i>String</i>?; <b>address</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>Mailbox::encode</b>(<i>Self</i>, utf8? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Mailbox::new</b>(<i>String</i>, name? : <i>String</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Message</b> { <b>headers</b> : <i>Headers</i>; <b>body</b> : <i>Body</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>Message::addresses</b>(<i>Self</i>, <i>StringView</i>) -&gt; <i>Array</i>[<i>Address</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::attachments</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Attachment</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Message::bcc</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Address</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::cc</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Address</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::content_type</b>(<i>Self</i>) -&gt; @moonmime.<i>MediaType</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::date</b>(<i>Self</i>) -&gt; @moondate.<i>Moment</i>? raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::encode</b>(<i>Self</i>, utf8? : <i>Bool</i>) -&gt; <i>Bytes</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::from</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Mailbox</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::html</b>(<i>Self</i>, charsets? : <i>Map</i>[<i>String</i>, &amp;@moonmime.<i>Charset</i>]) -&gt; <i>String</i>? raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::message_id</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Message::new</b>(from~ : <i>Mailbox</i>, to~ : <i>Array</i>[<i>Address</i>], subject~ : <i>String</i>, text? : <i>String</i>, html? : <i>String</i>, attachments? : <i>Array</i>[<i>Attachment</i>], cc? : <i>Array</i>[<i>Address</i>], date? : @moondate.<i>Moment</i>, message_id? : <i>String</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::parse</b>(<i>BytesView</i>, strict? : <i>Bool</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::reply_to</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Address</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::subject</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Message::text</b>(<i>Self</i>, charsets? : <i>Map</i>[<i>String</i>, &amp;@moonmime.<i>Charset</i>]) -&gt; <i>String</i>? raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Message::to</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Address</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Header</b>(at~ : <i>Int32</i>)</code></li>
+              <li><code><b>Address</b>(at~ : <i>Int32</i>)</code></li>
+              <li><code><b>Boundary</b>(at~ : <i>Int32</i>)</code></li>
+              <li><code><b>Encoding</b>(at~ : <i>Int32</i>)</code></li>
+              <li><code><b>Charset</b>(name~ : <i>String</i>)</code></li>
+              <li><code><b>Date</b></code></li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <!-- ============ 02 dkim ============ -->
       <section class="pkg" id="dkim" data-pkg="dkim">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:.6deg">
@@ -785,55 +786,53 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/dkim</span>
             <h2 class="cover__name">Sign it, then check the claim</h2>
-            <p class="cover__desc">One signature over the headers you name and the body you hash. Two key types, two canonicalisations, and a verdict per signature found.</p>
+            <p class="cover__desc">One signature over the headers you name and the body you hash, and a verdict for every signature a letter carries.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">RFC 6376</span>
               <span class="chip chip--spec">RFC 8463</span>
-              <span class="chip chip--count">6 entries</span>
+              <span class="chip chip--count">7 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Canon</b> { Simple; Relaxed }</code>
-            <p class="note">How whitespace and header case are normalised before hashing. <b>Simple</b> changes nothing; <b>Relaxed</b> collapses runs of spaces and lowercases names.</p>
-          </article>
-
-          <article class="slip" style="--r:-.24deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Key</b> { Rsa(<i>PrivateKey</i>); Ed25519(<i>PrivateKey</i>) }</code>
-            <p class="note">RSA-SHA256 and Ed25519-SHA256. The variant decides both the algorithm tag and how the signature is laid out in base64.</p>
-          </article>
-
-          <article class="slip" style="--r:.16deg">
-            <span class="slip__kind kind--value">value</span>
-            <code class="sig"><span class="k">pub let</span> <b>signed</b> : <i>Array[String]</i></code>
-            <p class="note">The header names signed when you do not pass your own list: from, to, subject, date, message-id and the rest of the usual set. Pass <b>headers</b> to override it.</p>
-          </article>
-
-          <article class="slip" style="--r:-.18deg">
+          <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">pub fn</span> <b>sign</b>(message : <i>BytesView</i>, key : <i>Key</i>, domain~ : <i>String</i>, selector~ : <i>String</i>, headers? : <i>Array[String]</i>, header_canon~ : <i>Canon</i> = Relaxed, body_canon~ : <i>Canon</i> = Simple, timestamp? : <i>Int64</i>, expire? : <i>Int64</i>, length~ : <i>Bool</i> = false, identity? : <i>String</i>) -&gt; <i>String</i> <span class="k">raise</span> <i>Refused</i></code>
-            <p class="note">Returns one complete <b>DKIM-Signature</b> line, unfolded, without a trailing CRLF. <b>length</b> adds the <b>l=</b> tag that limits the body hash; <b>identity</b> sets <b>i=</b>.</p>
+            <code class="sig"><span class="k">fn</span> <b>sign</b>(<i>BytesView</i>, <i>Key</i>, domain~ : <i>String</i>, selector~ : <i>String</i>, headers? : <i>Array</i>[<i>String</i>], header_canon? : <i>Canon</i>, body_canon? : <i>Canon</i>, timestamp? : <i>Int64</i>, expire? : <i>Int64</i>, length? : <i>Bool</i>, identity? : <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
           </article>
-
-          <article class="slip" style="--r:.22deg">
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>signed</b> : <i>Array</i>[<i>String</i>]</code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">pub fn</span> <b>verify</b>(message : <i>BytesView</i>, lookup : (<i>String</i>) -&gt; <i>String?</i> <span class="k">raise</span>, now~ : <i>Int64</i>) -&gt; <i>Array[Verdict]</i></code>
-            <p class="note"><b>lookup</b> turns a selector and domain into the published public key; you do the DNS. <b>now</b> is what <b>t=</b> and <b>x=</b> are checked against. Every signature in the letter gets a verdict, in order.</p>
+            <code class="sig"><span class="k">fn</span> <b>verify</b>(<i>BytesView</i>, (<i>String</i>) -&gt; <i>String</i>? raise, now~ : <i>Int64</i>) -&gt; <i>Array</i>[<i>Verdict</i>]</code>
           </article>
-
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Canon</b> { <b>Simple</b>; <b>Relaxed</b> }</code>
+          </article>
           <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Verdict</b> { Pass(domain~ : <i>String</i>, selector~ : <i>String</i>); Fail(domain~ : <i>String</i>, reason~ : <i>String</i>); PermError(<i>String</i>); TempError(<i>String</i>) }</code>
-            <p class="note"><b>Fail</b> means the signature did not verify — say the body changed. <b>PermError</b> and <b>TempError</b> mean the key could not be used, permanently or for now.</p>
+            <code class="sig"><span class="k">enum</span> <b>Key</b> { <b>Rsa</b>(@rsa.<i>PrivateKey</i>); <b>Ed25519</b>(@ed25519.<i>PrivateKey</i>) }</code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Verdict</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Pass</b>(domain~ : <i>String</i>, selector~ : <i>String</i>)</code></li>
+              <li><code><b>Fail</b>(domain~ : <i>String</i>, reason~ : <i>String</i>)</code></li>
+              <li><code><b>PermError</b>(<i>String</i>)</code></li>
+              <li><code><b>TempError</b>(<i>String</i>)</code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b> { <b>Missing</b>(<i>String</i>); <b>Malformed</b>(<i>String</i>) }</code>
           </article>
         </div>
       </section>
 
-      <!-- ============ 03 sasl ============ -->
       <section class="pkg" id="sasl" data-pkg="sasl">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:-.5deg">
@@ -845,74 +844,110 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/sasl</span>
             <h2 class="cover__name">Mechanisms, as a trait</h2>
-            <p class="cover__desc">Six mechanisms ship, and a seventh is whatever you implement. No global registry: a mechanism is a value you pass to a protocol.</p>
+            <p class="cover__desc">Six mechanisms behind one trait, so a mechanism written once works on all three protocols.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">RFC 4616</span>
               <span class="chip chip--spec">RFC 7677</span>
               <span class="chip chip--spec">RFC 7628</span>
-              <span class="chip chip--count">9 entries</span>
+              <span class="chip chip--count">10 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
-          <article class="slip" style="--r:.26deg">
-            <span class="slip__kind kind--trait">trait</span>
-            <code class="sig"><span class="k">pub(open) trait</span> <b>Mechanism</b> { <b>name</b>(<i>Self</i>) -&gt; <i>String</i>; <b>start</b>(<i>Self</i>) -&gt; <i>Bytes?</i>; <b>step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> <span class="k">raise</span> <i>Refused</i>; <b>finish</b>(<i>Self</i>) -&gt; <i>Unit</i> <span class="k">raise</span> <i>Refused</i> = _ }</code>
-            <p class="note">Four methods and no more. <b>start</b> returns none when the server speaks first; <b>finish</b> is where SCRAM checks the server’s own signature. Bytes in, bytes out — base64 is the protocol’s job, not yours.</p>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>prep</b>(<i>StringView</i>, unassigned? : <i>Bool</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
           </article>
-
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>respond</b>(&amp;<i>Mechanism</i>, <i>StringView</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>CramMd5</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">impl</span> <b>Mechanism</b> <span class="k">for</span> <i>CramMd5</i></code>
+            <code class="sig"><span class="k">fn</span> <b>CramMd5::finish</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>CramMd5::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>CramMd5::new</b>(<i>String</i>, <i>String</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>CramMd5::start</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>CramMd5::step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Login</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">impl</span> <b>Mechanism</b> <span class="k">for</span> <i>Login</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Login::finish</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Login::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Login::new</b>(<i>String</i>, <i>String</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Login::start</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Login::step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code>
+          </article>
           <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>Plain::new</b>(user, password, authzid?)</code>
-            <p class="note">The one everyone has. Sends <b>authzid\0authcid\0password</b> in a single step.</p>
+            <code class="sig"><span class="k">struct</span> <b>OAuthBearer</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">impl</span> <b>Mechanism</b> <span class="k">for</span> <i>OAuthBearer</i></code>
+            <code class="sig"><span class="k">fn</span> <b>OAuthBearer::error</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>OAuthBearer::finish</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>OAuthBearer::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>OAuthBearer::new</b>(<i>String</i>, username? : <i>String</i>, host? : <i>String</i>, port? : <i>Int32</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>OAuthBearer::start</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>OAuthBearer::step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code>
           </article>
-
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Plain</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">impl</span> <b>Mechanism</b> <span class="k">for</span> <i>Plain</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Plain::finish</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Plain::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Plain::new</b>(<i>String</i>, <i>String</i>, authzid? : <i>String</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Plain::start</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Plain::step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>ScramSha256</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">impl</span> <b>Mechanism</b> <span class="k">for</span> <i>ScramSha256</i></code>
+            <code class="sig"><span class="k">fn</span> <b>ScramSha256::finish</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>ScramSha256::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>ScramSha256::new</b>(<i>String</i>, <i>String</i>, nonce~ : <i>String</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>ScramSha256::start</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>ScramSha256::step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code>
+          </article>
           <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>Login</b> · <b>CramMd5</b></code>
-            <p class="note">The two other plain-ish ones. <b>Login</b> is the old two-challenge form; <b>CramMd5</b> never sends the password, only a digest of a server nonce.</p>
+            <code class="sig"><span class="k">struct</span> <b>XOAuth2</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">impl</span> <b>Mechanism</b> <span class="k">for</span> <i>XOAuth2</i></code>
+            <code class="sig"><span class="k">fn</span> <b>XOAuth2::error</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>XOAuth2::finish</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>XOAuth2::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>XOAuth2::new</b>(<i>String</i>, <i>String</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>XOAuth2::start</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>XOAuth2::step</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code>
           </article>
-
-          <article class="slip" style="--r:-.26deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>XOAuth2</b> · <b>OAuthBearer::new</b>(token, username?, host?, port?)</code>
-            <p class="note">Bearer tokens for the two shapes in the wild: Google’s three-field string, and the standard single-field form with an optional host and port.</p>
-          </article>
-
-          <article class="slip" style="--r:.22deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>ScramSha256::new</b>(user, password, nonce~)</code>
-            <p class="note">A full SCRAM exchange: client-first, server-first, client-final, server-final. <b>nonce</b> is yours to supply — this package never reaches for a random source.</p>
-          </article>
-
           <article class="slip" style="--r:-.16deg">
-            <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">pub fn</span> <b>prep</b>(<i>StringView</i>, unassigned? : <i>Bool</i>) -&gt; <i>String</i> <span class="k">raise</span> <i>Refused</i></code>
-            <p class="note">SASLprep: normalise a password or user name before it goes into a mechanism. Prohibited characters raise <b>Refused.Prep</b> with the character that was refused.</p>
+            <span class="slip__kind kind--trait">trait</span>
+            <code class="sig"><span class="k">trait</span> <b>Mechanism</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>fn</b> name(<i>Self</i>) -&gt; <i>String</i></code></li>
+              <li><code><b>fn</b> start(<i>Self</i>) -&gt; <i>Bytes</i>?</code></li>
+              <li><code><b>fn</b> step(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Bytes</i> raise <i>Refused</i></code></li>
+              <li><code><b>fn</b> finish(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i> = _</code></li>
+            </ul>
           </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">pub fn</span> <b>respond</b>(&amp;<i>Mechanism</i>, <i>StringView</i>) -&gt; <i>String</i> <span class="k">raise</span> <i>Refused</i></code>
-            <p class="note">Base64 challenge in, base64 answer out. Use this when you are driving the exchange yourself instead of handing the mechanism to a client.</p>
-          </article>
-
-          <article class="slip" style="--r:-.24deg">
+          <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">suberror</span>
-            <code class="sig"><span class="k">pub(all) suberror</span> <b>Refused</b> { Prep(<i>Char</i>); Malformed(<i>String</i>); Server(<i>String</i>); Signature }</code>
-            <p class="note"><b>Signature</b> is the one that matters: the server proved it does not know the password. Treat it as a hard stop, not a retry.</p>
-          </article>
-
-          <article class="slip" style="--r:.14deg">
-            <span class="slip__kind kind--fn">used by</span>
-            <code class="sig"><b>smtp::Client::auth</b>(&amp;<i>Mechanism</i>) · <b>imap::Client::authenticate</b>(&amp;<i>Mechanism</i>) · <b>pop3::Client::auth</b>(&amp;<i>Mechanism</i>)</code>
-            <p class="note">All three protocols take the same trait object, so a mechanism written once works on all of them.</p>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Prep</b>(<i>Char</i>)</code></li>
+              <li><code><b>Malformed</b>(<i>String</i>)</code></li>
+              <li><code><b>Server</b>(<i>String</i>)</code></li>
+              <li><code><b>Signature</b></code></li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <!-- ============ 04 smtp ============ -->
       <section class="pkg" id="smtp" data-pkg="smtp">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:.55deg">
@@ -924,107 +959,140 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/smtp</span>
             <h2 class="cover__name">Both ends of the relay</h2>
-            <p class="cover__desc">A client that queues commands and paces them by the extensions the server announced, and a server that answers the protocol itself and hands you only the decisions.</p>
+            <p class="cover__desc">A client that paces commands by the extensions a server announced, and a server that answers the protocol itself.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">RFC 5321</span>
               <span class="chip chip--spec">RFC 1870</span>
               <span class="chip chip--spec">RFC 3207</span>
               <span class="chip chip--spec">RFC 4954</span>
-              <span class="chip chip--count">13 entries</span>
+              <span class="chip chip--count">12 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
           <article class="slip" style="--r:-.22deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">pub(all) struct</span> <b>Reply</b> { code : <i>Int</i>; lines : <i>Array[String]</i> }</code>
-            <ul class="rows">
-              <li><code><b>new</b>(<i>Int</i>, <i>String</i>)</code><span>Build a reply to hand to the server side.</span></li>
-              <li><code><b>text</b>() -&gt; <i>String</i></code><span>The lines joined with spaces, code removed.</span></li>
-              <li><code><b>status</b>() -&gt; <i>String?</i></code><span>The enhanced code, e.g. <b>2.1.5</b>.</span></li>
-              <li><code><b>is_ok</b>() -&gt; <i>Bool</i></code><span>True for 2xx.</span></li>
-              <li><code><b>encode</b>() -&gt; <i>Bytes</i></code><span>The wire form, multi-line when there are several lines.</span></li>
-            </ul>
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>limits</b> : <i>Limits</i></code>
           </article>
-
           <article class="slip" style="--r:.18deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">pub(all) struct</span> <b>Limits</b> { line : <i>Int</i>; recipients : <i>Int</i>; size : <i>Int64</i> }</code>
-            <code class="sig"><span class="k">pub let</span> <b>limits</b> : <i>Limits</i></code>
-            <p class="note">The defaults: a 12288-byte line so a SASL exchange always fits, 1000 recipients, and a 10 MB message.</p>
-          </article>
-
-          <article class="slip" style="--r:-.26deg">
-            <span class="slip__kind kind--type">suberror</span>
-            <code class="sig"><span class="k">pub(all) suberror</span> <b>Refused</b> { Malformed(<i>String</i>); Exceeded(limit~ : <i>Int</i>, got~ : <i>Int</i>); Order(<i>String</i>); Unsupported(<i>String</i>) }</code>
-            <p class="note">Client-side mistakes, raised at queue time rather than on the wire: a command out of order, or an extension the server did not announce.</p>
-          </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>Client::new</b>(lmtp? : <i>Bool</i>, limits? : <i>Limits</i>)</code>
-            <p class="note">A client with nothing sent yet. Nothing here touches a socket: you feed it bytes and drain what it wants written.</p>
-          </article>
-
-          <article class="slip" style="--r:-.18deg">
-            <span class="slip__kind kind--fn">session</span>
-            <code class="sig"><b>ehlo</b>(name) · <b>helo</b>(name) · <b>starttls</b>() · <b>auth</b>(&amp;<i>Mechanism</i>) · <b>rset</b>() · <b>noop</b>() · <b>vrfy</b>(s) · <b>expn</b>(s) · <b>help</b>() · <b>quit</b>()</code>
-            <p class="note">Opening, securing and closing a session. <b>ehlo</b> records the extension map that every later command consults.</p>
-          </article>
-
-          <article class="slip" style="--r:.24deg">
-            <span class="slip__kind kind--fn">envelope</span>
-            <code class="sig"><b>mail</b>(from, size?, body? : <i>Body</i>, utf8?, ret? : <i>Ret</i>, envid?, auth?) · <b>rcpt</b>(to, notify? : <i>Array[Notify]</i>, orcpt?)</code>
-            <p class="note">The envelope, one recipient at a time. <b>ret</b>, <b>envid</b>, <b>auth</b> and <b>notify</b> are DSN parameters and are dropped if the server did not offer DSN.</p>
-          </article>
-
-          <article class="slip" style="--r:-.3deg">
-            <span class="slip__kind kind--fn">body</span>
-            <code class="sig"><b>data</b>(<i>BytesView</i>) · <b>bdat</b>(<i>BytesView</i>, last?) · <b>send</b>(from, <i>Array[to]</i>, <i>BytesView</i>)</code>
-            <p class="note"><b>data</b> holds the body until the server says 354, then adds the missing CRLF and the dot-stuffing. <b>bdat</b> is the CHUNKING path. <b>send</b> is all of it in one call, adding SIZE, BODY=8BITMIME and SMTPUTF8 by itself when the server has them.</p>
-          </article>
-
-          <article class="slip" style="--r:.16deg">
-            <span class="slip__kind kind--fn">state</span>
-            <code class="sig"><b>feed</b>(<i>BytesView</i>) -&gt; <i>Array[Event]</i> <span class="k">raise</span> <i>Refused</i> · <b>next_write</b>() -&gt; <i>Bytes?</i></code>
-            <p class="note">The whole I/O contract, in two calls. Feed what arrived, drain what must go out. <b>next_write</b> returns none when the client is waiting on the server.</p>
-          </article>
-
-          <article class="slip" style="--r:-.22deg">
-            <span class="slip__kind kind--fn">state</span>
-            <code class="sig"><b>extensions</b>() -&gt; <i>Map[String, String]</i> · <b>has</b>(<i>String</i>) -&gt; <i>Bool</i></code>
-            <p class="note">What the last EHLO announced, keyed by name. <b>has</b> is the check the client itself uses before it dares to send an extension command.</p>
-          </article>
-
-          <article class="slip" style="--r:.26deg">
             <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Event</b> { Reply(<i>Command</i>, <i>Reply</i>); Sasl(<i>sasl.Refused</i>) }</code>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Command</b> { Greeting; Hello(<i>String</i>); StartTls; Auth(<i>String</i>); Mail(<i>String</i>); Rcpt(<i>String</i>); Data; Bdat(<i>Int</i>); Delivery(<i>String</i>); Rset; Noop; Vrfy(<i>String</i>); Expn(<i>String</i>); Help; Quit }</code>
-            <p class="note">Every final reply arrives paired with the command it answered, so you never track the queue yourself. 334 and 354 are consumed inside the machine and do not surface.</p>
+            <code class="sig"><span class="k">enum</span> <b>Body</b> { <b>SevenBit</b>; <b>EightBit</b>; <b>Binary</b> }</code>
           </article>
-
           <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>Server::new</b>(<i>String</i>, lmtp? : <i>Bool</i>, starttls? : <i>Bool</i>, auth? : <i>Array[String]</i>, greeting? : <i>String</i>, limits? : <i>Limits</i>)</code>
-            <p class="note">A server that answers syntax, order, size and the 354 dance by itself. You only see the requests that need a judgment call.</p>
+            <code class="sig"><span class="k">struct</span> <b>Client</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::auth</b>(<i>Self</i>, &amp;@sasl.<i>Mechanism</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::bdat</b>(<i>Self</i>, <i>BytesView</i>, last? : <i>Bool</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::data</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::ehlo</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::expn</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::extensions</b>(<i>Self</i>) -&gt; <i>Map</i>[<i>String</i>, <i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Client::feed</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Array</i>[<i>Event</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::has</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::helo</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::help</b>(<i>Self</i>, topic? : <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::mail</b>(<i>Self</i>, <i>String</i>, size? : <i>Int32</i>, body? : <i>Body</i>, utf8? : <i>Bool</i>, ret? : <i>Ret</i>, envid? : <i>String</i>, auth? : <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::new</b>(lmtp? : <i>Bool</i>, limits? : <i>Limits</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::next_write</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Client::noop</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::pending</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::quit</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::rcpt</b>(<i>Self</i>, <i>String</i>, notify? : <i>Array</i>[<i>Notify</i>], orcpt? : <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::rset</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::send</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], <i>BytesView</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::starttls</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::vrfy</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
           </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--fn">server</span>
-            <code class="sig"><b>feed</b>(<i>BytesView</i>) · <b>next</b>() -&gt; <i>Request?</i> · <b>accept</b>() · <b>reply</b>(<i>Int</i>, <i>String</i>) · <b>challenge</b>(<i>BytesView</i>) · <b>next_write</b>() -&gt; <i>Bytes?</i> · <b>closed</b>() -&gt; <i>Bool</i></code>
-            <p class="note"><b>next</b> returns none while a request is still waiting for your answer. <b>challenge</b> is the SASL continuation. In LMTP, Data is answered once per accepted recipient.</p>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Command</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Greeting</b></code></li>
+              <li><code><b>Hello</b>(<i>String</i>)</code></li>
+              <li><code><b>StartTls</b></code></li>
+              <li><code><b>Auth</b>(<i>String</i>)</code></li>
+              <li><code><b>Mail</b>(<i>String</i>)</code></li>
+              <li><code><b>Rcpt</b>(<i>String</i>)</code></li>
+              <li><code><b>Data</b></code></li>
+              <li><code><b>Bdat</b>(<i>Int32</i>)</code></li>
+              <li><code><b>Delivery</b>(<i>String</i>)</code></li>
+              <li><code><b>Rset</b></code></li>
+              <li><code><b>Noop</b></code></li>
+              <li><code><b>Vrfy</b>(<i>String</i>)</code></li>
+              <li><code><b>Expn</b>(<i>String</i>)</code></li>
+              <li><code><b>Help</b></code></li>
+              <li><code><b>Quit</b></code></li>
+            </ul>
           </article>
-
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Event</b> { <b>Reply</b>(<i>Command</i>, <i>Reply</i>); <b>Sasl</b>(@sasl.<i>Refused</i>) }</code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Limits</b> { <b>line</b> : <i>Int32</i>; <b>recipients</b> : <i>Int32</i>; <b>size</b> : <i>Int32</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>Limits::new</b>(line? : <i>Int32</i>, recipients? : <i>Int32</i>, size? : <i>Int32</i>) -&gt; <i>Self</i></code>
+          </article>
           <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Request</b> { Hello(<i>String</i>, extended~ : <i>Bool</i>); StartTls; Auth(<i>String</i>, <i>Bytes?</i>); Response(<i>Bytes</i>); Mail(<i>String</i>, <i>Map[String, String?]</i>); Rcpt(<i>String</i>, <i>Map[String, String?]</i>); Data(<i>Bytes</i>); Vrfy(<i>String</i>); Expn(<i>String</i>); Rset; Quit }</code>
-            <p class="note">What the application actually decides: who may relay, which mailbox exists, whether to accept the body. <b>Rset</b> and <b>Quit</b> are already answered and are only reported.</p>
+            <code class="sig"><span class="k">enum</span> <b>Notify</b> { <b>Success</b>; <b>Failure</b>; <b>Delay</b> }</code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Reply</b> { <b>code</b> : <i>Int32</i>; <b>lines</b> : <i>Array</i>[<i>String</i>] }</code>
+            <code class="sig"><span class="k">fn</span> <b>Reply::encode</b>(<i>Self</i>) -&gt; <i>Bytes</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Reply::is_ok</b>(<i>Self</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Reply::new</b>(<i>Int32</i>, <i>StringView</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Reply::status</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Reply::text</b>(<i>Self</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Request</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Hello</b>(<i>String</i>, extended~ : <i>Bool</i>)</code></li>
+              <li><code><b>StartTls</b></code></li>
+              <li><code><b>Auth</b>(<i>String</i>, <i>Bytes</i>?)</code></li>
+              <li><code><b>Response</b>(<i>Bytes</i>)</code></li>
+              <li><code><b>Mail</b>(<i>String</i>, <i>Map</i>[<i>String</i>, <i>String</i>?])</code></li>
+              <li><code><b>Rcpt</b>(<i>String</i>, <i>Map</i>[<i>String</i>, <i>String</i>?])</code></li>
+              <li><code><b>Data</b>(<i>Bytes</i>)</code></li>
+              <li><code><b>Vrfy</b>(<i>String</i>)</code></li>
+              <li><code><b>Expn</b>(<i>String</i>)</code></li>
+              <li><code><b>Rset</b></code></li>
+              <li><code><b>Quit</b></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Ret</b> { <b>Full</b>; <b>Headers</b> }</code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Server</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::accept</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::challenge</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::closed</b>(<i>Self</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::feed</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::new</b>(<i>String</i>, lmtp? : <i>Bool</i>, starttls? : <i>Bool</i>, auth? : <i>Array</i>[<i>String</i>], greeting? : <i>String</i>, limits? : <i>Limits</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::next</b>(<i>Self</i>) -&gt; <i>Request</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Server::next_write</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Server::reply</b>(<i>Self</i>, <i>Int32</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Malformed</b>(<i>String</i>)</code></li>
+              <li><code><b>Exceeded</b>(limit~ : <i>Int32</i>, got~ : <i>Int32</i>)</code></li>
+              <li><code><b>Order</b>(<i>String</i>)</code></li>
+              <li><code><b>Unsupported</b>(<i>String</i>)</code></li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <!-- ============ 05 imap ============ -->
       <section class="pkg" id="imap" data-pkg="imap">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:-.6deg">
@@ -1036,86 +1104,156 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/imap</span>
             <h2 class="cover__name">Stay in the mailbox</h2>
-            <p class="cover__desc">IMAP4rev2 with IDLE and CONDSTORE. Every command gets a tag; every response comes back decoded into a shape you can match on.</p>
+            <p class="cover__desc">IMAP4rev2 with IDLE and CONDSTORE. Every command gets a tag and every response comes back decoded.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">RFC 9051</span>
               <span class="chip chip--spec">RFC 2177</span>
               <span class="chip chip--spec">RFC 7162</span>
-              <span class="chip chip--count">11 entries</span>
+              <span class="chip chip--count">10 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>limits</b> : <i>Limits</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Client</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::append</b>(<i>Self</i>, <i>String</i>, <i>BytesView</i>, flags? : <i>Array</i>[<i>String</i>], date? : <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::authenticate</b>(<i>Self</i>, &amp;@sasl.<i>Mechanism</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::capabilities</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Client::capability</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::close</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::copy</b>(<i>Self</i>, <i>String</i>, <i>String</i>, uid? : <i>Bool</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::create</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::delete</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::done</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::enable</b>(<i>Self</i>, <i>Array</i>[<i>String</i>]) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::examine</b>(<i>Self</i>, <i>String</i>, condstore? : <i>Bool</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::expunge</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::feed</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Array</i>[<i>Event</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::fetch</b>(<i>Self</i>, <i>String</i>, <i>String</i>, uid? : <i>Bool</i>, changedsince? : <i>Int64</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::has</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::idle</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::list</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::login</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::logout</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::move_to</b>(<i>Self</i>, <i>String</i>, <i>String</i>, uid? : <i>Bool</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::namespaces</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::new</b>(limits? : <i>Limits</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::next_write</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Client::noop</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::pending</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::rename</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::search</b>(<i>Self</i>, <i>String</i>, uid? : <i>Bool</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::select</b>(<i>Self</i>, <i>String</i>, condstore? : <i>Bool</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::starttls</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::state</b>(<i>Self</i>) -&gt; <i>State</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::status</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>]) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::store</b>(<i>Self</i>, <i>String</i>, <i>String</i>, uid? : <i>Bool</i>, unchangedsince? : <i>Int64</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::subscribe</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::uid_expunge</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::unselect</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::unsubscribe</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Code</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Alert</b></code></li>
+              <li><code><b>Capability</b>(<i>Array</i>[<i>String</i>])</code></li>
+              <li><code><b>PermanentFlags</b>(<i>Array</i>[<i>String</i>])</code></li>
+              <li><code><b>ReadOnly</b></code></li>
+              <li><code><b>ReadWrite</b></code></li>
+              <li><code><b>TryCreate</b></code></li>
+              <li><code><b>UidNext</b>(<i>Int64</i>)</code></li>
+              <li><code><b>UidValidity</b>(<i>Int64</i>)</code></li>
+              <li><code><b>HighestModseq</b>(<i>Int64</i>)</code></li>
+              <li><code><b>NoModseq</b></code></li>
+              <li><code><b>Modified</b>(<i>String</i>)</code></li>
+              <li><code><b>AppendUid</b>(<i>Int64</i>, <i>String</i>)</code></li>
+              <li><code><b>CopyUid</b>(<i>Int64</i>, <i>String</i>, <i>String</i>)</code></li>
+              <li><code><b>Closed</b></code></li>
+              <li><code><b>Other</b>(<i>String</i>, <i>String</i>?)</code></li>
+            </ul>
+          </article>
           <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Value</b> { Nil; Number(<i>Int64</i>); Atom(<i>String</i>); Text(<i>Bytes</i>); List(<i>Array[Value]</i>) }</code>
-            <p class="note">The response grammar in five cases. Anything the machine does not recognise still lands here, so a FETCH data item you did not expect is readable rather than lost.</p>
+            <code class="sig"><span class="k">enum</span> <b>Event</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Data</b>(<i>Response</i>)</code></li>
+              <li><code><b>Done</b>(<i>Int32</i>, <i>Status</i>, <i>Code</i>?, <i>String</i>)</code></li>
+              <li><code><b>Sasl</b>(@sasl.<i>Refused</i>)</code></li>
+            </ul>
           </article>
-
-          <article class="slip" style="--r:-.18deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Status</b> { Ok; No; Bad }</code>
-            <p class="note">How a tagged command ended. <b>No</b> is a refusal; <b>Bad</b> is your command being wrong.</p>
-          </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Code</b> { Alert; Capability(<i>Array[String]</i>); PermanentFlags(<i>Array[String]</i>); ReadOnly; ReadWrite; TryCreate; UidNext(<i>Int64</i>); UidValidity(<i>Int64</i>); HighestModseq(<i>Int64</i>); NoModseq; Modified(<i>String</i>); AppendUid(<i>Int64</i>, <i>Int64</i>); CopyUid(<i>Int64</i>, <i>String</i>, <i>String</i>); Closed; Other(<i>String</i>, <i>String?</i>) }</code>
-            <p class="note">The bracketed codes. Uid and modseq bookkeeping you need for CONDSTORE arrives here rather than as a separate call.</p>
-          </article>
-
-          <article class="slip" style="--r:-.26deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Response</b> { Condition(<i>String</i>, <i>Code?</i>, <i>String</i>); Capability(<i>Array[String]</i>); Enabled(<i>Array[String]</i>); Flags(<i>Array[String]</i>); Exists(<i>Int64</i>); Expunge(<i>Int64</i>); List(flags~ : <i>Array[String]</i>, delimiter~ : <i>String?</i>, name~ : <i>String</i>); Status(<i>String</i>, <i>Map[String, Int64]</i>); Esearch(tag~ : <i>String?</i>, uid~ : <i>Bool</i>, items~ : <i>Map[String, Value]</i>); Search(<i>Array[Int64]</i>, modseq~ : <i>Int64?</i>); Fetch(<i>Int64</i>, <i>Map[String, Value]</i>); Namespace(<i>Value</i>); Other(<i>String</i>, <i>Array[Value]</i>) }</code>
-            <p class="note">Untagged responses, one variant per shape in the spec. FETCH keys keep their original spelling, so <b>BODY[HEADER.FIELDS (FROM)]</b> stays exactly that.</p>
-          </article>
-
-          <article class="slip" style="--r:.16deg">
-            <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Event</b> { Data(<i>Response</i>); Done(<i>Int</i>, <i>Status</i>, <i>Code?</i>, <i>String</i>); Sasl(<i>sasl.Refused</i>) }</code>
-            <p class="note"><b>Done</b> carries the tag of the command that finished, so a caller that reuses one client for several commands can pair them up by number.</p>
-          </article>
-
           <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>Client::new</b>(limits? : <i>Limits</i>)</code>
-            <p class="note">Each command you send is queued and returns its tag number. Responses come back through <b>feed</b> in arrival order.</p>
+            <code class="sig"><span class="k">struct</span> <b>Limits</b> { <b>line</b> : <i>Int32</i>; <b>literal</b> : <i>Int32</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>Limits::new</b>(line? : <i>Int32</i>, literal? : <i>Int32</i>) -&gt; <i>Self</i></code>
           </article>
-
-          <article class="slip" style="--r:.22deg">
-            <span class="slip__kind kind--fn">session</span>
-            <code class="sig"><b>login</b>(user, password) · <b>authenticate</b>(&amp;<i>Mechanism</i>) · <b>starttls</b>() · <b>capability</b>() · <b>enable</b>(<i>Array[String]</i>) · <b>noop</b>() · <b>logout</b>()</code>
-            <p class="note"><b>enable</b> is how UTF8=ACCEPT and CONDSTORE are turned on. A server that never announced them answers Bad, which arrives as a Status rather than a raise.</p>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Response</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Condition</b>(<i>String</i>, <i>Code</i>?, <i>String</i>)</code></li>
+              <li><code><b>Capability</b>(<i>Array</i>[<i>String</i>])</code></li>
+              <li><code><b>Enabled</b>(<i>Array</i>[<i>String</i>])</code></li>
+              <li><code><b>Flags</b>(<i>Array</i>[<i>String</i>])</code></li>
+              <li><code><b>Exists</b>(<i>Int64</i>)</code></li>
+              <li><code><b>Expunge</b>(<i>Int64</i>)</code></li>
+              <li><code><b>List</b>(flags~ : <i>Array</i>[<i>String</i>], delimiter~ : <i>String</i>?, name~ : <i>String</i>)</code></li>
+              <li><code><b>Status</b>(<i>String</i>, <i>Map</i>[<i>String</i>, <i>Int64</i>])</code></li>
+              <li><code><b>Esearch</b>(tag~ : <i>String</i>?, uid~ : <i>Bool</i>, items~ : <i>Map</i>[<i>String</i>, <i>Value</i>])</code></li>
+              <li><code><b>Search</b>(<i>Array</i>[<i>Int64</i>], modseq~ : <i>Int64</i>?)</code></li>
+              <li><code><b>Fetch</b>(<i>Int64</i>, <i>Map</i>[<i>String</i>, <i>Value</i>])</code></li>
+              <li><code><b>Namespace</b>(<i>Value</i>, <i>Value</i>, <i>Value</i>)</code></li>
+              <li><code><b>Other</b>(<i>String</i>, <i>Array</i>[<i>Value</i>])</code></li>
+            </ul>
           </article>
-
-          <article class="slip" style="--r:-.24deg">
-            <span class="slip__kind kind--fn">mailbox</span>
-            <code class="sig"><b>select</b>(name, condstore?) · <b>examine</b>(name) · <b>create</b> · <b>delete</b> · <b>rename</b> · <b>subscribe</b> · <b>unsubscribe</b> · <b>list</b>(reference, pattern) · <b>namespace</b> · <b>status</b>(name, <i>Array[String]</i>)</code>
-            <p class="note">Names are UTF-8 and are quoted or sent as a literal for you. Against a server that only speaks rev1 and has not enabled UTF8=ACCEPT, the name is written in modified UTF-7 instead.</p>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>State</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>NotAuthenticated</b></code></li>
+              <li><code><b>Authenticated</b></code></li>
+              <li><code><b>Selected</b>(<i>String</i>)</code></li>
+              <li><code><b>Logout</b></code></li>
+            </ul>
           </article>
-
           <article class="slip" style="--r:.18deg">
-            <span class="slip__kind kind--fn">messages</span>
-            <code class="sig"><b>append</b>(name, <i>BytesView</i>, flags?, date?) · <b>idle</b>() · <b>done</b>() · <b>close</b>() · <b>unselect</b>() · <b>expunge</b>()</code>
-            <p class="note"><b>append</b> sends a literal, and pipelines it straight away when LITERAL+ or LITERAL- was announced. <b>idle</b> keeps the connection open; <b>done</b> ends it and returns you to normal command flow.</p>
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Status</b> { <b>Ok</b>; <b>No</b>; <b>Bad</b> }</code>
           </article>
-
-          <article class="slip" style="--r:-.28deg">
-            <span class="slip__kind kind--fn">search</span>
-            <code class="sig"><b>search</b>(criteria, uid?) · <b>fetch</b>(set, items, uid?, changedsince?) · <b>store</b>(set, action, uid?, unchangedsince?) · <b>copy</b> · <b>move</b> · <b>uid_expunge</b></code>
-            <p class="note">Sets and criteria are passed as the text you would type; this layer does not second-guess the grammar. <b>changedsince</b> and <b>unchangedsince</b> are the CONDSTORE arguments.</p>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Value</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Nil</b></code></li>
+              <li><code><b>Number</b>(<i>Int64</i>)</code></li>
+              <li><code><b>Atom</b>(<i>String</i>)</code></li>
+              <li><code><b>Text</b>(<i>Bytes</i>)</code></li>
+              <li><code><b>List</b>(<i>Array</i>[<i>Value</i>])</code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>Value::list</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Self</i>]?</code>
+            <code class="sig"><span class="k">fn</span> <b>Value::number</b>(<i>Self</i>) -&gt; <i>Int64</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Value::text</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
           </article>
-
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--fn">state</span>
-            <code class="sig"><b>feed</b>(<i>BytesView</i>) -&gt; <i>Array[Event]</i> <span class="k">raise</span> <i>Refused</i> · <b>next_write</b>() -&gt; <i>Bytes?</i> · <b>capabilities</b>() -&gt; <i>Array[String]</i> · <b>state</b>() -&gt; <i>State</i></code>
-            <p class="note"><b>state</b> is one of NotAuthenticated, Authenticated, Selected(name) or Logout — the same four the protocol itself names.</p>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Malformed</b>(<i>String</i>)</code></li>
+              <li><code><b>Exceeded</b>(limit~ : <i>Int32</i>, got~ : <i>Int32</i>)</code></li>
+              <li><code><b>Order</b>(<i>String</i>)</code></li>
+              <li><code><b>Unsupported</b>(<i>String</i>)</code></li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <!-- ============ 06 pop3 ============ -->
       <section class="pkg" id="pop3" data-pkg="pop3">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:.5deg">
@@ -1127,50 +1265,108 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/pop3</span>
             <h2 class="cover__name">Pick up and go</h2>
-            <p class="cover__desc">The small one: a greeting, a login, a list, and the messages themselves. Multi-line replies come back with the dot-stuffing already undone.</p>
+            <p class="cover__desc">The small one: a greeting, a login, a list, and the messages themselves.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">RFC 1939</span>
               <span class="chip chip--spec">RFC 2449</span>
-              <span class="chip chip--count">5 entries</span>
+              <span class="chip chip--count">8 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>limits</b> : <i>Limits</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Client</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::apop</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::auth</b>(<i>Self</i>, &amp;@sasl.<i>Mechanism</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::capa</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::capabilities</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Client::dele</b>(<i>Self</i>, <i>Int32</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::feed</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Array</i>[<i>Event</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::has</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::list</b>(<i>Self</i>, message? : <i>Int32</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::new</b>(limits? : <i>Limits</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::next_write</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Client::noop</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::pass</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::pending</b>(<i>Self</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::quit</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::retr</b>(<i>Self</i>, <i>Int32</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::rset</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::stat</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::state</b>(<i>Self</i>) -&gt; <i>State</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::stls</b>(<i>Self</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::top</b>(<i>Self</i>, <i>Int32</i>, <i>Int32</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::uidl</b>(<i>Self</i>, message? : <i>Int32</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Client::user</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Command</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Greeting</b></code></li>
+              <li><code><b>User</b>(<i>String</i>)</code></li>
+              <li><code><b>Pass</b></code></li>
+              <li><code><b>Apop</b>(<i>String</i>)</code></li>
+              <li><code><b>Auth</b>(<i>String</i>)</code></li>
+              <li><code><b>Stls</b></code></li>
+              <li><code><b>Capa</b></code></li>
+              <li><code><b>Stat</b></code></li>
+              <li><code><b>List</b>(<i>Int32</i>?)</code></li>
+              <li><code><b>Uidl</b>(<i>Int32</i>?)</code></li>
+              <li><code><b>Retr</b>(<i>Int32</i>)</code></li>
+              <li><code><b>Top</b>(<i>Int32</i>, <i>Int32</i>)</code></li>
+              <li><code><b>Dele</b>(<i>Int32</i>)</code></li>
+              <li><code><b>Rset</b></code></li>
+              <li><code><b>Noop</b></code></li>
+              <li><code><b>Quit</b></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Event</b> { <b>Reply</b>(<i>Command</i>, <i>Reply</i>); <b>Sasl</b>(@sasl.<i>Refused</i>) }</code>
+          </article>
           <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><b>Client::new</b>(limits? : <i>Limits</i>)</code>
-            <p class="note">Commands queue; a group only goes out together when the server announced PIPELINING.</p>
+            <code class="sig"><span class="k">struct</span> <b>Limits</b> { <b>line</b> : <i>Int32</i>; <b>message</b> : <i>Int32</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>Limits::new</b>(line? : <i>Int32</i>, message? : <i>Int32</i>) -&gt; <i>Self</i></code>
           </article>
-
-          <article class="slip" style="--r:.18deg">
-            <span class="slip__kind kind--fn">session</span>
-            <code class="sig"><b>user</b> · <b>pass</b> · <b>apop</b> · <b>auth</b>(&amp;<i>Mechanism</i>) · <b>stls</b> · <b>capa</b> · <b>noop</b> · <b>quit</b></code>
-            <p class="note"><b>apop</b> digests the timestamp from the greeting; <b>stls</b> upgrades the connection if CAPA listed it.</p>
-          </article>
-
-          <article class="slip" style="--r:-.24deg">
-            <span class="slip__kind kind--fn">mailbox</span>
-            <code class="sig"><b>stat</b>() · <b>list</b>(message?) · <b>uidl</b>(message?) · <b>retr</b>(n) · <b>top</b>(n, lines) · <b>dele</b>(n) · <b>rset</b>()</code>
-            <p class="note">Counting, listing, fetching and marking. <b>dele</b> only marks: the message disappears when the session ends with QUIT, and <b>rset</b> takes the marks back.</p>
-          </article>
-
-          <article class="slip" style="--r:.22deg">
-            <span class="slip__kind kind--fn">state</span>
-            <code class="sig"><b>feed</b>(<i>BytesView</i>) -&gt; <i>Array[Event]</i> <span class="k">raise</span> <i>Refused</i> · <b>next_write</b>() -&gt; <i>Bytes?</i> · <b>pending</b>() -&gt; <i>Int</i></code>
-            <p class="note"><b>pending</b> tells you how many commands are still unanswered, which is the whole of what back-pressure needs here.</p>
-          </article>
-
-          <article class="slip" style="--r:-.18deg">
+          <article class="slip" style="--r:.14deg">
             <span class="slip__kind kind--type">enum</span>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Event</b> { Reply(<i>Command</i>, <i>Reply</i>); Sasl(<i>sasl.Refused</i>) }</code>
-            <code class="sig"><span class="k">pub(all) enum</span> <b>Reply</b> { Greeting(text~ : <i>String</i>, timestamp~ : <i>String?</i>); Ok(<i>String</i>); Err(<i>String</i>); Stat(count~ : <i>Int</i>, size~ : <i>Int64</i>); Listing(<i>Array[(Int, Int64)]</i>); Uids(<i>Array[(Int, String)]</i>); Content(<i>Bytes</i>); Capabilities(<i>Array[String]</i>) }</code>
-            <p class="note">The greeting carries the timestamp APOP needs. <b>Content</b> is a whole message with the dot-stuffing already removed.</p>
+            <code class="sig"><span class="k">enum</span> <b>Reply</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Greeting</b>(text~ : <i>String</i>, timestamp~ : <i>String</i>?)</code></li>
+              <li><code><b>Ok</b>(<i>String</i>)</code></li>
+              <li><code><b>Err</b>(<i>String</i>)</code></li>
+              <li><code><b>Stat</b>(count~ : <i>Int32</i>, size~ : <i>Int64</i>)</code></li>
+              <li><code><b>Listing</b>(<i>Array</i>[(<i>Int32</i>, <i>Int64</i>)])</code></li>
+              <li><code><b>Uids</b>(<i>Array</i>[(<i>Int32</i>, <i>String</i>)])</code></li>
+              <li><code><b>Content</b>(<i>Bytes</i>)</code></li>
+              <li><code><b>Capabilities</b>(<i>Array</i>[<i>String</i>])</code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>State</b> { <b>Authorization</b>; <b>Transaction</b>; <b>Update</b> }</code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Malformed</b>(<i>String</i>)</code></li>
+              <li><code><b>Exceeded</b>(limit~ : <i>Int32</i>, got~ : <i>Int32</i>)</code></li>
+              <li><code><b>Order</b>(<i>String</i>)</code></li>
+              <li><code><b>Unsupported</b>(<i>String</i>)</code></li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <!-- ============ 07 net ============ -->
       <section class="pkg" id="net" data-pkg="net">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:-.45deg">
@@ -1182,44 +1378,79 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/net</span>
             <h2 class="cover__name">The one that touches a socket</h2>
-            <p class="cover__desc">Every other package takes bytes and hands bytes back. This one drives the same state machines over TCP and TLS, including the upgrade to STARTTLS mid-conversation.</p>
+            <p class="cover__desc">The same state machines over TCP and TLS, including the upgrade to STARTTLS mid-conversation.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">TCP</span>
               <span class="chip chip--spec">TLS</span>
               <span class="chip chip--spec">native only</span>
-              <span class="chip chip--count">4 entries</span>
+              <span class="chip chip--count">6 entries</span>
             </div>
           </figcaption>
         </figure>
 
         <div class="thread">
-          <article class="slip" style="--r:.2deg">
-            <span class="slip__kind kind--type">module</span>
-            <code class="sig"><b>Smtp::connect</b>(host, port, security) · <b>Smtp::send</b>(message)</code>
-            <p class="note">Open the connection with implicit TLS or plain TCP, negotiate STARTTLS if that is what you asked for, authenticate, then hand over a whole message.</p>
-          </article>
-
           <article class="slip" style="--r:-.22deg">
-            <span class="slip__kind kind--type">module</span>
-            <code class="sig"><b>Smtp</b> · <b>Imap</b> · <b>Pop3</b></code>
-            <p class="note">One session type per protocol, each holding a connection and the matching state machine from the package above it.</p>
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Imap</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::authenticate</b>(<i>Self</i>, &amp;@sasl.<i>Mechanism</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Imap::client</b>(<i>Self</i>) -&gt; @imap.<i>Client</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::connect</b>(<i>String</i>, <i>Security</i>, port? : <i>Int32</i>, limits? : @imap.<i>Limits</i>, now? : <i>Int64</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::login</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::logout</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::read</b>(<i>Self</i>) -&gt; <i>Array</i>[@imap.<i>Event</i>]</code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::run</b>(<i>Self</i>) -&gt; <i>Array</i>[@imap.<i>Event</i>]</code>
+            <code class="sig"><span class="k">async fn</span> <b>Imap::wait</b>(<i>Self</i>, <i>Int32</i>) -&gt; <i>Reply</i></code>
           </article>
-
           <article class="slip" style="--r:.18deg">
-            <span class="slip__kind kind--type">module</span>
-            <code class="sig"><b>security</b> : <i>None</i> · <i>StartTls</i> · <i>Tls</i></code>
-            <p class="note">The three shapes a connection takes. STARTTLS is negotiated in the clear, then the socket is upgraded in place.</p>
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Pop3</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::auth</b>(<i>Self</i>, &amp;@sasl.<i>Mechanism</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Pop3::client</b>(<i>Self</i>) -&gt; @pop3.<i>Client</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::connect</b>(<i>String</i>, <i>Security</i>, port? : <i>Int32</i>, limits? : @pop3.<i>Limits</i>, now? : <i>Int64</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::list</b>(<i>Self</i>) -&gt; <i>Array</i>[(<i>Int32</i>, <i>Int64</i>)]</code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::login</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::quit</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::retr</b>(<i>Self</i>, <i>Int32</i>) -&gt; <i>Bytes</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Pop3::run</b>(<i>Self</i>) -&gt; <i>Array</i>[@pop3.<i>Event</i>]</code>
           </article>
-
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Reply</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>data</b> : <i>Array</i>[@imap.<i>Response</i>]</code></li>
+              <li><code><b>status</b> : @imap.<i>Status</i></code></li>
+              <li><code><b>code</b> : @imap.<i>Code</i>?</code></li>
+              <li><code><b>text</b> : <i>String</i></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Security</b> { <b>Tls</b>(@tls.<i>Client</i>); <b>StartTls</b>(@tls.<i>Client</i>); <b>Clear</b> }</code>
+          </article>
           <article class="slip" style="--r:-.2deg">
-            <span class="slip__kind kind--type">module</span>
-            <code class="sig"><b>limits</b> · <b>timeouts</b></code>
-            <p class="note">Line, recipient and size limits follow the client you drive; connect and read timeouts belong here, because this is the only layer that can block.</p>
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Smtp</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">async fn</span> <b>Smtp::auth</b>(<i>Self</i>, &amp;@sasl.<i>Mechanism</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Smtp::client</b>(<i>Self</i>) -&gt; @smtp.<i>Client</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Smtp::connect</b>(<i>String</i>, <i>Security</i>, port? : <i>Int32</i>, hello? : <i>String</i>, lmtp? : <i>Bool</i>, limits? : @smtp.<i>Limits</i>, now? : <i>Int64</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Smtp::quit</b>(<i>Self</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">async fn</span> <b>Smtp::run</b>(<i>Self</i>) -&gt; <i>Array</i>[@smtp.<i>Event</i>]</code>
+            <code class="sig"><span class="k">async fn</span> <b>Smtp::send</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], <i>BytesView</i>) -&gt; <i>Array</i>[(<i>String</i>, @smtp.<i>Reply</i>)]</code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Rejected</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Reply</b>(@smtp.<i>Command</i>, @smtp.<i>Reply</i>)</code></li>
+              <li><code><b>Done</b>(@imap.<i>Status</i>, @imap.<i>Code</i>?, <i>String</i>)</code></li>
+              <li><code><b>Err</b>(@pop3.<i>Command</i>, <i>String</i>)</code></li>
+              <li><code><b>Sasl</b>(@sasl.<i>Refused</i>)</code></li>
+              <li><code><b>Closed</b></code></li>
+            </ul>
           </article>
         </div>
       </section>
-
-      <p class="empty" id="empty">Nothing in the catalogue matches that. Try a shorter word.</p>
+    
     </main>
   </div>
 
