@@ -1110,7 +1110,8 @@ input::-ms-reveal,input::-ms-clear{display:none}
       if (!line) { flushPara(); flushList(); return; }
       var m = line.match(/^(#{1,3})\s+(.*)$/);
       if (m) { flushPara(); flushList(); var lvl = m[1].length + 1; out.push('<h' + lvl + '>' + inline(m[2]) + '</h' + lvl + '>'); return; }
-      if (line.indexOf('> ') === 0) { flushPara(); flushList(); out.push('<blockquote>' + inline(line.slice(2)) + '</blockquote>'); return; }
+      // the line was escaped above, so a quote marker reads as `&gt; ` by now
+      if (line.indexOf('&gt; ') === 0) { flushPara(); flushList(); out.push('<blockquote>' + inline(line.slice(5)) + '</blockquote>'); return; }
       if (line.indexOf('- ') === 0 || line.indexOf('* ') === 0) { flushPara(); (list || (list = [])).push(line.slice(2)); return; }
       flushList(); para.push(line);
     });
@@ -1678,6 +1679,48 @@ input::-ms-reveal,input::-ms-clear{display:none}
     return btoa(out);
   }
 
+  /* The letter as a postcard, for the HTML part of the message. Mail clients do
+     not run this page, so everything the card needs is inline: no fonts to load,
+     no images to fetch, no external stylesheet. Clients that strip <style> fall
+     back to the inline colour and family on the wrapper. */
+  function postcardHtml(d) {
+    var to = splitList(d.to)[0] || '';
+    var stamp = 'Posted';
+    var mono = "Courier New,monospace";
+    return ''
+      + '<div style="margin:0;padding:26px 12px;background:#efe9da;">'
+      + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr><td align="center">'
+      + '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;border-collapse:collapse;background:#f7f3e6;border:1px solid #e3e0d2;">'
+      + '<tr><td style="padding:26px 30px 0 30px;">'
+      + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'
+      + '<td style="font-family:' + mono + ';font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#5e6f66;">MoonMail &middot; The desk</td>'
+      + '<td align="right"><span style="display:inline-block;padding:5px 9px;border:1px dashed #2f6b3f;color:#2f6b3f;font-family:' + mono + ';font-size:9px;letter-spacing:.16em;text-transform:uppercase;">' + stamp + '</span></td>'
+      + '</tr></table>'
+      + '<div style="height:1px;line-height:1px;font-size:0;background:#e3e0d2;margin:16px 0 0 0;">&nbsp;</div>'
+      + '</td></tr>'
+      + '<tr><td style="padding:20px 30px 4px 30px;">'
+      + '<div style="font-family:' + mono + ';font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#8a9a90;padding:0 0 14px 0;">To &middot; ' + esc(to) + '</div>'
+      + '<div class="mm" style="font-family:Georgia,\'Songti SC\',\'Times New Roman\',serif;font-size:16px;line-height:1.85;color:#22302a;">' + md(d.text) + '</div>'
+      + '</td></tr>'
+      + '<tr><td style="padding:6px 30px 26px 30px;">'
+      + '<div style="height:1px;line-height:1px;font-size:0;background:#e3e0d2;margin:0 0 12px 0;">&nbsp;</div>'
+      + '<div style="font-family:' + mono + ';font-size:10px;line-height:1.7;color:#8a9a90;">'
+      + esc(d.from || '') + '<br>' + esc(DISCLAIMER)
+      + '</div>'
+      + '</td></tr>'
+      + '</table></td></tr></table></div>'
+      + '<style>'
+      + '.mm p{margin:0 0 15px 0;}'
+      + '.mm h2{font-family:Georgia,serif;font-size:20px;line-height:1.4;margin:22px 0 10px 0;font-weight:400;color:#1d4a31;}'
+      + '.mm h3{font-family:Georgia,serif;font-size:17px;line-height:1.5;margin:18px 0 8px 0;font-weight:400;color:#1d4a31;}'
+      + '.mm blockquote{margin:0 0 15px 0;padding:2px 0 2px 14px;border-left:2px solid #cfd8cc;color:#5e6f66;font-style:italic;}'
+      + '.mm ul{margin:0 0 15px 0;padding:0 0 0 20px;}'
+      + '.mm li{margin:0 0 6px 0;}'
+      + '.mm a{color:#2f6b3f;}'
+      + '.mm strong{font-weight:600;}'
+      + '</style>';
+  }
+
   function writeLetter() {
     var d = gather();
     var built = engineCall('compose', {
@@ -1686,7 +1729,7 @@ input::-ms-reveal,input::-ms-clear{display:none}
       cc: splitList(d.cc),
       subject: d.subject || 'A letter from the desk',
       text: d.text + '\n\n--\n' + DISCLAIMER,
-      html: md(d.text) + '<p style="color:#667a70;font-size:12px">' + esc(DISCLAIMER) + '</p>'
+      html: postcardHtml(d)
     });
     return built;
   }
