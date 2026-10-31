@@ -52,33 +52,45 @@ fn hex_bytes(s : String) -> Bytes {
 }
 
 ///|
-/// A tiny in-memory POP3 server: hands out recorded lines and keeps every
-/// command the client writes.
-struct Scripted {
-  inbox : Array[String]
-  sent : Array[String]
-}
-
-///|
-fn Scripted::new(lines : Array[String]) -> Scripted {
-  let inbox : Array[String] = []
-  let n = lines.length()
-  for i in 0..<n {
-    inbox.push(lines[n - 1 - i])
+/// A client session against a recorded POP3 server: the server's lines go in
+/// one by one, and the client's writes in between are dropped.
+fn pop3_tour() -> Unit raise @pop3.Refused {
+  let pop = @pop3.Client::new()
+  let events = []
+  let replay = (text : String) => {
+    let _ = pop.next_write()
+    events.append(pop.feed(@utf8.encode(text + "\r\n")))
   }
-  { inbox, sent: [], }
-}
-
-///|
-impl @pop3.Pop3Io for Scripted with fn write_line(self, line) -> Unit raise @pop3.Pop3Error {
-  self.sent.push(line)
-}
-
-///|
-impl @pop3.Pop3Io for Scripted with fn read_line(self) -> String raise @pop3.Pop3Error {
-  match self.inbox.pop() {
-    Some(line) => line
-    None => raise @pop3.Pop3Error::Io(msg="the tour's script ran out of lines")
+  replay("+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>")
+  pop.capa()
+  replay("+OK capability list follows\r\nTOP\r\nUIDL\r\nSASL PLAIN\r\n.")
+  pop.apop("mrose", "tanstaaf")
+  replay("+OK maildrop has 2 messages")
+  pop.stat()
+  replay("+OK 2 320")
+  pop.list()
+  replay("+OK 2 messages\r\n1 120\r\n2 200\r\n.")
+  pop.retr(1)
+  replay(
+    "+OK 120 octets\r\nSubject: one\r\n\r\n..a line that starts with a dot\r\n.",
+  )
+  pop.uidl(message=2)
+  replay("+OK 2 QhdPYR:00WBw1Ph7x7")
+  pop.quit()
+  replay("+OK bye")
+  println("--- pop3")
+  for event in events {
+    match event {
+      Reply(command, Content(data)) =>
+        println(
+          @debug.to_string(command) +
+          " -> " +
+          @utf8.decode_lossy(data[:]).escape(),
+        )
+      Reply(command, reply) =>
+        println(@debug.to_string(command) + " -> " + @debug.to_string(reply))
+      Sasl(why) => println("sasl -> " + @debug.to_string(why))
+    }
   }
 }
 
@@ -326,53 +338,9 @@ fn main {
   println("re-emitted   -> \{saved.length()} octets, stable: \{saved == again}")
 
   // --------------------------------------------------------------- pop3
-  //
-  // POP3 over a scripted transport, so the dialogue is visible and no socket is
-  // opened. The client refuses a mailbox command until it has authenticated.
-  let transcript = [
-    "+OK POP3 server ready", "+OK password required", "+OK mailbox locked", "+OK 2 320",
-    "+OK 2 messages", "1 120", "2 200", ".", "+OK 120 octets", "From: alice@example.com",
-    "Subject: one", "", "first message body", ".",
-  ]
-  let inbox : Array[String] = []
-  let count = transcript.length()
-  for i in 0..<count {
-    inbox.push(transcript[count - 1 - i])
+  pop3_tour() catch {
+    e => println("pop3 tour stopped: " + @debug.to_string(e))
   }
-  let script : Scripted = { inbox, sent: [], }
-  let client = @pop3.Pop3::new(script as &@pop3.Pop3Io)
-  let _ = client.greeting() catch { _ => "" }
-  let _ = client.user("alice") catch { _ => () }
-  let _ = client.pass("secret") catch { _ => () }
-  let mut messages = 0
-  let mut octets = 0
-  let _ = try {
-    let st = client.stat()
-    messages = st.count
-    octets = st.size
-  } catch {
-    _ => ()
-  }
-  let mut list = ""
-  let _ = try {
-    for item in client.list() {
-      list = list +
-        "#" +
-        item.number.to_string() +
-        "=" +
-        item.size.to_string() +
-        " "
-    }
-  } catch {
-    _ => ()
-  }
-  let fetched = client.retr(1) catch { _ => "" }
-  println("--- pop3")
-  println("state        -> \{client.state() == @pop3.Pop3State::Transaction}")
-  println("stat         -> \{messages} messages, \{octets} octets")
-  println("list         -> \{list}")
-  println("retr         -> \{fetched.length()} octets")
-  println("commands sent -> \{script.sent.length()}")
 
   // --------------------------------------------------------------- smtp
   smtp_tour(raw) catch {
@@ -494,19 +462,7 @@ fn main {
 
   // ---------------------------------------------------------- extensions
   //
-  // The smaller pieces each protocol grew: CHUNKING and DSN on SMTP, single
-  // message UIDL and readable CAPA names on POP3, overview rows on NNTP.
-  let pop_script = Scripted::new([
-    "+OK ready", "+OK password required", "+OK logged in", "+OK capability list follows",
-    "TOP", "UIDL", "SASL PLAIN LOGIN", ".", "+OK 2 200",
-  ])
-  let pop = @pop3.Pop3::new(pop_script as &@pop3.Pop3Io)
-  let _ = pop.greeting() catch { _ => "" }
-  let _ = pop.user("alice") catch { _ => () }
-  let _ = pop.pass("secret") catch { _ => () }
-  let caps = pop.capa_names() catch { _ => [] }
-  let uid = pop.uidl_one(2) catch { _ => "" }
-
+  // The smaller pieces each protocol grew: overview rows on NNTP.
   let over_script = NntpScript::new([
     "200 posting ok", "224 overview information follows", "1\tSubject one\talice@example.com",
     "2\tSubject two\tbob@example.com", ".",
@@ -516,7 +472,6 @@ fn main {
   let rows = news.over("1-2") catch { _ => [] }
 
   println("--- extensions")
-  println("pop3 caps    -> \{caps.length()}, uid \{uid}")
   println("over rows    -> \{rows.length()}")
 
   // --------------------------------------------------------------- dkim

@@ -1,0 +1,42 @@
+// The SMTP, LMTP, IMAP and POP3 state machines on moonnet sockets: implicit TLS,
+// STARTTLS, and the clear. moonnet has sockets on the native and wasm
+// backends only, so the package is empty elsewhere.
+import {
+  "moonbitstack/moonmail/smtp",
+  "moonbitstack/moonmail/imap",
+  "moonbitstack/moonmail/pop3",
+  "moonbitstack/moonmail/sasl",
+  "moonbitstack/moonnet/tcp",
+  "moonbitstack/moontls/tls",
+}
+
+import {
+  "moonbitstack/moonmail/smtp",
+  "moonbitstack/moonmail/sasl",
+  "moonbitstack/moonnet/tcp",
+  "moonbitstack/moontls/tls",
+  "moonbitstack/mooncred/x509",
+  "moonbitlang/async",
+  "moonbitlang/async/socket",
+  "moonbitstack/moonfetch",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+  "moonbitlang/core/encoding/utf8",
+} for "test"
+
+// On the backends without sockets every file is left out, so the imports go
+// unused there.
+
+warnings = "-29"
+
+options(
+  targets: {
+    "session.mbt": [ "native", "wasm" ],
+    "smtp.mbt": [ "native", "wasm" ],
+    "imap.mbt": [ "native", "wasm" ],
+    "pop3.mbt": [ "native", "wasm" ],
+    "net_test.mbt": [ "native" ],
+    "certs_test.mbt": [ "native" ],
+    "mailpit_test.mbt": [ "native" ],
+  },
+)

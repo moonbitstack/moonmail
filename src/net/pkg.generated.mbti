@@ -1,0 +1,80 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/net"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moonmail/imap",
+  "moonbitstack/moonmail/pop3",
+  "moonbitstack/moonmail/sasl",
+  "moonbitstack/moonmail/smtp",
+  "moonbitstack/moontls/tls",
+}
+
+// Values
+
+// Errors
+pub(all) suberror Rejected {
+  Reply(@smtp.Command, @smtp.Reply)
+  Done(@imap.Status, @imap.Code?, String)
+  Err(@pop3.Command, String)
+  Sasl(@sasl.Refused)
+  Closed
+} derive(Eq, @debug.Debug)
+pub fn Rejected::equal(Self, Self) -> Bool
+pub fn Rejected::not_equal(Self, Self) -> Bool
+pub fn Rejected::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub struct Imap {
+  // private fields
+}
+pub async fn Imap::authenticate(Self, &@sasl.Mechanism) -> Unit
+pub fn Imap::client(Self) -> @imap.Client
+pub async fn Imap::connect(String, Security, port? : Int32, limits? : @imap.Limits, now? : Int64) -> Self
+pub async fn Imap::login(Self, String, String) -> Unit
+pub async fn Imap::logout(Self) -> Unit
+pub async fn Imap::read(Self) -> Array[@imap.Event]
+pub async fn Imap::run(Self) -> Array[@imap.Event]
+pub async fn Imap::wait(Self, Int32) -> Reply
+
+pub struct Pop3 {
+  // private fields
+}
+pub async fn Pop3::auth(Self, &@sasl.Mechanism) -> Unit
+pub fn Pop3::client(Self) -> @pop3.Client
+pub async fn Pop3::connect(String, Security, port? : Int32, limits? : @pop3.Limits, now? : Int64) -> Self
+pub async fn Pop3::list(Self) -> Array[(Int32, Int64)]
+pub async fn Pop3::login(Self, String, String) -> Unit
+pub async fn Pop3::quit(Self) -> Unit
+pub async fn Pop3::retr(Self, Int32) -> Bytes
+pub async fn Pop3::run(Self) -> Array[@pop3.Event]
+
+pub(all) struct Reply {
+  data : Array[@imap.Response]
+  status : @imap.Status
+  code : @imap.Code?
+  text : String
+} derive(Eq, @debug.Debug)
+pub fn Reply::equal(Self, Self) -> Bool
+pub fn Reply::not_equal(Self, Self) -> Bool
+pub fn Reply::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Security {
+  Tls(@tls.Client)
+  StartTls(@tls.Client)
+  Clear
+}
+
+pub struct Smtp {
+  // private fields
+}
+pub async fn Smtp::auth(Self, &@sasl.Mechanism) -> Unit
+pub fn Smtp::client(Self) -> @smtp.Client
+pub async fn Smtp::connect(String, Security, port? : Int32, hello? : String, lmtp? : Bool, limits? : @smtp.Limits, now? : Int64) -> Self
+pub async fn Smtp::quit(Self) -> Unit
+pub async fn Smtp::run(Self) -> Array[@smtp.Event]
+pub async fn Smtp::send(Self, String, Array[String], BytesView) -> Array[(String, @smtp.Reply)]
+
+// Type aliases
+
+// Traits

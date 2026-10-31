@@ -2,75 +2,113 @@
 package "moonbitstack/moonmail/pop3"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitstack/moonmail/sasl",
 }
 
 // Values
+pub let limits : Limits
 
 // Errors
-pub(all) suberror Pop3Error {
-  Server(msg~ : String)
-  Io(msg~ : String)
-  Protocol(msg~ : String)
-  Sasl(@sasl.Refused)
-}
+pub(all) suberror Refused {
+  Malformed(String)
+  Exceeded(limit~ : Int32, got~ : Int32)
+  Order(String)
+  Unsupported(String)
+} derive(Eq, @debug.Debug)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
-pub struct MessageInfo {
-  number : Int32
-  size : Int32
+pub struct Client {
+  // private fields
 }
+pub fn Client::apop(Self, String, String) -> Unit raise Refused
+pub fn Client::auth(Self, &@sasl.Mechanism) -> Unit raise Refused
+pub fn Client::capa(Self) -> Unit
+pub fn Client::capabilities(Self) -> Array[String]
+pub fn Client::dele(Self, Int32) -> Unit raise Refused
+pub fn Client::feed(Self, BytesView) -> Array[Event] raise Refused
+pub fn Client::has(Self, String) -> Bool
+pub fn Client::list(Self, message? : Int32) -> Unit raise Refused
+pub fn Client::new(limits? : Limits) -> Self
+pub fn Client::next_write(Self) -> Bytes?
+pub fn Client::noop(Self) -> Unit raise Refused
+pub fn Client::pass(Self, String) -> Unit raise Refused
+pub fn Client::pending(Self) -> Int32
+pub fn Client::quit(Self) -> Unit
+pub fn Client::retr(Self, Int32) -> Unit raise Refused
+pub fn Client::rset(Self) -> Unit raise Refused
+pub fn Client::stat(Self) -> Unit raise Refused
+pub fn Client::state(Self) -> State
+pub fn Client::stls(Self) -> Unit raise Refused
+pub fn Client::top(Self, Int32, Int32) -> Unit raise Refused
+pub fn Client::uidl(Self, message? : Int32) -> Unit raise Refused
+pub fn Client::user(Self, String) -> Unit raise Refused
 
-pub struct Pop3 {
-  io : &Pop3Io
-  mut state : Pop3State
-}
-pub fn Pop3::apop(Self, String, String) -> Unit raise Pop3Error
-pub fn Pop3::authenticate(Self, &@sasl.Mechanism) -> Unit raise Pop3Error
-pub fn Pop3::capa(Self) -> Array[String] raise Pop3Error
-pub fn Pop3::capa_names(Self) -> Array[String] raise Pop3Error
-pub fn Pop3::dele(Self, Int32) -> Unit raise Pop3Error
-pub fn Pop3::greeting(Self) -> String raise Pop3Error
-pub fn Pop3::last(Self) -> Int32 raise Pop3Error
-pub fn Pop3::list(Self) -> Array[MessageInfo] raise Pop3Error
-pub fn Pop3::list_one(Self, Int32) -> Int32 raise Pop3Error
-pub fn Pop3::new(&Pop3Io) -> Self
-pub fn Pop3::noop(Self) -> Unit raise Pop3Error
-pub fn Pop3::pass(Self, String) -> Unit raise Pop3Error
-pub fn Pop3::quit(Self) -> Unit raise Pop3Error
-pub fn Pop3::retr(Self, Int32) -> String raise Pop3Error
-pub fn Pop3::retr_bytes(Self, Int32) -> Bytes raise Pop3Error
-pub fn Pop3::rset(Self) -> Unit raise Pop3Error
-pub fn Pop3::starttls(Self) -> Unit raise Pop3Error
-pub fn Pop3::stat(Self) -> Stat raise Pop3Error
-pub fn Pop3::state(Self) -> Pop3State
-pub fn Pop3::top(Self, Int32, Int32) -> String raise Pop3Error
-pub fn Pop3::uidl(Self) -> Array[UidlEntry] raise Pop3Error
-pub fn Pop3::uidl_one(Self, Int32) -> String raise Pop3Error
-pub fn Pop3::user(Self, String) -> Unit raise Pop3Error
+pub(all) enum Command {
+  Greeting
+  User(String)
+  Pass
+  Apop(String)
+  Auth(String)
+  Stls
+  Capa
+  Stat
+  List(Int32?)
+  Uidl(Int32?)
+  Retr(Int32)
+  Top(Int32, Int32)
+  Dele(Int32)
+  Rset
+  Noop
+  Quit
+} derive(Eq, @debug.Debug)
+pub fn Command::equal(Self, Self) -> Bool
+pub fn Command::not_equal(Self, Self) -> Bool
+pub fn Command::to_repr(Self) -> @debug.Repr
 
-pub(all) enum Pop3State {
+pub(all) enum Event {
+  Reply(Command, Reply)
+  Sasl(@sasl.Refused)
+} derive(Eq, @debug.Debug)
+pub fn Event::equal(Self, Self) -> Bool
+pub fn Event::not_equal(Self, Self) -> Bool
+pub fn Event::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Limits {
+  line : Int32
+  message : Int32
+} derive(Eq, @debug.Debug)
+pub fn Limits::equal(Self, Self) -> Bool
+pub fn Limits::new(line? : Int32, message? : Int32) -> Self
+pub fn Limits::not_equal(Self, Self) -> Bool
+pub fn Limits::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Reply {
+  Greeting(text~ : String, timestamp~ : String?)
+  Ok(String)
+  Err(String)
+  Stat(count~ : Int32, size~ : Int64)
+  Listing(Array[(Int32, Int64)])
+  Uids(Array[(Int32, String)])
+  Content(Bytes)
+  Capabilities(Array[String])
+} derive(Eq, @debug.Debug)
+pub fn Reply::equal(Self, Self) -> Bool
+pub fn Reply::not_equal(Self, Self) -> Bool
+pub fn Reply::to_repr(Self) -> @debug.Repr
+
+pub(all) enum State {
   Authorization
   Transaction
   Update
-} derive(Eq)
-pub fn Pop3State::equal(Self, Self) -> Bool
-pub fn Pop3State::not_equal(Self, Self) -> Bool
-
-pub struct Stat {
-  count : Int32
-  size : Int32
-}
-
-pub struct UidlEntry {
-  number : Int32
-  uid : String
-}
+} derive(Eq, @debug.Debug)
+pub fn State::equal(Self, Self) -> Bool
+pub fn State::not_equal(Self, Self) -> Bool
+pub fn State::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
 // Traits
-pub(open) trait Pop3Io {
-  fn write_line(Self, String) -> Unit raise Pop3Error
-  fn read_line(Self) -> String raise Pop3Error
-}

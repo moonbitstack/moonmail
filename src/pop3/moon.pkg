@@ -1,8 +1,12 @@
-// POP3 client (RFC 1939): the command/response dialogue a mailbox server
-// speaks, kept free of sockets so a caller supplies the transport and a test
-// can replay a recorded session.
+// POP3 client (RFC 1939) with the extension mechanism (RFC 2449), SASL
+// (RFC 5034) and STLS (RFC 2595), as a state machine with no I/O.
 // https://www.rfc-editor.org/rfc/rfc1939
+// https://www.rfc-editor.org/rfc/rfc2449
+// https://www.rfc-editor.org/rfc/rfc5034
+// https://www.rfc-editor.org/rfc/rfc2595
 import {
   "moonbitstack/moonbase/base64",
+  "moonbitstack/mooncrypt/hash/md5",
   "moonbitstack/moonmail/sasl",
+  "moonbitlang/core/encoding/utf8",
 }

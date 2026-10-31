@@ -182,6 +182,16 @@ pub fn Client::extensions(self : Client) -> Map[String, String] {
 }
 
 ///|
+/// How many responses the client still expects: the greeting until it
+/// arrives, and the completion of every command queued or sent. A transport
+/// reads until it is zero.
+pub fn Client::pending(self : Client) -> Int32 {
+  (if self.greeted { 0 } else { 1 }) +
+  self.queue.length() +
+  self.waiting.length()
+}
+
+///|
 /// Whether the last `EHLO` reply announced the extension `name`.
 pub fn Client::has(self : Client, name : String) -> Bool {
   self.extensions.contains(name.to_upper())

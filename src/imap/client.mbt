@@ -118,6 +118,16 @@ pub fn Client::capabilities(self : Client) -> Array[String] {
 }
 
 ///|
+/// How many responses the client still expects: the greeting until it
+/// arrives, and the completion of every command queued or sent. A transport
+/// reads until it is zero.
+pub fn Client::pending(self : Client) -> Int32 {
+  (if self.greeted { 0 } else { 1 }) +
+  self.queue.length() +
+  self.waiting.length()
+}
+
+///|
 /// Whether the server announced `name`.
 pub fn Client::has(self : Client, name : String) -> Bool {
   self.capabilities.contains(name.to_upper())

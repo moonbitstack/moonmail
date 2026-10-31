@@ -36,13 +36,16 @@ moon run src/examples/tour
 - **SASL** (`@moonmail/sasl`) — PLAIN, LOGIN, CRAM-MD5, XOAUTH2, OAUTHBEARER
   (RFC 7628) and SCRAM-SHA-256 (RFC 7677) with SASLprep (RFC 4013). A
   mechanism is a trait: one you write goes to `authenticate` like these.
-- **POP3** (`@moonmail/pop3`) — RFC 1939 state machine, dot-unstuffed replies,
-  `USER`/`PASS`, `APOP`, SASL `AUTH`, `STLS`, `CAPA`, `TOP`, `UIDL`, `LAST`,
-  and `retr_bytes` for a body kept as octets.
+- **POP3** (`@moonmail/pop3`) — client with no I/O, RFC 1939 and RFC 2449:
+  `USER`/`PASS`, `APOP`, SASL `AUTH`, `STLS`, `CAPA`, `PIPELINING`, `STAT`,
+  `LIST`, `UIDL`, `RETR` and `TOP` dot-unstuffed with their octets kept.
 - **SMTP / LMTP** (`@moonmail/smtp`) — client and server as state machines
   with no I/O, RFC 5321 and RFC 2033: `PIPELINING` groups, `SIZE`, `8BITMIME`,
   `BINARYMIME` and `CHUNKING`, `SMTPUTF8`, DSN parameters, `STARTTLS`, SASL
   `AUTH`, and RFC 3463 enhanced status codes off any reply.
+- **Over a socket** (`@moonmail/net`, native and wasm) — the SMTP, LMTP, IMAP
+  and POP3 state machines on moonnet: implicit TLS, STARTTLS that a server must
+  offer, or the clear; sending one message in one call.
 - **NNTP** (`@moonmail/nntp`) — RFC 3977 news: groups, articles, posting,
   `LISTGROUP`, `OVER`/`HDR`, `NEWGROUPS`/`NEWNEWS`, `AUTHINFO`, `CAPABILITIES`.
 - **IMAP** (`@moonmail/imap`) — IMAP4rev2 client with no I/O (RFC 9051) that
@@ -62,16 +65,16 @@ moon run src/examples/tour
 
 ## POP3
 
-```moonbit
-let client = @pop3.Pop3::new(connection as &@pop3.Pop3Io)
-try {
-  let _ = client.greeting()
-  client.user("alice")
-  client.pass("secret")
-  let stat = client.stat()            // { count, size }
-  let message = client.retr(1)        // the raw message, ready for @moonmail.parse
-} catch {
-  _ => ()
+```moonbit nocheck
+let pop = @pop3.Client::new()
+pop.user("alice")
+pop.pass("secret")
+pop.retr(1)
+// ... write pop.next_write(), feed the server's octets
+for event in pop.feed(octets) {
+  if event is Reply(Retr(_), Content(message)) {
+    println(message.length())
+  }
 }
 ```
 
@@ -115,6 +118,30 @@ while server.next() is Some(request) {
 
 `lmtp=true` on either side speaks LMTP, where the message gets one reply per
 accepted recipient.
+
+## Over a socket
+
+`@moonmail/net` carries the state machines over moonnet. `StartTls` refuses a
+server that does not offer it rather than going on in the clear.
+
+```moonbit nocheck
+let smtp = @net.Smtp::connect("smtp.example.com", StartTls(tls))
+smtp.auth(@sasl.Plain::new("alice", password))
+let refused = smtp.send("alice@example.com", ["bob@example.com"], raw[:])
+smtp.quit()
+
+let imap = @net.Imap::connect("imap.example.com", Tls(tls))
+imap.login("alice", password)
+let inbox = imap.wait(imap.client().select("INBOX"))
+
+let pop = @net.Pop3::connect("pop.example.com", Tls(tls))
+pop.login("alice", password)
+let first = pop.retr(1)
+```
+
+`tls` is a `@tls.Client` from moontls with the roots to trust. The tests run
+against a local relay made of `@smtp.Server`, and in CI against Mailpit, which
+takes a message by SMTP and gives it back by POP3.
 
 ## SASL
 

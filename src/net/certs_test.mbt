@@ -1,0 +1,38 @@
+// Copyright 2026 Leo Cheng
+// SPDX-License-Identifier: Apache-2.0
+
+// A test root, and a certificate and key for localhost under it, valid from
+// 2020 to 2040.
+
+///|
+let root : String =
+  #|-----BEGIN CERTIFICATE-----
+  #|MIIBTDCB86ADAgECAhQROEaL7Xuw8BTEggptTBxT0dH7fzAKBggqhkjOPQQDAjAc
+  #|MRowGAYDVQQDDBFtb29ubmV0IHRlc3Qgcm9vdDAeFw0yMDAxMDEwMDAwMDBaFw00
+  #|MDAxMDEwMDAwMDBaMBwxGjAYBgNVBAMMEW1vb25uZXQgdGVzdCByb290MFkwEwYH
+  #|KoZIzj0CAQYIKoZIzj0DAQcDQgAEz8b8NdfPUUorr7gOYDHls+X+M4aBjeWAvBV+
+  #|dPRyuLUYUTi0YkpxcA7O9o80Fo4aNScP8PNasbXHv18GGbrYHKMTMBEwDwYDVR0T
+  #|AQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiEA/LYIYqEeT7nAMpmdSXo8Oe7z
+  #|dpvH5qmpZe4O9rQVtc8CIEqG2+sVUZJKi9l7A6XYYvtr8RHpFWFFlaXYxTrPUhQa
+  #|-----END CERTIFICATE-----
+
+///|
+let cert : String =
+  #|-----BEGIN CERTIFICATE-----
+  #|MIIBZTCCAQugAwIBAgIUPGjG/WLQSOYK/f7yyDZzzrSU4e0wCgYIKoZIzj0EAwIw
+  #|HDEaMBgGA1UEAwwRbW9vbm5ldCB0ZXN0IHJvb3QwHhcNMjAwMTAxMDAwMDAwWhcN
+  #|NDAwMTAxMDAwMDAwWjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwWTATBgcqhkjOPQIB
+  #|BggqhkjOPQMBBwNCAASoyG5Fk7zYK7PNGQUGtsb3OgvEP6JuXPVgJRxCtXQ2nCa6
+  #|ow7RNqFXZ0p7zU36qHDx0lzi+8C1bfvEKoIb6OviozMwMTAaBgNVHREEEzARggls
+  #|b2NhbGhvc3SHBH8AAAEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCgYIKoZIzj0EAwID
+  #|SAAwRQIgA3KzSoczJCn/IKN96Hb/TfnZcgvhQlosn6JMh3IA3DACIQCAelakRIBi
+  #|MopZsqVoEA6nabfWnM8CH/7yIISgZcn+Ag==
+  #|-----END CERTIFICATE-----
+
+///|
+let key : String =
+  #|-----BEGIN PRIVATE KEY-----
+  #|MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVAwDfCmH4DBYN004
+  #|L89lkE+Bm1L0Skh+QDmk0iM60gmhRANCAASoyG5Fk7zYK7PNGQUGtsb3OgvEP6Ju
+  #|XPVgJRxCtXQ2nCa6ow7RNqFXZ0p7zU36qHDx0lzi+8C1bfvEKoIb6Ovi
+  #|-----END PRIVATE KEY-----

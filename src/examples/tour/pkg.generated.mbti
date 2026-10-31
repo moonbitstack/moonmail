@@ -8,8 +8,6 @@ package "moonbitstack/moonmail/examples/tour"
 // Types and methods
 type NntpScript
 
-type Scripted
-
 // Type aliases
 
 // Traits

@@ -47,6 +47,7 @@ pub fn Client::mail(Self, String, size? : Int32, body? : Body, utf8? : Bool, ret
 pub fn Client::new(lmtp? : Bool, limits? : Limits) -> Self
 pub fn Client::next_write(Self) -> Bytes?
 pub fn Client::noop(Self) -> Unit
+pub fn Client::pending(Self) -> Int32
 pub fn Client::quit(Self) -> Unit
 pub fn Client::rcpt(Self, String, notify? : Array[Notify], orcpt? : String) -> Unit raise Refused
 pub fn Client::rset(Self) -> Unit

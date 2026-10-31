@@ -48,6 +48,7 @@ pub fn Client::namespaces(Self) -> Int32 raise Refused
 pub fn Client::new(limits? : Limits) -> Self
 pub fn Client::next_write(Self) -> Bytes?
 pub fn Client::noop(Self) -> Int32
+pub fn Client::pending(Self) -> Int32
 pub fn Client::rename(Self, String, String) -> Int32 raise Refused
 pub fn Client::search(Self, String, uid? : Bool) -> Int32 raise Refused
 pub fn Client::select(Self, String, condstore? : Bool) -> Int32 raise Refused
