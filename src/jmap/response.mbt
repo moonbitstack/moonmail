@@ -34,6 +34,19 @@ pub extend Response with Debug::{to_repr}
 ///|
 pub fn Response::parse(body : String) -> Response raise Refused {
   let document = reads(body)
+  // RFC 8620 section 3.6.1: a request the server will not even try — bad JSON,
+  // a capability it does not know, too many calls — answers with a problem
+  // document instead of methodResponses. Reading it as a malformed response
+  // would hide the one sentence that says what to fix.
+  match optional(document, "methodResponses") {
+    None =>
+      raise Refused::Failed(
+        call="request",
+        kind=text_opt(document, "type").unwrap_or("about:blank"),
+        description=text_opt(document, "detail").unwrap_or("the server sent no methodResponses"),
+      )
+    Some(_) => ()
+  }
   let invocations : Array[Invocation] = []
   for entry in items(document, "methodResponses") {
     let parts = match entry {

@@ -35,13 +35,24 @@ pub extend Request with Debug::{to_repr}
 ///|
 pub fn Request::new() -> Request {
   {
-    capabilities: [
-      "urn:ietf:params:jmap:core",
-      "urn:ietf:params:jmap:mail",
-      "urn:ietf:params:jmap:submission",
-    ],
+    capabilities: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
     calls: [],
   }
+}
+
+///|
+/// Ask for a capability the calls below need. RFC 8620 section 3.2 makes the
+/// `using` list a claim: a server that does not offer one answers the whole
+/// request with `unknownCapability`, so a request carries only what it uses —
+/// asking for `submission` on a `Mailbox/get` would fail on a server that
+/// cannot send at all, and reading the inbox should still work there.
+pub fn Request::using_capability(self : Request, capability : String) -> Unit {
+  for known in self.capabilities {
+    if known == capability {
+      return
+    }
+  }
+  self.capabilities.push(capability)
 }
 
 ///|
@@ -209,6 +220,70 @@ pub fn Request::email_set_draft(
 }
 
 ///|
+/// `Email/set` with one `update` (RFC 8621 section 4.6): change a letter that
+/// already exists. The patch keys are paths, so `keywords/$seen` sets one
+/// keyword without rewriting the map, and `mailboxIds` replaces the set of
+/// mailboxes the letter is filed in.
+pub fn Request::email_set_update(
+  self : Request,
+  account : String,
+  id : String,
+  patch : Array[(String, Json)],
+) -> String {
+  self.call(
+    "Email/set",
+    object([
+      ("accountId", Json::string(account)),
+      ("update", object([(id, object(patch))])),
+    ]),
+  )
+}
+
+///|
+/// Mark a letter read or unread. This is the write a mail client performs more
+/// than any other, and the one a reader notices if it is wrong.
+pub fn Request::email_mark_seen(
+  self : Request,
+  account : String,
+  id : String,
+  seen : Bool,
+) -> String {
+  self.email_set_update(account, id, [("keywords/$seen", Json::boolean(seen))])
+}
+
+///|
+/// File a letter in a mailbox. JMAP replaces the set, so the letter ends up in
+/// `mailbox` and nowhere else — one mailbox is how a move is spelled.
+pub fn Request::email_move(
+  self : Request,
+  account : String,
+  id : String,
+  mailbox : String,
+) -> String {
+  self.email_set_update(account, id, [
+    ("mailboxIds", object([(mailbox, Json::boolean(true))])),
+  ])
+}
+
+///|
+/// `Email/set` with one `destroy`: delete a letter for good, not into Trash.
+/// Moving to the trash mailbox is `email_move`, and a client that offers
+/// "delete" should say which of the two it means.
+pub fn Request::email_destroy(
+  self : Request,
+  account : String,
+  id : String,
+) -> String {
+  self.call(
+    "Email/set",
+    object([
+      ("accountId", Json::string(account)),
+      ("destroy", Json::array([Json::string(id)])),
+    ]),
+  )
+}
+
+///|
 /// `EmailSubmission/set` (RFC 8621 section 7.5): hand a stored letter to the
 /// submission server. The letter has to exist first, so this always follows an
 /// `Email/set` that created it.
@@ -218,6 +293,7 @@ pub fn Request::email_submission_set(
   identity : String,
   email_id : String,
 ) -> String {
+  self.using_capability("urn:ietf:params:jmap:submission")
   self.call(
     "EmailSubmission/set",
     object([

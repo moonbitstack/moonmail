@@ -100,9 +100,13 @@ pub(all) struct Request {
   calls : Array[Call]
 } derive(Eq, @debug.Debug)
 pub fn Request::call(Self, String, Json) -> String
+pub fn Request::email_destroy(Self, String, String) -> String
 pub fn Request::email_get(Self, String, Array[String], Array[String]) -> String
+pub fn Request::email_mark_seen(Self, String, String, Bool) -> String
+pub fn Request::email_move(Self, String, String, String) -> String
 pub fn Request::email_query(Self, String, String, Int32) -> String
 pub fn Request::email_set_draft(Self, String, String, Draft) -> String
+pub fn Request::email_set_update(Self, String, String, Array[(String, Json)]) -> String
 pub fn Request::email_submission_set(Self, String, String, String) -> String
 pub fn Request::equal(Self, Self) -> Bool
 pub fn Request::identity_get(Self, String) -> String
@@ -112,6 +116,7 @@ pub fn Request::not_equal(Self, Self) -> Bool
 pub fn Request::to_json(Self) -> Json
 pub fn Request::to_repr(Self) -> @debug.Repr
 pub fn Request::to_string(Self) -> String
+pub fn Request::using_capability(Self, String) -> Unit
 
 pub(all) struct Response {
   invocations : Array[Invocation]

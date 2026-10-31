@@ -14386,37 +14386,37 @@ function _M0FP212moonbitstack8moonmail14parse__address(text) {
   }
   return new _M0DTPC16result6ResultGRP212moonbitstack8moonmail7AddressRP212moonbitstack8moonmail7RefusedE2Ok(address);
 }
-function _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__repr(_x_178) {
-  switch (_x_178.$tag) {
+function _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__repr(_x_196) {
+  switch (_x_196.$tag) {
     case 28: {
-      const _Malformed = _x_178;
-      const _$42$arg_179 = _Malformed._0;
-      return _M0MPC15debug4Repr4ctor("Malformed", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4001, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_179) }]);
+      const _Malformed = _x_196;
+      const _$42$arg_197 = _Malformed._0;
+      return _M0MPC15debug4Repr4ctor("Malformed", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4001, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_197) }]);
     }
     case 27: {
       return _M0MPC15debug4Repr4ctor("NotAnObject", []);
     }
     case 26: {
-      const _Missing = _x_178;
-      const _$42$arg_180 = _Missing._0;
-      return _M0MPC15debug4Repr4ctor("Missing", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4002, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_180) }]);
+      const _Missing = _x_196;
+      const _$42$arg_198 = _Missing._0;
+      return _M0MPC15debug4Repr4ctor("Missing", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4002, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_198) }]);
     }
     case 25: {
-      const _WrongType = _x_178;
-      const _$42$arg_181 = _WrongType._0;
-      return _M0MPC15debug4Repr4ctor("WrongType", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4003, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_181) }]);
+      const _WrongType = _x_196;
+      const _$42$arg_199 = _WrongType._0;
+      return _M0MPC15debug4Repr4ctor("WrongType", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4003, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_199) }]);
     }
     case 24: {
-      const _BadUrl = _x_178;
-      const _$42$arg_182 = _BadUrl._0;
-      return _M0MPC15debug4Repr4ctor("BadUrl", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4004, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_182) }]);
+      const _BadUrl = _x_196;
+      const _$42$arg_200 = _BadUrl._0;
+      return _M0MPC15debug4Repr4ctor("BadUrl", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4004, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_200) }]);
     }
     default: {
-      const _Failed = _x_178;
-      const _$42$arg_183 = _Failed._0;
-      const _$42$arg_184 = _Failed._1;
-      const _$42$arg_185 = _Failed._2;
-      return _M0MPC15debug4Repr4ctor("Failed", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4005, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_183) }, { _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4006, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_184) }, { _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4007, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_185) }]);
+      const _Failed = _x_196;
+      const _$42$arg_201 = _Failed._0;
+      const _$42$arg_202 = _Failed._1;
+      const _$42$arg_203 = _Failed._2;
+      return _M0MPC15debug4Repr4ctor("Failed", [{ _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4005, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_201) }, { _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4006, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_202) }, { _0: _M0IP312moonbitstack8moonmail4jmap7RefusedPC15debug5Debug8to__reprN6constrS4007, _1: _M0IPC16string6StringPC15debug5Debug8to__repr(_$42$arg_203) }]);
     }
   }
 }
@@ -15128,21 +15128,25 @@ function _M0MP312moonbitstack8moonmail4jmap8Response5parse(body) {
   } else {
     return _bind;
   }
-  const invocations = [];
-  const _bind$2 = _M0FP312moonbitstack8moonmail4jmap5items(document, "methodResponses");
-  let _bind$3;
-  if (_bind$2.$tag === 1) {
-    const _ok = _bind$2;
-    _bind$3 = _ok._0;
-  } else {
-    return _bind$2;
+  const _bind$2 = _M0FP312moonbitstack8moonmail4jmap8optional(document, "methodResponses");
+  if (_bind$2 === undefined) {
+    return new _M0DTPC16result6ResultGRP312moonbitstack8moonmail4jmap8ResponseRP312moonbitstack8moonmail4jmap7RefusedE3Err(new _M0DTPC15error5Error49moonbitstack_2fmoonmail_2fjmap_2eRefused_2eFailed("request", _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail4jmap9text__opt(document, "type"), "about:blank"), _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail4jmap9text__opt(document, "detail"), "the server sent no methodResponses")));
   }
-  const _bind$4 = _bind$3.length;
+  const invocations = [];
+  const _bind$3 = _M0FP312moonbitstack8moonmail4jmap5items(document, "methodResponses");
+  let _bind$4;
+  if (_bind$3.$tag === 1) {
+    const _ok = _bind$3;
+    _bind$4 = _ok._0;
+  } else {
+    return _bind$3;
+  }
+  const _bind$5 = _bind$4.length;
   let _tmp = 0;
   while (true) {
     const _ = _tmp;
-    if (_ < _bind$4) {
-      const entry = _bind$3[_];
+    if (_ < _bind$5) {
+      const entry = _bind$4[_];
       let parts;
       if (entry.$tag === 5) {
         const _Array = entry;
@@ -15153,18 +15157,18 @@ function _M0MP312moonbitstack8moonmail4jmap8Response5parse(body) {
       if (parts.length < 3) {
         return new _M0DTPC16result6ResultGRP312moonbitstack8moonmail4jmap8ResponseRP312moonbitstack8moonmail4jmap7RefusedE3Err(new _M0DTPC15error5Error52moonbitstack_2fmoonmail_2fjmap_2eRefused_2eWrongType("methodResponses"));
       }
-      const _bind$5 = _M0MPC15array5Array2atGUssEE(parts, 0);
+      const _bind$6 = _M0MPC15array5Array2atGUssEE(parts, 0);
       let name;
-      if (_bind$5.$tag === 4) {
-        const _String = _bind$5;
+      if (_bind$6.$tag === 4) {
+        const _String = _bind$6;
         name = _String._0;
       } else {
         return new _M0DTPC16result6ResultGRP312moonbitstack8moonmail4jmap8ResponseRP312moonbitstack8moonmail4jmap7RefusedE3Err(new _M0DTPC15error5Error52moonbitstack_2fmoonmail_2fjmap_2eRefused_2eWrongType("methodName"));
       }
-      const _bind$6 = _M0MPC15array5Array2atGUssEE(parts, 2);
+      const _bind$7 = _M0MPC15array5Array2atGUssEE(parts, 2);
       let tag;
-      if (_bind$6.$tag === 4) {
-        const _String = _bind$6;
+      if (_bind$7.$tag === 4) {
+        const _String = _bind$7;
         tag = _String._0;
       } else {
         return new _M0DTPC16result6ResultGRP312moonbitstack8moonmail4jmap8ResponseRP312moonbitstack8moonmail4jmap7RefusedE3Err(new _M0DTPC15error5Error52moonbitstack_2fmoonmail_2fjmap_2eRefused_2eWrongType("methodTag"));
@@ -15179,7 +15183,26 @@ function _M0MP312moonbitstack8moonmail4jmap8Response5parse(body) {
   return new _M0DTPC16result6ResultGRP312moonbitstack8moonmail4jmap8ResponseRP312moonbitstack8moonmail4jmap7RefusedE2Ok(new _M0TP312moonbitstack8moonmail4jmap8Response(invocations, _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail4jmap9text__opt(document, "sessionState"), "")));
 }
 function _M0MP312moonbitstack8moonmail4jmap7Request3new() {
-  return new _M0TP312moonbitstack8moonmail4jmap7Request(["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"], []);
+  return new _M0TP312moonbitstack8moonmail4jmap7Request(["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"], []);
+}
+function _M0MP312moonbitstack8moonmail4jmap7Request17using__capability(self, capability) {
+  const _bind = self.capabilities;
+  const _bind$2 = _bind.length;
+  let _tmp = 0;
+  while (true) {
+    const _ = _tmp;
+    if (_ < _bind$2) {
+      const known = _bind[_];
+      if (known === capability) {
+        return undefined;
+      }
+      _tmp = _ + 1 | 0;
+      continue;
+    } else {
+      break;
+    }
+  }
+  _M0MPC15array5Array4pushGRP312moonbitstack8moonmail4jmap10InvocationE(self.capabilities, capability);
 }
 function _M0MP312moonbitstack8moonmail4jmap7Request4call(self, name, args) {
   const tag = `c${_M0MPC13int3Int18to__string_2einner(self.calls.length, 10)}`;
@@ -15329,6 +15352,7 @@ function _M0MP312moonbitstack8moonmail4jmap7Request17email__set__draft(self, acc
   return _M0MP312moonbitstack8moonmail4jmap7Request4call(self, "Email/set", _M0FP312moonbitstack8moonmail4jmap6object([{ _0: "accountId", _1: new _M0DTPB4Json6String(account) }, { _0: "create", _1: _M0FP312moonbitstack8moonmail4jmap6object([{ _0: "draft", _1: _M0FP312moonbitstack8moonmail4jmap6object(properties) }]) }]));
 }
 function _M0MP312moonbitstack8moonmail4jmap7Request22email__submission__set(self, account, identity, email_id) {
+  _M0MP312moonbitstack8moonmail4jmap7Request17using__capability(self, "urn:ietf:params:jmap:submission");
   return _M0MP312moonbitstack8moonmail4jmap7Request4call(self, "EmailSubmission/set", _M0FP312moonbitstack8moonmail4jmap6object([{ _0: "accountId", _1: new _M0DTPB4Json6String(account) }, { _0: "create", _1: _M0FP312moonbitstack8moonmail4jmap6object([{ _0: "submission", _1: _M0FP312moonbitstack8moonmail4jmap6object([{ _0: "identityId", _1: new _M0DTPB4Json6String(identity) }, { _0: "emailId", _1: new _M0DTPB4Json6String(email_id) }]) }]) }]));
 }
 function _M0FP312moonbitstack8moonmail6engine9addresses(values) {

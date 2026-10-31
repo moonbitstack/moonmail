@@ -171,3 +171,142 @@ test "submission: the created id comes back by its creation id" {
     #|}, "c2"]] }
   assert_eq(created_id(Response::parse(body), "c2", "submission"), "es-9")
 }
+
+///|
+fn document_of(request : Request) -> Json {
+  try {
+    @json.parse(request.to_string()[:])
+  } catch {
+    _ => Json::null()
+  }
+}
+
+///|
+fn using_of(request : Request) -> Array[String] {
+  let document = document_of(request)
+  let entries = match document {
+    Json::Object(map) =>
+      match map.get("using") {
+        Some(Json::Array(entries)) => entries
+        _ => []
+      }
+    _ => []
+  }
+  let out : Array[String] = []
+  for entry in entries {
+    match entry {
+      Json::String(value) => out.push(value)
+      _ => ()
+    }
+  }
+  out
+}
+
+///|
+fn arguments_of(request : Request) -> Json {
+  let document = document_of(request)
+  match document {
+    Json::Object(map) =>
+      match map.get("methodCalls") {
+        Some(Json::Array(calls)) =>
+          match calls[0] {
+            Json::Array(parts) => parts[1]
+            _ => Json::null()
+          }
+        _ => Json::null()
+      }
+    _ => Json::null()
+  }
+}
+
+///|
+test "capabilities: a read asks for mail, a send adds submission" {
+  let request = Request::new()
+  ignore(request.mailbox_get("u-1"))
+  let read = using_of(request)
+  assert_eq(read.length(), 2)
+  assert_eq(read[1], "urn:ietf:params:jmap:mail")
+  ignore(request.email_submission_set("u-1", "id-1", "em-1"))
+  let send = using_of(request)
+  assert_eq(send.length(), 3)
+  assert_eq(send[2], "urn:ietf:params:jmap:submission")
+}
+
+///|
+test "request-level error: a problem document keeps its type" {
+  let body =
+    #|{ "type": "urn:ietf:params:jmap:error:unknownCapability",
+    #|  "detail": "The request used a capability this server does not have." }
+  let refusal = try {
+    let _ = Response::parse(body)
+    None
+  } catch {
+    Refused::Failed(kind=kind, description=detail, ..) => Some(kind + " / " + detail)
+    _ => None
+  }
+  assert_eq(
+    refusal,
+    Some(
+      "urn:ietf:params:jmap:error:unknownCapability / The request used a capability this server does not have.",
+    ),
+  )
+}
+
+///|
+test "email: marking seen patches one keyword, not the whole map" {
+  let request = Request::new()
+  ignore(request.email_mark_seen("u-1", "em-1", true))
+  let args = arguments_of(request)
+  let patch = match args {
+    Json::Object(map) =>
+      match map.get("update") {
+        Some(Json::Object(update)) =>
+          match update.get("em-1") {
+            Some(Json::Object(patch)) => patch
+            _ => Map([])
+          }
+        _ => Map([])
+      }
+    _ => Map([])
+  }
+  assert_eq(patch.get("keywords/$seen"), Some(Json::boolean(true)))
+  assert_eq(patch.length(), 1)
+}
+
+///|
+test "email: moving replaces the mailbox set" {
+  let request = Request::new()
+  ignore(request.email_move("u-1", "em-1", "mb-ar"))
+  let args = arguments_of(request)
+  let boxes = match args {
+    Json::Object(map) =>
+      match map.get("update") {
+        Some(Json::Object(update)) =>
+          match update.get("em-1") {
+            Some(Json::Object(patch)) => patch.get("mailboxIds")
+            _ => None
+          }
+        _ => None
+      }
+    _ => None
+  }
+  let expected = object([("mb-ar", Json::boolean(true))])
+  assert_eq(boxes, Some(expected))
+}
+
+///|
+test "email: destroying names the id, it does not move it to trash" {
+  let request = Request::new()
+  ignore(request.email_destroy("u-1", "em-1"))
+  let args = arguments_of(request)
+  let destroyed = match args {
+    Json::Object(map) => map.get("destroy")
+    _ => None
+  }
+  assert_eq(destroyed, Some(Json::array([Json::string("em-1")])))
+  let update = match args {
+    Json::Object(map) => map.get("update")
+    _ => None
+  }
+  assert_eq(update, None)
+}
