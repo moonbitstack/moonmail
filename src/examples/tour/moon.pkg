@@ -8,7 +8,6 @@ import {
   "moonbitstack/moonmail/pop3",
   "moonbitstack/moonmail/smtp",
   "moonbitstack/moonmail/imap",
-  "moonbitstack/moonmail/jmap",
   "moonbitstack/moonmail/dkim",
   "moonbitstack/mooncrypt/sign/ed25519",
   "moonbitstack/moonbase/base64",

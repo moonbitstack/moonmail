@@ -11,14 +11,6 @@
 /// but that each is reached the same way a caller would reach it.
 
 ///|
-fn or_empty(value : String?) -> String {
-  match value {
-    Some(v) => v
-    None => ""
-  }
-}
-
-///|
 fn prefix(s : String, n : Int32) -> String {
   let m = if s.length() < n { s.length() } else { n }
   s[0:m].to_owned()
@@ -328,51 +320,6 @@ fn main {
   imap_tour() catch {
     e => println("imap tour stopped: " + @debug.to_string(e))
   }
-
-  // --------------------------------------------------------------- jmap
-  //
-  // JMAP is JSON over HTTP; the model here builds the request and reads the
-  // method responses. The `@moonmail/jmap/fetch` package posts them with
-  // moonfetch.
-  let jmap_request = @jmap.Request::mail([@jmap.mailbox_get("acct1", "c1")])
-  let jmap_body = @jmap.dumps_request(jmap_request)
-  let mut jmap_method = ""
-  let _ = try {
-    let reply = @jmap.parse_response(
-      "{\"methodResponses\":[[\"Mailbox/get\",{\"list\":[]},\"c1\"]],\"sessionState\":\"ss1\"}",
-    )
-    jmap_method = reply.responses[0].name
-  } catch {
-    _ => ()
-  }
-  println("--- jmap")
-  println("request bytes -> \{jmap_body.length()}")
-  println("reply method  -> \{jmap_method}")
-  // Email/set is how a draft is created; the reply names the server-side id.
-  let email_set = @jmap.email_set("acct1", "c2")
-  email_set.create(
-    "draft1",
-    @jmap.email_draft(
-      "Drafts",
-      "alice@example.com",
-      ["bob@example.com"],
-      "Hello",
-      "Body text",
-    ),
-  )
-  let set_body = @jmap.dumps_request(@jmap.Request::mail([email_set.to_call()]))
-  let mut created_id = ""
-  let _ = try {
-    let reply = @jmap.parse_response(
-      "{\"methodResponses\":[[\"Email/set\",{\"created\":{\"draft1\":{\"id\":\"M100\"}}},\"c2\"]],\"sessionState\":\"ss1\"}",
-    )
-    let result = @jmap.parse_set_response(reply.responses[0].arguments)
-    created_id = or_empty(result.created.get("draft1"))
-  } catch {
-    _ => ()
-  }
-  println("set bytes     -> \{set_body.length()}")
-  println("created id    -> \{created_id}")
 
   // --------------------------------------------------------------- dkim
   dkim_tour(raw) catch {

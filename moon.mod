@@ -19,7 +19,7 @@ keywords = [
   "moonbit",
 ]
 
-description = "Email for MoonBit: the message model, MIME and DKIM, and SMTP, LMTP, IMAP, POP3 and JMAP."
+description = "Email for MoonBit: the message model, MIME and DKIM, and SMTP, LMTP, IMAP and POP3."
 
 source = "src"
 
@@ -33,6 +33,5 @@ import {
   "moonbitstack/moontls@0.9.3",
   "moonbitstack/mooncred@0.6.5",
   "moonbitlang/async@0.22.5",
-  "moonbitstack/moonjson@0.4.2",
   "moonbitstack/moonfetch@0.1.0",
 }

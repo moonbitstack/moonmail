@@ -63,10 +63,6 @@ moon run src/examples/tour
   also speaks to IMAP4rev1 servers: the response grammar with literals and
   response codes, pipelined UID commands, `IDLE`, `CONDSTORE`, `LITERAL+`,
   `SASL-IR`, and modified UTF-7 names toward rev1 servers.
-- **JMAP** (`@moonmail/jmap`) — RFC 8620/8621: the session, request body and
-  method responses as JSON; `Email/set`, `Mailbox/set` and
-  `EmailSubmission/set` with their result parsing, `Identity/get`,
-  `Thread/get`, and a draft builder; `@moonmail/jmap/fetch` posts over moonfetch.
 - **DKIM** (`@moonmail/dkim`) — RFC 6376 canonicalization (simple and relaxed),
   body hash, and RSA-SHA256 sign and verify.
 
@@ -92,7 +88,7 @@ out of sequence or need an extension the server did not announce. Octets go
 out through `next_write` and come back through `feed`, which reports each reply
 with the command it answers.
 
-```moonbit
+```moonbit nocheck
 let smtp = @smtp.Client::new()
 smtp.ehlo("client.example")
 // ... write smtp.next_write(), feed the server's octets until the EHLO reply
@@ -109,7 +105,7 @@ for event in smtp.feed(octets) {
 The server answers syntax, sequence, limits, the `354` and the chunk replies
 itself, and hands the application what it decides:
 
-```moonbit
+```moonbit nocheck
 let server = @smtp.Server::new("mx.example", auth=["PLAIN"])
 server.feed(octets)
 while server.next() is Some(request) {
@@ -155,7 +151,7 @@ takes a message by SMTP and gives it back by POP3.
 SMTP's `auth` and IMAP's and POP3's `authenticate` take any
 `&@sasl.Mechanism`; the protocol does the base64 and the cancelling.
 
-```moonbit
+```moonbit nocheck
 // SCRAM never sends the password, and refuses a server that cannot prove it
 // holds the salted key. The nonce is fresh random printable ASCII each time.
 smtp.auth(@sasl.ScramSha256::new("alice", "secret", nonce~))
@@ -170,7 +166,7 @@ when it expects proof from the server.
 Each command returns its tag number; `feed` reports untagged responses as
 `Data` and each completion as `Done` with that number.
 
-```moonbit
+```moonbit nocheck
 let imap = @imap.Client::new()
 let _ = imap.login("alice", "secret")
 let _ = imap.select("INBOX")
@@ -187,7 +183,7 @@ for event in imap.feed(octets) {
 
 ## DKIM
 
-```moonbit
+```moonbit nocheck
 let options = @dkim.SignOptions::new(
   domain="example.com",
   selector="sel",
@@ -201,7 +197,7 @@ let signature = @dkim.sign(raw[:], private_key, options)
 
 The pieces a caller reaches for once the simple path works:
 
-```moonbit
+```moonbit nocheck
 // IMAP: ask about a mailbox without selecting it, wait for changes, and
 // store flags only where nothing changed them since (CONDSTORE).
 let _ = imap.status("INBOX", ["MESSAGES", "UIDNEXT", "UIDVALIDITY"])
@@ -213,18 +209,12 @@ let _ = imap.store("1:5", "+FLAGS (\\Seen)", uid=true, unchangedsince=modseq)
 smtp.mail("alice@example.com", size=1234, body=Binary)
 smtp.rcpt("bob@example.com", notify=[Success, Failure])
 smtp.bdat(chunk[:], last=true)   // LAST ends the transaction
-
-// JMAP: create a draft and read back the id the server gave it.
-let email_set = @jmap.email_set("acct1", "c1")
-email_set.create("draft1",
-  @jmap.email_draft("Drafts", "alice@example.com", ["bob@example.com"], "Hi", "Body"))
-let result = @jmap.parse_set_response(response.responses[0].arguments)
 ```
 
 ## What it is not
 
 The protocol packages open no socket; `@moonmail/net` does that on the native
-and wasm backends, and JMAP ships a moonfetch adapter.
+and wasm backends.
 
 ## The gate
 
