@@ -1,10 +1,21 @@
-// DKIM (RFC 6376): sign and verify a message's headers so a receiver can tell
-// it was not changed in flight. RSA-SHA256 only, per RFC 8463's rsa-sha256.
+// DKIM (RFC 6376): sign a message and check its signatures, with RSA-SHA256
+// and Ed25519-SHA256 (RFC 8463). The key records come from a lookup the
+// caller supplies, so the package does no DNS of its own.
 // https://www.rfc-editor.org/rfc/rfc6376
 // https://www.rfc-editor.org/rfc/rfc8463
+// https://www.rfc-editor.org/rfc/rfc8301
 import {
   "moonbitstack/mooncrypt/rsa",
+  "moonbitstack/mooncrypt/sign/ed25519",
   "moonbitstack/mooncrypt/hash/sha2",
+  "moonbitstack/mooncrypt/asn1",
   "moonbitstack/moonbase/base64",
   "moonbitlang/core/encoding/utf8",
 }
+
+import {
+  "moonbitstack/mooncred/x509",
+  "moonbitstack/mooncrypt/sign/ed25519",
+  "moonbitstack/moonbase/base64",
+  "moonbitlang/core/encoding/utf8",
+} for "test"

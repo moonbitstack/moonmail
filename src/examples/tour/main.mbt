@@ -25,33 +25,6 @@ fn prefix(s : String, n : Int32) -> String {
 }
 
 ///|
-fn hex_value(c : Char) -> Int32 {
-  if c >= '0' && c <= '9' {
-    c.to_int() - '0'.to_int()
-  } else if c >= 'a' && c <= 'f' {
-    c.to_int() - 'a'.to_int() + 10
-  } else if c >= 'A' && c <= 'F' {
-    c.to_int() - 'A'.to_int() + 10
-  } else {
-    0
-  }
-}
-
-///|
-fn hex_bytes(s : String) -> Bytes {
-  let out = Buffer()
-  let n = s.length()
-  let mut i = 0
-  while i + 1 < n {
-    let hi = hex_value(s.get_char(i).unwrap_or('0'))
-    let lo = hex_value(s.get_char(i + 1).unwrap_or('0'))
-    out.write_byte((hi * 16 + lo).to_byte())
-    i = i + 2
-  }
-  out.to_bytes()
-}
-
-///|
 /// A client session against a recorded POP3 server: the server's lines go in
 /// one by one, and the client's writes in between are dropped.
 fn pop3_tour() -> Unit raise @pop3.Refused {
@@ -262,6 +235,36 @@ fn message_tour() -> Unit raise @moonmail.Refused {
 }
 
 ///|
+/// Sign with the Ed25519 key of RFC 8463 and check the signature against the
+/// record that publishes its public half.
+fn dkim_tour(raw : Bytes) -> Unit raise {
+  let seed = @base64.decode("nWGxne/9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A=")
+  let key = @ed25519.PrivateKey::of_secret(seed[:])
+  let field = @dkim.sign(
+    raw[:],
+    Ed25519(key),
+    domain="football.example.com",
+    selector="brisbane",
+  )
+  let signed = @utf8.encode(field + "\r\n" + @utf8.decode_lossy(raw[:]))
+  let record = "v=DKIM1; k=ed25519; p=11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo="
+  let verdicts = @dkim.verify(
+    signed[:],
+    name => {
+      if name == "brisbane._domainkey.football.example.com" {
+        Some(record)
+      } else {
+        None
+      }
+    },
+    now=0,
+  )
+  println("--- dkim")
+  println("field        -> \{prefix(field, 48)}…")
+  println("verdicts     -> \{@debug.to_string(verdicts)}")
+}
+
+///|
 #coverage.skip
 fn main {
   // --------------------------------------------------------------- message
@@ -372,40 +375,7 @@ fn main {
   println("created id    -> \{created_id}")
 
   // --------------------------------------------------------------- dkim
-  //
-  // Sign a message and check the signature we just made. The key is a throwaway
-  // 1024-bit RSA key generated for this tour; a real one comes from the key
-  // the `d=`/`s=` selector publishes.
-  let n = hex_bytes(
-    "cc5b577e919dacc7d97bfbba88a6dff832697cf0fd67efecc5c5884393d945c98cea2327c32a74fa96526f48cf4b081c6444ee91d2f85da5405d5f665e40d3ad5afb35c77af79e14f8610b58900e90ee7cbdd659c5303d02b504655c13601d143bf05c4c2a6ec35add559e116c6989125d3dc89962d44b95e40d3d73659a66f7",
-  )
-  let e = hex_bytes("010001")
-  let d = hex_bytes(
-    "b5da52f1ff03214e76eb2e07c0b33f7bcee0b09e83e28a4f596f7ee3241ea54bc66a54fe7d5ebada840ab79d435ab1cd122d855f9f2e05a798af7ec5c9fa4662d5ad9868d75cd3305ae18a49f8b9bd1082045b2d69e97803406af1f0607e2f2c94aeddaf2c0e967d1ab71ddd2ce055ac0881654009f4c89d7ff9b0edb1440001",
-  )
-  let mut verified = false
-  let mut tags = ""
-  let _ = try {
-    let key = @rsa.PrivateKey::new(
-      n[:],
-      e[:],
-      d[:],
-      digest=@rsa.Digest::Sha256,
-      scheme=@rsa.Scheme::Pkcs1,
-    )
-    let opts = @dkim.SignOptions::new(domain="example.com", selector="tour", headers=[
-      "From", "To", "Subject",
-    ])
-    let sig = @dkim.sign(raw[:], key, opts)
-    tags = sig
-    let signed = Buffer()
-    signed.write_string_utf8("DKIM-Signature: " + sig + "\r\n")
-    signed.write_bytes(raw)
-    verified = @dkim.verify(signed.to_bytes()[:], key.public())
-  } catch {
-    _ => ()
+  dkim_tour(raw) catch {
+    e => println("dkim tour stopped: " + @debug.to_string(e))
   }
-  println("--- dkim")
-  println("tags         -> \{prefix(tags, 24)}…")
-  println("verifies     -> \{verified}")
 }

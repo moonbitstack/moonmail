@@ -10,7 +10,8 @@ import {
   "moonbitstack/moonmail/imap",
   "moonbitstack/moonmail/jmap",
   "moonbitstack/moonmail/dkim",
-  "moonbitstack/mooncrypt/rsa",
+  "moonbitstack/mooncrypt/sign/ed25519",
+  "moonbitstack/moonbase/base64",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/utf8",
 }

@@ -2,274 +2,234 @@
 // SPDX-License-Identifier: Apache-2.0
 
 ///|
-fn hex_value(c : Char) -> Int32 {
-  if c >= '0' && c <= '9' {
-    c.to_int() - '0'.to_int()
-  } else if c >= 'a' && c <= 'f' {
-    c.to_int() - 'a'.to_int() + 10
-  } else if c >= 'A' && c <= 'F' {
-    c.to_int() - 'A'.to_int() + 10
-  } else {
-    0
-  }
+/// RFC 8463 appendix A: the message, its two signatures, and the two keys.
+let message : String =
+  #|DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed;
+  #| d=football.example.com; i=@football.example.com;
+  #| q=dns/txt; s=brisbane; t=1528637909; h=from : to :
+  #| subject : date : message-id : from : subject : date;
+  #| bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;
+  #| b=/gCrinpcQOoIfuHNQIbq4pgh9kyIK3AQUdt9OdqQehSwhEIug4D11Bus
+  #| Fa3bT3FY5OsU7ZbnKELq+eXdp1Q1Dw==
+  #|DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  #| d=football.example.com; i=@football.example.com;
+  #| q=dns/txt; s=test; t=1528637909; h=from : to : subject :
+  #| date : message-id : from : subject : date;
+  #| bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;
+  #| b=F45dVWDfMbQDGHJFlXUNB2HKfbCeLRyhDXgFpEL8GwpsRe0IeIixNTe3
+  #| DhCVlUrSjV4BwcVcOF6+FF3Zo9Rpo1tFOeS9mPYQTnGdaSGsgeefOsk2Jz
+  #| dA+L10TeYt9BgDfQNZtKdN1WO//KgIqXP7OdEFE4LjFYNcUxZQ4FADY+8=
+  #|From: Joe SixPack <joe@football.example.com>
+  #|To: Suzie Q <suzie@shopping.example.net>
+  #|Subject: Is dinner ready?
+  #|Date: Fri, 11 Jul 2003 21:00:37 -0700 (PDT)
+  #|Message-ID: <20030712040037.46341.5F8J@football.example.com>
+  #|
+  #|Hi.
+  #|
+  #|We lost the game.  Are you hungry yet?
+  #|
+  #|Joe.
+  #|
+
+///|
+let rsa_pem : String =
+  #|-----BEGIN RSA PRIVATE KEY-----
+  #|MIICXQIBAAKBgQDkHlOQoBTzWRiGs5V6NpP3idY6Wk08a5qhdR6wy5bdOKb2jLQi
+  #|Y/J16JYi0Qvx/byYzCNb3W91y3FutACDfzwQ/BC/e/8uBsCR+yz1Lxj+PL6lHvqM
+  #|KrM3rG4hstT5QjvHO9PzoxZyVYLzBfO2EeC3Ip3G+2kryOTIKT+l/K4w3QIDAQAB
+  #|AoGAH0cxOhFZDgzXWhDhnAJDw5s4roOXN4OhjiXa8W7Y3rhX3FJqmJSPuC8N9vQm
+  #|6SVbaLAE4SG5mLMueHlh4KXffEpuLEiNp9Ss3O4YfLiQpbRqE7Tm5SxKjvvQoZZe
+  #|zHorimOaChRL2it47iuWxzxSiRMv4c+j70GiWdxXnxe4UoECQQDzJB/0U58W7RZy
+  #|6enGVj2kWF732CoWFZWzi1FicudrBFoy63QwcowpoCazKtvZGMNlPWnC7x/6o8Gc
+  #|uSe0ga2xAkEA8C7PipPm1/1fTRQvj1o/dDmZp243044ZNyxjg+/OPN0oWCbXIGxy
+  #|WvmZbXriOWoSALJTjExEgraHEgnXssuk7QJBALl5ICsYMu6hMxO73gnfNayNgPxd
+  #|WFV6Z7ULnKyV7HSVYF0hgYOHjeYe9gaMtiJYoo0zGN+L3AAtNP9huqkWlzECQE1a
+  #|licIeVlo1e+qJ6Mgqr0Q7Aa7falZ448ccbSFYEPD6oFxiOl9Y9se9iYHZKKfIcst
+  #|o7DUw1/hz2Ck4N5JrgUCQQCyKveNvjzkkd8HjYs0SwM0fPjK16//5qDZ2UiDGnOe
+  #|uEzxBDAr518Z8VFbR41in3W4Y3yCDgQlLlcETrS+zYcL
+  #|-----END RSA PRIVATE KEY-----
+
+///|
+fn crlf(text : String) -> Bytes {
+  @utf8.encode(text.replace_all(old="\n", new="\r\n"))
 }
 
 ///|
-fn hex_bytes(s : String) -> Bytes {
-  let out = Buffer()
-  let n = s.length()
-  let mut i = 0
-  while i + 1 < n {
-    let hi = hex_value(s.get_char(i).unwrap_or('0'))
-    let lo = hex_value(s.get_char(i + 1).unwrap_or('0'))
-    out.write_byte((hi * 16 + lo).to_byte())
-    i = i + 2
-  }
-  out.to_bytes()
-}
-
-///|
-/// A fixed 1024-bit RSA key generated for these tests; the signature only has to
-/// round-trip, so the key need not be from any authority.
-fn test_key() -> @rsa.PrivateKey? {
-  let n = hex_bytes(
-    "cc5b577e919dacc7d97bfbba88a6dff832697cf0fd67efecc5c5884393d945c98cea2327c32a74fa96526f48cf4b081c6444ee91d2f85da5405d5f665e40d3ad5afb35c77af79e14f8610b58900e90ee7cbdd659c5303d02b504655c13601d143bf05c4c2a6ec35add559e116c6989125d3dc89962d44b95e40d3d73659a66f7",
-  )
-  let e = hex_bytes("010001")
-  let d = hex_bytes(
-    "b5da52f1ff03214e76eb2e07c0b33f7bcee0b09e83e28a4f596f7ee3241ea54bc66a54fe7d5ebada840ab79d435ab1cd122d855f9f2e05a798af7ec5c9fa4662d5ad9868d75cd3305ae18a49f8b9bd1082045b2d69e97803406af1f0607e2f2c94aeddaf2c0e967d1ab71ddd2ce055ac0881654009f4c89d7ff9b0edb1440001",
-  )
-  Some(
-    @rsa.PrivateKey::new(
-      n[:],
-      e[:],
-      d[:],
-      digest=@rsa.Digest::Sha256,
-      scheme=@rsa.Scheme::Pkcs1,
-    ),
-  ) catch {
+fn records(name : String) -> String? {
+  match name {
+    "brisbane._domainkey.football.example.com" =>
+      Some("v=DKIM1; k=ed25519; p=11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=")
+    "test._domainkey.football.example.com" =>
+      Some(
+        "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkHlOQoBTzWRiGs5V6NpP3idY6Wk08a5qhdR6wy5bdOKb2jLQiY/J16JYi0Qvx/byYzCNb3W91y3FutACDfzwQ/BC/e/8uBsCR+yz1Lxj+PL6lHvqMKrM3rG4hstT5QjvHO9PzoxZyVYLzBfO2EeC3Ip3G+2kryOTIKT+l/K4w3QIDAQAB",
+      )
     _ => None
   }
 }
 
 ///|
-test "dkim relaxed header canonicalisation" {
-  inspect(
-    @dkim.canonicalize_header("A", "A: X", @dkim.Canon::Relaxed),
-    content="a:X\r\n",
+fn ed25519_key() -> @dkim.Key raise {
+  let seed = @base64.decode("nWGxne/9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A=")
+  Ed25519(@ed25519.PrivateKey::of_secret(seed[:]))
+}
+
+///|
+fn rsa_key() -> @dkim.Key raise {
+  guard @x509.PrivateKey::pem(rsa_pem) is Rsa(key) else { fail("not RSA") }
+  Rsa(key)
+}
+
+///|
+test "dkim verifies both signatures of RFC 8463" {
+  let verdicts = @dkim.verify(crlf(message)[:], n => records(n), now=1528637909)
+  assert_eq(verdicts, [
+    Pass(domain="football.example.com", selector="brisbane"),
+    Pass(domain="football.example.com", selector="test"),
+  ])
+}
+
+///|
+test "dkim fails a changed body, a changed header and a changed signature" {
+  let body = message.replace(old="We lost the game.", new="We won the game.")
+  assert_eq(
+    @dkim.verify(crlf(body)[:], n => records(n), now=0)[0],
+    Fail(domain="football.example.com", reason="the body hash does not match"),
   )
-  // A fold and stray WSP collapse to single spaces, trailing WSP disappears.
-  inspect(
-    @dkim.canonicalize_header("B", "B : Y\r\n\tZ  ", @dkim.Canon::Relaxed),
-    content="b:Y Z\r\n",
+  let header = message.replace(old="Is dinner ready?", new="Is lunch ready?")
+  assert_eq(@dkim.verify(crlf(header)[:], n => records(n), now=0), [
+    Fail(domain="football.example.com", reason="the signature does not verify"),
+    Fail(domain="football.example.com", reason="the signature does not verify"),
+  ])
+  let added = "Subject: second\n" + message
+  assert_eq(
+    @dkim.verify(crlf(added)[:], n => records(n), now=0).map(v => v is Pass(..)),
+    [false, false],
   )
 }
 
 ///|
-test "dkim simple header canonicalisation keeps octets" {
-  inspect(
-    @dkim.canonicalize_header("A", "A:  X  Y", @dkim.Canon::Simple),
-    content="A:  X  Y\r\n",
-  )
+test "dkim signs as RFC 8463 does" {
+  let plain = crlf(message[message.find("From: Joe").unwrap():].to_owned())
+  for key in [ed25519_key(), rsa_key()] {
+    let selector = if key is Ed25519(_) { "brisbane" } else { "test" }
+    let field = @dkim.sign(
+      plain[:],
+      key,
+      domain="football.example.com",
+      selector~,
+      headers=[
+        "from", "to", "subject", "date", "message-id", "from", "subject", "date",
+      ],
+      header_canon=Relaxed,
+      body_canon=Relaxed,
+      timestamp=1528637909,
+      identity="@football.example.com",
+    )
+    inspect(
+      field.contains("bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8="),
+      content="true",
+    )
+    let signed = @utf8.encode(field + "\r\n" + @utf8.decode_lossy(plain[:]))
+    assert_eq(@dkim.verify(signed[:], n => records(n), now=0), [
+      Pass(domain="football.example.com", selector~),
+    ])
+  }
 }
 
 ///|
-test "dkim relaxed body canonicalisation" {
-  let body = @utf8.encode(" C \r\nD \tE\r\n\r\n\r\n")
-  let canon = @dkim.canon_body(body[:], @dkim.Canon::Relaxed)
-  inspect(@utf8.decode_lossy(canon[:]), content=" C\r\nD E\r\n")
-  // Cross-checked against Python's hashlib for the same canonical octets.
-  inspect(
-    @dkim.body_hash(body[:], @dkim.Canon::Relaxed),
-    content="unak6JHq0wL+Q1HP7dW1tjBx9FLA6DffoZ0qrLwbbpo=",
-  )
-}
-
-///|
-test "dkim body hash drops trailing empty lines" {
-  let body = @utf8.encode("Hello\r\n\r\n\r\n")
-  inspect(
-    @utf8.decode_lossy(@dkim.canon_body(body[:], @dkim.Canon::Simple)[:]),
-    content="Hello\r\n",
-  )
-  inspect(
-    @dkim.body_hash(body[:], @dkim.Canon::Simple),
-    content="Ba3gj8+xBPQLJTahTfzW6RbWQ/XPgESxkCi2B66PSQg=",
-  )
-}
-
-///|
-test "dkim body hash of an empty body" {
-  inspect(
-    @dkim.body_hash(@utf8.encode("")[:], @dkim.Canon::Relaxed),
-    content="47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
-  )
-}
-
-///|
-test "dkim sign then verify a relaxed message" {
-  let msg = @utf8.encode(
-    "From: Alice <alice@example.com>\r\nTo: Bob <bob@example.com>\r\nSubject: Hello\r\nDate: Fri, 30 Oct 2026 08:00:00 +0000\r\n\r\nHello, Bob!\r\n",
-  )
-  let mut verified = false
-  match test_key() {
-    Some(key) => {
-      let pkey = key.public()
-      let opts = @dkim.SignOptions::new(domain="example.com", selector="sel", headers=[
-        "From", "To", "Subject", "Date",
-      ])
-      let sig = @dkim.sign(msg[:], key, opts)
-      let out = Buffer()
-      out.write_string_utf8("DKIM-Signature: " + sig + "\r\n")
-      out.write_bytes(msg)
-      verified = @dkim.verify(out.to_bytes()[:], pkey)
+test "dkim judges expiry, length and the key record" {
+  let plain = crlf("From: a@example.com\nSubject: hi\n\nbody\nmore\n")
+  let key = ed25519_key()
+  let lookup = (name : String) => {
+    if name.has_prefix("brisbane.") {
+      records("brisbane._domainkey.football.example.com")
+    } else {
+      None
     }
-    None => ()
   }
-  inspect(verified, content="true")
-}
-
-///|
-test "dkim sign then verify a simple message" {
-  let msg = @utf8.encode(
-    "From: Alice <alice@example.com>\r\nSubject: Hi\r\n\r\nbody line\r\n",
+  let expiring = @dkim.sign(
+    plain[:],
+    key,
+    domain="football.example.com",
+    selector="brisbane",
+    timestamp=100,
+    expire=200,
   )
-  let mut verified = false
-  match test_key() {
-    Some(key) => {
-      let pkey = key.public()
-      let opts = @dkim.SignOptions::new(
-        domain="example.com",
-        selector="sel",
-        headers=["From", "Subject"],
-        header_canon=@dkim.Canon::Simple,
-        body_canon=@dkim.Canon::Simple,
-      )
-      let sig = @dkim.sign(msg[:], key, opts)
-      let out = Buffer()
-      out.write_string_utf8("DKIM-Signature: " + sig + "\r\n")
-      out.write_bytes(msg)
-      verified = @dkim.verify(out.to_bytes()[:], pkey)
-    }
-    None => ()
-  }
-  inspect(verified, content="true")
-}
-
-///|
-test "dkim signature matches an openssl reference vector" {
-  // The expected value was produced independently: canonicalize and hash in
-  // Python, sign the signing input with `openssl dgst -sha256 -sign`. RSA
-  // PKCS#1 v1.5 is deterministic, so the octets must agree exactly.
-  let msg = @utf8.encode(
-    "From: Alice <alice@example.com>\r\nTo: Bob <bob@example.com>\r\nSubject: Hello\r\nDate: Fri, 30 Oct 2026 08:00:00 +0000\r\n\r\nHello, Bob!\r\n",
+  let signed = @utf8.encode(expiring + "\r\n" + @utf8.decode_lossy(plain[:]))
+  assert_eq(
+    @dkim.verify(signed[:], n => lookup(n), now=150).map(v => v is Pass(..)),
+    [true],
   )
-  let mut actual = ""
-  match test_key() {
-    Some(key) => {
-      let opts = @dkim.SignOptions::new(domain="example.com", selector="sel", headers=[
-        "From", "To", "Subject", "Date",
-      ])
-      actual = @dkim.sign(msg[:], key, opts)
-    }
-    None => ()
-  }
-  inspect(
-    actual,
-    content="v=1; a=rsa-sha256; c=relaxed/relaxed; d=example.com; s=sel; h=from:to:subject:date; bh=gDa01/VL/4U905vImGmcTiz9KfkZV915tbfsTFkpe5U=; b=NC8B9khNlnRjSGwre7LQacGpjxufthddo3HFueUMy5FW8Dtlkw0sfq4681UWuZvtrvBYQYSE+N+r4LRxJp/PbFjstswLzp8ixAEJLYREaKKjfsmoZWmdPKwgbD4GcbUR2YiZkkUVHqHfSPWn5WF1DW5J001N2QM7K4d6PXy2XDo=",
+  assert_eq(@dkim.verify(signed[:], n => lookup(n), now=300), [
+    Fail(domain="football.example.com", reason="the signature expired"),
+  ])
+  let counted = @dkim.sign(
+    plain[:],
+    key,
+    domain="football.example.com",
+    selector="brisbane",
+    length=true,
   )
-}
-
-///|
-test "dkim verify rejects a tampered body" {
-  let msg = @utf8.encode("From: Alice\r\nSubject: Hi\r\n\r\nbody line\r\n")
-  let mut verified = true
-  match test_key() {
-    Some(key) => {
-      let pkey = key.public()
-      let opts = @dkim.SignOptions::new(domain="example.com", selector="sel", headers=[
-        "From", "Subject",
-      ])
-      let sig = @dkim.sign(msg[:], key, opts)
-      let out = Buffer()
-      out.write_string_utf8("DKIM-Signature: " + sig + "\r\n")
-      out.write_string_utf8(
-        "From: Alice\r\nSubject: Hi\r\n\r\nbody line TAMPERED\r\n",
-      )
-      verified = @dkim.verify(out.to_bytes()[:], pkey)
-    }
-    None => ()
-  }
-  inspect(verified, content="false")
-}
-
-///|
-/// Insert a folding break inside the `b=` value, the way a signer that respects
-/// a line-length limit would.
-fn fold_b(value : String) -> String {
-  let at = value.find("b=")
-  match at {
-    Some(pos) => {
-      let cut = pos + 2 + 40
-      if cut < value.length() {
-        value[0:cut].to_owned() + "\r\n " + value[cut:].to_owned()
-      } else {
-        value
-      }
-    }
-    None => value
-  }
-}
-
-///|
-test "dkim verifies a signature folded across lines" {
-  let msg = @utf8.encode(
-    "From: Alice <alice@example.com>\r\nSubject: Hi\r\n\r\nbody\r\n",
+  let appended = @utf8.encode(
+    counted + "\r\n" + @utf8.decode_lossy(plain[:]) + "added later\r\n",
   )
-  let mut verified = false
-  match test_key() {
-    Some(key) => {
-      let opts = @dkim.SignOptions::new(domain="example.com", selector="sel", headers=[
-        "From", "Subject",
-      ])
-      let sig = @dkim.sign(msg[:], key, opts)
-      let out = Buffer()
-      out.write_string_utf8("DKIM-Signature: " + fold_b(sig) + "\r\n")
-      out.write_bytes(msg)
-      verified = @dkim.verify(out.to_bytes()[:], key.public())
-    }
-    None => ()
-  }
-  inspect(verified, content="true")
+  assert_eq(
+    @dkim.verify(appended[:], n => lookup(n), now=0).map(v => v is Pass(..)),
+    [true],
+  )
+  let unknown = @dkim.sign(
+    plain[:],
+    key,
+    domain="football.example.com",
+    selector="gone",
+  )
+  let orphan = @utf8.encode(unknown + "\r\n" + @utf8.decode_lossy(plain[:]))
+  assert_eq(@dkim.verify(orphan[:], n => lookup(n), now=0), [
+    PermError("no key is published at gone._domainkey.football.example.com"),
+  ])
+  let failing = @dkim.verify(
+    orphan[:],
+    _ => fail("the resolver timed out"),
+    now=0,
+  )
+  assert_eq(failing.map(v => v is TempError(_)), [true])
+  let revoked = @dkim.verify(
+    signed[:],
+    _ => Some("v=DKIM1; k=ed25519; p="),
+    now=150,
+  )
+  assert_eq(revoked, [PermError("the key is revoked")])
+  let mismatched = @dkim.verify(
+    signed[:],
+    _ => records("test._domainkey.football.example.com"),
+    now=150,
+  )
+  assert_eq(mismatched, [PermError("the key is k=rsa for a=ed25519-sha256")])
 }
 
 ///|
-test "dkim verify fails without a signature header" {
-  let msg = @utf8.encode("From: a@example.com\r\nSubject: b\r\n\r\nbody\r\n")
-  let mut result = true
-  match test_key() {
-    Some(key) => result = @dkim.verify(msg[:], key.public())
-    None => ()
+test "dkim refuses rsa-sha1 and what does not cover From" {
+  let sha1 = "DKIM-Signature: v=1; a=rsa-sha1; d=x.test; s=s; h=from; bh=; b=\r\nFrom: a@x.test\r\n\r\n"
+  assert_eq(@dkim.verify(@utf8.encode(sha1)[:], _ => None, now=0), [
+    PermError("a=rsa-sha1 is not accepted"),
+  ])
+  let uncovered = "DKIM-Signature: v=1; a=rsa-sha256; d=x.test; s=s; h=subject; bh=; b=\r\nFrom: a@x.test\r\n\r\n"
+  assert_eq(@dkim.verify(@utf8.encode(uncovered)[:], _ => None, now=0), [
+    PermError("h= does not cover From"),
+  ])
+  let anonymous = crlf("Subject: hi\n\nbody\n")
+  let refused = try {
+    let _ = @dkim.sign(
+      anonymous[:],
+      ed25519_key(),
+      domain="x.test",
+      selector="s",
+    )
+    None
+  } catch {
+    @dkim.Missing(what) => Some(what)
+    e => raise e
   }
-  inspect(result, content="false")
-}
-
-///|
-test "dkim verify rejects a tampered signed header" {
-  let msg = @utf8.encode("From: Alice\r\nSubject: Hi\r\n\r\nbody\r\n")
-  let mut verified = true
-  match test_key() {
-    Some(key) => {
-      let opts = @dkim.SignOptions::new(domain="example.com", selector="sel", headers=[
-        "From", "Subject",
-      ])
-      let sig = @dkim.sign(msg[:], key, opts)
-      let out = Buffer()
-      out.write_string_utf8("DKIM-Signature: " + sig + "\r\n")
-      out.write_string_utf8("From: Alice\r\nSubject: Hacked\r\n\r\nbody\r\n")
-      verified = @dkim.verify(out.to_bytes()[:], key.public())
-    }
-    None => ()
-  }
-  inspect(verified, content="false")
+  assert_eq(refused, Some("From"))
 }

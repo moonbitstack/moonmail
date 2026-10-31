@@ -2,42 +2,50 @@
 package "moonbitstack/moonmail/dkim"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitstack/mooncrypt/rsa",
+  "moonbitstack/mooncrypt/sign/ed25519",
 }
 
 // Values
-pub fn body_hash(BytesView, Canon) -> String
+pub fn sign(BytesView, Key, domain~ : String, selector~ : String, headers? : Array[String], header_canon? : Canon, body_canon? : Canon, timestamp? : Int64, expire? : Int64, length? : Bool, identity? : String) -> String raise Refused
 
-pub fn canon_body(BytesView, Canon) -> Bytes
+pub let signed : Array[String]
 
-pub fn canonicalize_header(String, String, Canon) -> String
-
-pub fn sign(BytesView, @rsa.PrivateKey, SignOptions) -> String
-
-pub fn verify(BytesView, @rsa.PublicKey) -> Bool
+pub fn verify(BytesView, (String) -> String? raise, now~ : Int64) -> Array[Verdict]
 
 // Errors
-pub(all) suberror DkimError {
-  MissingSignature
-  Malformed(msg~ : String)
-}
+pub(all) suberror Refused {
+  Missing(String)
+  Malformed(String)
+} derive(Eq, @debug.Debug)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) enum Canon {
   Simple
   Relaxed
-} derive(Eq)
+} derive(Eq, @debug.Debug)
 pub fn Canon::equal(Self, Self) -> Bool
 pub fn Canon::not_equal(Self, Self) -> Bool
+pub fn Canon::to_repr(Self) -> @debug.Repr
 
-pub struct SignOptions {
-  domain : String
-  selector : String
-  headers : Array[String]
-  header_canon : Canon
-  body_canon : Canon
+pub(all) enum Key {
+  Rsa(@rsa.PrivateKey)
+  Ed25519(@ed25519.PrivateKey)
 }
-pub fn SignOptions::new(domain~ : String, selector~ : String, headers~ : Array[String], header_canon? : Canon, body_canon? : Canon) -> Self
+
+pub(all) enum Verdict {
+  Pass(domain~ : String, selector~ : String)
+  Fail(domain~ : String, reason~ : String)
+  PermError(String)
+  TempError(String)
+} derive(Eq, @debug.Debug)
+pub fn Verdict::equal(Self, Self) -> Bool
+pub fn Verdict::not_equal(Self, Self) -> Bool
+pub fn Verdict::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
