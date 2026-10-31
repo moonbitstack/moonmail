@@ -377,11 +377,12 @@ html[data-theme="dark"] .swatch img{filter:saturate(.94) brightness(.9)}
 .tool b{font-weight:800}
 .count{margin-left:auto;font:500 8px var(--font-mono);letter-spacing:.1em;color:var(--paper-ink-2)}
 
+.body-field{position:relative}
 .body{
-  width:100%;min-height:330px;resize:vertical;
+  display:block;width:100%;min-height:330px;resize:none;
   border:0;background:transparent;outline:none;
   font:500 15px/1.75 var(--font-ui);color:var(--paper-ink);
-  padding:4px 0;
+  padding:4px 0 10px;
 }
 .body::placeholder{color:var(--paper-ink-2);opacity:.5}
 input,textarea,select{caret-color:var(--green)}
@@ -392,11 +393,13 @@ input::-ms-reveal,input::-ms-clear{display:none}
   box-shadow:0 0 0 40px var(--paper) inset;
   transition:background-color 9999s ease 0s;
 }
-.body::-webkit-resizer{
+/* the drag handle is drawn, not grabbed: the sheet keeps its size */
+.body-grip{
+  position:absolute;right:1px;bottom:2px;width:15px;height:15px;
+  pointer-events:none;
   background:
-    linear-gradient(135deg,transparent 0 52%,color-mix(in srgb,var(--paper-ink) 24%,transparent) 52% 62%,transparent 62%),
-    linear-gradient(135deg,transparent 0 72%,color-mix(in srgb,var(--paper-ink) 16%,transparent) 72% 82%,transparent 82%);
-  border-radius:0 0 2px 0;
+    linear-gradient(135deg,transparent 0 52%,color-mix(in srgb,var(--paper-ink) 26%,transparent) 52% 61%,transparent 61%),
+    linear-gradient(135deg,transparent 0 71%,color-mix(in srgb,var(--paper-ink) 15%,transparent) 71% 80%,transparent 80%);
 }
 
 .locked{
@@ -533,6 +536,20 @@ input::-ms-reveal,input::-ms-clear{display:none}
   font:600 8px var(--font-stamp);letter-spacing:.1em;text-transform:uppercase;
   transform:rotate(-2deg);box-shadow:0 8px 14px -12px rgba(31,43,36,.55);
 }
+
+.post-foot{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  margin-top:14px;
+}
+.post-foot .mini-stamp{margin-top:0;flex:0 0 auto}
+.post-foot__note{
+  display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+  padding-top:2px;text-align:right;
+  font:600 7.5px/1.45 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);
+}
+.post-foot__note span{white-space:nowrap}
+.post-foot__note span:first-child{color:var(--ink-2)}
 
 /* ============ wire ============ */
 .wire{
@@ -802,7 +819,10 @@ input::-ms-reveal,input::-ms-clear{display:none}
           <span class="count" id="count">0 characters</span>
         </div>
 
-        <textarea class="body" id="body" spellcheck="true" placeholder="Write your letter in Markdown…"></textarea>
+        <div class="body-field">
+          <textarea class="body" id="body" spellcheck="true" placeholder="Write your letter in Markdown…"></textarea>
+          <span class="body-grip" aria-hidden="true"></span>
+        </div>
 
         <div class="locked">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
@@ -871,7 +891,14 @@ input::-ms-reveal,input::-ms-clear{display:none}
           <b>Stays in this tab.</b> The page talks only to the local post office you point it at. Your password is never written to storage, logged, or sent anywhere else.
         </div>
       </div>
-      <span class="mini-stamp">Local only</span>
+      <div class="post-foot">
+        <span class="mini-stamp">Local only</span>
+        <div class="post-foot__note" aria-label="wasm composes, the office sends, the tab keeps the password">
+          <span>wasm composes</span>
+          <span>the office sends</span>
+          <span>the tab keeps it</span>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -1117,25 +1144,120 @@ input::-ms-reveal,input::-ms-clear{display:none}
   });
 
   /* ---------- toolbar ---------- */
-  function wrapSel(before, after, fallback) {
-    var s = bodyEl.selectionStart, e = bodyEl.selectionEnd;
-    var sel = bodyEl.value.slice(s, e) || fallback;
-    bodyEl.value = bodyEl.value.slice(0, s) + before + sel + after + bodyEl.value.slice(e);
+  function setSel(s, e) {
+    bodyEl.selectionStart = s;
+    bodyEl.selectionEnd = e;
+  }
+
+  /* **text** → clicking again gives text back, instead of stacking stars */
+  function isWrapped(v, s, e, before, after) {
+    if (s < before.length || e + after.length > v.length) return false;
+    if (v.slice(s - before.length, s) !== before) return false;
+    if (v.slice(e, e + after.length) !== after) return false;
+    // a lone `*` must not eat one half of a `**` run
+    if (before === '*' && after === '*') {
+      if (v[s - 2] === '*' || v[e + 1] === '*') return false;
+    }
+    return true;
+  }
+
+  function toggleWrap(before, after, fallback) {
+    var v = bodyEl.value, s = bodyEl.selectionStart, e = bodyEl.selectionEnd;
+    var sel = v.slice(s, e);
+
+    // the selection already carries the markers
+    if (sel.length > before.length + after.length &&
+        sel.slice(0, before.length) === before &&
+        sel.slice(sel.length - after.length) === after) {
+      var inner = sel.slice(before.length, sel.length - after.length);
+      bodyEl.value = v.slice(0, s) + inner + v.slice(e);
+      bodyEl.focus();
+      setSel(s, s + inner.length);
+      updateCard();
+      return;
+    }
+
+    // the markers sit just outside the selection
+    if (isWrapped(v, s, e, before, after)) {
+      bodyEl.value = v.slice(0, s - before.length) + sel + v.slice(e + after.length);
+      bodyEl.focus();
+      setSel(s - before.length, s - before.length + sel.length);
+      updateCard();
+      return;
+    }
+
+    // nothing there yet: wrap what is selected, or write a placeholder and select it
+    var text = sel || fallback;
+    bodyEl.value = v.slice(0, s) + before + text + after + v.slice(e);
     bodyEl.focus();
-    bodyEl.selectionStart = s + before.length;
-    bodyEl.selectionEnd = s + before.length + sel.length;
+    setSel(s + before.length, s + before.length + text.length);
     updateCard();
   }
+
+  /* `## `, `- `, `> ` toggle on every line of the selection */
+  function togglePrefix(prefix, fallback) {
+    var v = bodyEl.value, s = bodyEl.selectionStart, e = bodyEl.selectionEnd;
+    var from = v.lastIndexOf('\n', s - 1) + 1;
+    var to = e > from && v[e - 1] === '\n' ? e - 1 : e;
+    var block = v.slice(from, to);
+
+    if (!block) {
+      bodyEl.value = v.slice(0, s) + prefix + fallback + v.slice(e);
+      bodyEl.focus();
+      setSel(s + prefix.length, s + prefix.length + fallback.length);
+      updateCard();
+      return;
+    }
+
+    var lines = block.split('\n');
+    var other = ['## ', '- ', '> '].filter(function (p) { return p !== prefix; });
+    var all = lines.every(function (line) { return line.indexOf(prefix) === 0; });
+    var out = lines.map(function (line) {
+      if (all) return line.slice(prefix.length);
+      // a line that already carries a block marker gets that marker replaced, not doubled
+      for (var i = 0; i < other.length; i++) {
+        if (line.indexOf(other[i]) === 0) return prefix + line.slice(other[i].length);
+      }
+      return line.indexOf(prefix) === 0 ? line : prefix + line;
+    }).join('\n');
+
+    bodyEl.value = v.slice(0, from) + out + v.slice(to);
+    bodyEl.focus();
+    setSel(from, from + out.length);
+    updateCard();
+  }
+
+  function toggleLink() {
+    var v = bodyEl.value, s = bodyEl.selectionStart, e = bodyEl.selectionEnd;
+    var sel = v.slice(s, e);
+    var m = sel.match(/^\[([\s\S]*)\]\(([^)]*)\)$/);
+    if (m) {
+      bodyEl.value = v.slice(0, s) + m[1] + v.slice(e);
+      bodyEl.focus();
+      setSel(s, s + m[1].length);
+      updateCard();
+      return;
+    }
+    toggleWrap('[', '](https://)', 'link text');
+    // put the cursor in the url instead of leaving the label selected
+    var close = bodyEl.value.indexOf('](', bodyEl.selectionStart);
+    if (close > -1) {
+      var open = bodyEl.value.indexOf('https://', close) + 'https://'.length;
+      if (open > close) { bodyEl.focus(); setSel(open, open); }
+    }
+  }
+
   document.querySelectorAll('.tool').forEach(function (btn) {
+    btn.addEventListener('mousedown', function (ev) { ev.preventDefault(); });
     btn.addEventListener('click', function () {
       var k = btn.getAttribute('data-md');
-      if (k === 'bold') wrapSel('**', '**', 'bold text');
-      else if (k === 'italic') wrapSel('*', '*', 'italic text');
-      else if (k === 'head') wrapSel('## ', '', 'Heading');
-      else if (k === 'link') wrapSel('[', '](https://)', 'link text');
-      else if (k === 'list') wrapSel('- ', '', 'list item');
-      else if (k === 'quote') wrapSel('> ', '', 'quoted line');
-      else if (k === 'code') wrapSel('`', '`', 'code');
+      if (k === 'bold') toggleWrap('**', '**', 'bold text');
+      else if (k === 'italic') toggleWrap('*', '*', 'italic text');
+      else if (k === 'code') toggleWrap('`', '`', 'code');
+      else if (k === 'link') toggleLink();
+      else if (k === 'head') togglePrefix('## ', 'Heading');
+      else if (k === 'list') togglePrefix('- ', 'list item');
+      else if (k === 'quote') togglePrefix('> ', 'quoted line');
     });
   });
 
