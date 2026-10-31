@@ -2,37 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 ///|
-/// What this library refuses, and the place it stopped reading.
-///
-/// `at` counts from the first byte of whatever was handed over, so that a
-/// failing test prints where the loss happened and not only that one did.
+/// What this package refuses, and where it stopped reading. `at` is an octet
+/// offset into the message for `Header`, `Boundary` and `Encoding`, and a
+/// UTF-16 code unit offset into the address text for `Address`.
 pub(all) suberror Refused {
-  /// A field with no colon, or a name carrying a character RFC 5322 §2.2 keeps
-  /// out of names.
+  /// A field with no colon, or a name with a character RFC 5322 section 2.2
+  /// keeps out of names.
   Header(at~ : Int32)
   /// An address list that stopped being one.
   Address(at~ : Int32)
-  /// A multipart body whose closing boundary never came.
+  /// A multipart body without a boundary, or whose closing boundary never
+  /// came.
   Boundary(at~ : Int32)
-  /// A transfer encoding whose payload does not read back as it should.
+  /// A transfer encoding that is unknown, or whose payload does not read back.
   Encoding(at~ : Int32)
-  /// A named charset nobody has registered.
+  /// A charset that is neither built in nor passed in.
   Charset(name~ : String)
-} derive(Eq)
+  /// A date that does not read as an RFC 5322 date-time.
+  Date
+} derive(Eq, Debug)
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}
 
 ///|
-pub impl Show for Refused with fn output(self, logger) {
-  match self {
-    Header(at~) => logger.write_string("Header(at=" + at.to_string() + ")")
-    Address(at~) => logger.write_string("Address(at=" + at.to_string() + ")")
-    Boundary(at~) => logger.write_string("Boundary(at=" + at.to_string() + ")")
-    Encoding(at~) => logger.write_string("Encoding(at=" + at.to_string() + ")")
-    Charset(name~) => logger.write_string("Charset(name=" + name + ")")
-  }
-}
-
-///|
-pub extend Refused with Show::{to_string, output}
+pub extend Refused with Debug::{to_repr}

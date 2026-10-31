@@ -6,11 +6,21 @@ SMTP/LMTP, IMAP and POP3 dialogues. The protocols are state machines with no
 I/O, octets in and replies out, so a socket, a TLS stream and a test all look
 alike; `@moonmail/net` carries them over moonnet.
 
-```moonbit
-let msg = @moonmail.parse(raw[:])
-println(msg.decoded_header("Subject"))   // encoded words already resolved
-println(msg.content_type().main)         // "text/plain"
-println(msg.payload())                   // transfer-decoded body
+```moonbit nocheck
+let message = @moonmail.Message::parse(raw[:])
+message.subject()          // encoded words already decoded
+message.from()             // the mailboxes, display names decoded
+message.text()             // the body a reader would show, by its charset
+message.attachments()      // name, type, octets, inline and Content-ID
+
+let reply = @moonmail.Message::new(
+  from=@moonmail.Mailbox::new("alice@example.com", name="Alice"),
+  to=[Mailbox(@moonmail.Mailbox::new("bob@example.com"))],
+  subject="Re: lunch",
+  text="Noon works.",
+  attachments=[@moonmail.Attachment::new("map.png", png)],
+)
+let wire = reply.encode()  // CRLF, folded, encoded words; reads back the same
 ```
 
 Every call that talks to a server raises its protocol's error on a rejection;
@@ -24,15 +34,18 @@ moon run src/examples/tour
 
 ## What it does
 
-- **Reading and writing** — `parse` and `serialize`, headers unfolded,
-  case-insensitive lookup, repeated headers kept in order, `Content-Type` with
-  its boundary (media types parsed by `moonmime`), multipart bodies split into
-  their parts.
-- **Transfer encodings** — quoted-printable, base64, 7bit, 8bit and binary
-  bodies, decoded by `parse` and written by `serialize`. Quoted-printable,
-  RFC 2047 encoded words and charsets come from
-  [moonmime](https://github.com/moonbitstack/moonmime) (`moonmime/qp`,
-  `encode_words`, `decode_words`, `Charset`), which HTTP uses too.
+- **Messages** — `Message::parse` and `encode`: the header unfolded and
+  folded again at 78 columns, a `Headers` table that keeps order and ignores
+  case and refuses a value that would start a second field, `Body` as a leaf,
+  parts or an attached message, and the transfer encodings taken off and put
+  back. Writing what was read and reading it again gives the same tree; what
+  `7bit` cannot carry goes out in quoted-printable or base64.
+- **Addresses and dates** — RFC 5322's address grammar in full, groups and the
+  obsolete forms included, checked against Python's `email`; RFC 5322 dates
+  with the old two-digit years and named zones.
+- **Building** — `Message::new` picks `alternative`, `related` and `mixed` from
+  what it carries. Quoted-printable, encoded words and charsets come from
+  [moonmime](https://github.com/moonbitstack/moonmime).
 - **SASL** (`@moonmail/sasl`) — PLAIN, LOGIN, CRAM-MD5, XOAUTH2, OAUTHBEARER
   (RFC 7628) and SCRAM-SHA-256 (RFC 7677) with SASLprep (RFC 4013). A
   mechanism is a trait: one you write goes to `authenticate` like these.

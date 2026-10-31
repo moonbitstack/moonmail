@@ -1,10 +1,22 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbitstack/moonmail"
 
-// Values
-pub fn parse(BytesView) -> Message
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moondate",
+  "moonbitstack/moonmime",
+}
 
-pub fn serialize(Message) -> Bytes
+// Values
+pub fn encode_addresses(ArrayView[Address], utf8? : Bool) -> String
+
+pub fn format_date(@moondate.Moment) -> String
+
+pub fn parse_address(StringView) -> Address raise Refused
+
+pub fn parse_addresses(StringView) -> Array[Address] raise Refused
+
+pub fn parse_date(StringView) -> @moondate.Moment raise Refused
 
 // Errors
 pub(all) suberror Refused {
@@ -13,58 +25,92 @@ pub(all) suberror Refused {
   Boundary(at~ : Int32)
   Encoding(at~ : Int32)
   Charset(name~ : String)
-} derive(Eq)
+  Date
+} derive(Eq, @debug.Debug)
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
-pub fn Refused::output(Self, &Logger) -> Unit
-pub fn Refused::to_string(Self) -> String
-pub impl Show for Refused
+pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
-pub enum Body {
-  Leaf(Bytes)
-  Multipart(MultipartBody)
-}
+pub(all) enum Address {
+  Mailbox(Mailbox)
+  Group(name~ : String, members~ : Array[Mailbox])
+} derive(Eq, @debug.Debug)
+pub fn Address::encode(Self, utf8? : Bool) -> String
+pub fn Address::equal(Self, Self) -> Bool
+pub fn Address::mailboxes(Self) -> Array[Mailbox]
+pub fn Address::not_equal(Self, Self) -> Bool
+pub fn Address::to_repr(Self) -> @debug.Repr
 
-pub struct ContentType {
-  main : String
-  is_multipart : Bool
-  boundary : String?
-}
-
-pub struct Header {
+pub(all) struct Attachment {
   name : String
-  value : String
-}
+  media_type : String
+  data : Bytes
+  inline : Bool
+  id : String?
+} derive(Eq, @debug.Debug)
+pub fn Attachment::equal(Self, Self) -> Bool
+pub fn Attachment::new(String, Bytes, media_type? : String, inline? : Bool, id? : String) -> Self
+pub fn Attachment::not_equal(Self, Self) -> Bool
+pub fn Attachment::to_repr(Self) -> @debug.Repr
 
-pub struct Message {
-  headers : Array[Header]
+pub(all) enum Body {
+  Leaf(Bytes)
+  Multipart(Array[Message])
+  Embedded(Message)
+} derive(Eq, @debug.Debug)
+pub fn Body::equal(Self, Self) -> Bool
+pub fn Body::not_equal(Self, Self) -> Bool
+pub fn Body::to_repr(Self) -> @debug.Repr
+
+pub struct Headers {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn Headers::add(Self, String, String) -> Unit raise Refused
+pub fn Headers::all(Self, StringView) -> Array[String]
+pub fn Headers::equal(Self, Self) -> Bool
+pub fn Headers::get(Self, StringView) -> String?
+pub fn Headers::iter(Self) -> Iter[(String, String)]
+pub fn Headers::length(Self) -> Int32
+pub fn Headers::new() -> Self
+pub fn Headers::not_equal(Self, Self) -> Bool
+pub fn Headers::remove(Self, StringView) -> Unit
+pub fn Headers::set(Self, String, String) -> Unit raise Refused
+pub fn Headers::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Mailbox {
+  name : String?
+  address : String
+} derive(Eq, @debug.Debug)
+pub fn Mailbox::encode(Self, utf8? : Bool) -> String
+pub fn Mailbox::equal(Self, Self) -> Bool
+pub fn Mailbox::new(String, name? : String) -> Self
+pub fn Mailbox::not_equal(Self, Self) -> Bool
+pub fn Mailbox::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Message {
+  headers : Headers
   body : Body
-}
-pub fn Message::content_type(Self) -> ContentType
-pub fn Message::decoded_header(Self, StringView) -> String?
-pub fn Message::get_header(Self, StringView) -> String?
-pub fn Message::headers_named(Self, StringView) -> Array[String]
-pub fn Message::is_multipart(Self) -> Bool
-pub fn Message::parts(Self) -> Array[Self]
-pub fn Message::payload(Self) -> Bytes
-
-pub struct MultipartBody {
-  preamble : String
-  parts : Array[Message]
-  epilogue : String
-}
-
-pub enum TransferEncoding {
-  SevenBit
-  EightBit
-  Binary
-  Base64
-  QuotedPrintable
-}
-pub fn TransferEncoding::output(Self, &Logger) -> Unit
-pub fn TransferEncoding::to_string(Self) -> String
-pub impl Show for TransferEncoding
+} derive(Eq, @debug.Debug)
+pub fn Message::addresses(Self, StringView) -> Array[Address] raise Refused
+pub fn Message::attachments(Self) -> Array[Attachment]
+pub fn Message::bcc(Self) -> Array[Address] raise Refused
+pub fn Message::cc(Self) -> Array[Address] raise Refused
+pub fn Message::content_type(Self) -> @moonmime.MediaType
+pub fn Message::date(Self) -> @moondate.Moment? raise Refused
+pub fn Message::encode(Self, utf8? : Bool) -> Bytes
+pub fn Message::equal(Self, Self) -> Bool
+pub fn Message::from(Self) -> Array[Mailbox] raise Refused
+pub fn Message::html(Self, charsets? : Map[String, &@moonmime.Charset]) -> String? raise Refused
+pub fn Message::message_id(Self) -> String?
+pub fn Message::new(from~ : Mailbox, to~ : Array[Address], subject~ : String, text? : String, html? : String, attachments? : Array[Attachment], cc? : Array[Address], date? : @moondate.Moment, message_id? : String) -> Self raise Refused
+pub fn Message::not_equal(Self, Self) -> Bool
+pub fn Message::parse(BytesView, strict? : Bool) -> Self raise Refused
+pub fn Message::reply_to(Self) -> Array[Address] raise Refused
+pub fn Message::subject(Self) -> String?
+pub fn Message::text(Self, charsets? : Map[String, &@moonmime.Charset]) -> String? raise Refused
+pub fn Message::to(Self) -> Array[Address] raise Refused
+pub fn Message::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

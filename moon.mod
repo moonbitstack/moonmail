@@ -27,6 +27,7 @@ import {
   "moonbitstack/moonbase@0.4.2",
   "moonbitstack/mooncrypt@0.4.4",
   "moonbitstack/moonmime@0.2.1",
+  "moonbitstack/moondate@0.1.0",
   "moonbitstack/moonucd@0.1.1",
   "moonbitstack/moonnet@0.1.4",
   "moonbitstack/moontls@0.9.3",

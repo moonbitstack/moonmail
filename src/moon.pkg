@@ -1,11 +1,16 @@
-// The email message model: reading RFC 5322 into a tree, holding it, and writing
-// it back out. Quoted-printable, encoded words and charsets come from moonmime.
-// Everything here is bytes in, data out: no sockets, no files, no state.
+// The message model: reading RFC 5322 and MIME into a tree, holding it, and
+// writing it back out, with the address grammar, dates and a builder.
+// Quoted-printable, encoded words and charsets come from moonmime. Octets in,
+// data out: no sockets, no clock, no randomness.
 // https://www.rfc-editor.org/rfc/rfc5322
 // https://www.rfc-editor.org/rfc/rfc2045
+// https://www.rfc-editor.org/rfc/rfc2046
 // https://www.rfc-editor.org/rfc/rfc2047
+// https://www.rfc-editor.org/rfc/rfc6532
 import {
   "moonbitstack/moonbase/base64",
+  "moonbitstack/mooncrypt/hash/sha2",
+  "moonbitstack/moondate",
   "moonbitstack/moonmime",
   "moonbitstack/moonmime/qp",
   "moonbitlang/core/encoding/utf8",

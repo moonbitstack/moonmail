@@ -226,39 +226,51 @@ fn imap_tour() -> Unit raise @imap.Refused {
 }
 
 ///|
+/// A message read into a tree, its readers, one built from scratch, and the
+/// round trip that writes the same octets twice.
+fn message_tour() -> Unit raise @moonmail.Refused {
+  let raw = @utf8.encode(
+    "From: =?utf-8?q?Ren=C3=A9e?= <renee@example.com>\r\nTo: Bob <bob@example.com>, team: carol@example.com, dan@example.com;\r\nSubject: =?utf-8?B?Q2Fmw6k=?=\r\nDate: Tue, 1 Jul 2003 10:52:37 +0200\r\nContent-Type: multipart/alternative; boundary=\"BOUND\"\r\n\r\n--BOUND\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nCaf=C3=A9 and cr=C3=A8me\r\n--BOUND\r\nContent-Type: text/html; charset=utf-8\r\n\r\n<p>Caf\u{e9}</p>\r\n--BOUND--\r\n",
+  )
+  let message = @moonmail.Message::parse(raw[:])
+  println("--- message")
+  println("subject      -> \{message.subject().unwrap_or("")}")
+  println(
+    "from         -> \{message.from().map(m => m.encode(utf8=true)).join(", ")}",
+  )
+  println(
+    "to           -> \{message.to().map(a => a.encode(utf8=true)).join(", ")}",
+  )
+  println("date         -> \{@moonmail.format_date(message.date().unwrap())}")
+  println("type         -> \{message.content_type().essence}")
+  println("text         -> \{message.text().unwrap_or("")}")
+  println("html         -> \{message.html().unwrap_or("")}")
+  let built = @moonmail.Message::new(
+    from=@moonmail.Mailbox::new("alice@example.com", name="Alice"),
+    to=[Mailbox(@moonmail.Mailbox::new("bob@example.com"))],
+    subject="Grüße",
+    text="Hello",
+    html="<p>Hello</p>",
+    attachments=[@moonmail.Attachment::new("notes.txt", b"one\r\ntwo\r\n")],
+  )
+  let wire = built.encode()
+  let again = @moonmail.Message::parse(wire[:]).encode()
+  println(
+    "built        -> \{built.content_type().essence}, \{built.attachments().length()} attachment",
+  )
+  println("stable       -> \{wire == again}")
+}
+
+///|
 #coverage.skip
 fn main {
-  // --------------------------------------------------------------- parse
-  //
-  // A message is bytes in, a tree out. The Subject carries an RFC 2047 encoded
-  // word, and the body is quoted-printable, so both decoders run on the way.
-  let raw = @utf8.encode(
-    "From: Alice <alice@example.com>\r\nTo: Bob <bob@example.com>\r\nSubject: =?utf-8?B?Q2Fmw6k=?=\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nCaf=C3=A9 and cr=C3=A8me\r\n",
-  )
-  let msg = @moonmail.parse(raw[:])
-  let subject = or_empty(msg.decoded_header("Subject"))
-  let ctype = msg.content_type()
-  let payload = @utf8.decode_lossy(msg.payload()[:])
-  println("--- parse")
-  println("subject      -> \{subject}")
-  println("content-type -> \{ctype.main}")
-  println("multipart    -> \{msg.is_multipart()}")
-  println("body         -> \{payload}")
-
-  // ------------------------------------------------------------ multipart
-  //
-  // A multipart splits at its boundary; each part is itself a message, so the
-  // same reader runs again on every child.
-  let multi = @utf8.encode(
-    "Content-Type: multipart/alternative; boundary=\"BOUND\"\r\n\r\n--BOUND\r\nContent-Type: text/plain\r\n\r\nplain\r\n--BOUND\r\nContent-Type: text/html\r\n\r\n<p>html</p>\r\n--BOUND--\r\n",
-  )
-  let tree = @moonmail.parse(multi[:])
-  let parts = tree.parts()
-  println("--- multipart")
-  println("parts        -> \{parts.length()}")
-  for i in 0..<parts.length() {
-    println("  part \{i}       -> \{@utf8.decode_lossy(parts[i].payload()[:])}")
+  // --------------------------------------------------------------- message
+  message_tour() catch {
+    e => println("message tour stopped: " + @debug.to_string(e))
   }
+  let raw = @utf8.encode(
+    "From: Alice <alice@example.com>\r\nTo: Bob <bob@example.com>\r\nSubject: Hi\r\n\r\nHello\r\n",
+  )
 
   // ----------------------------------------------------- quoted-printable
   //
@@ -298,14 +310,6 @@ fn main {
     _ => true
   }
   println("ascii refuses é -> \{refused}")
-
-  // ---------------------------------------------------------- serialize
-  //
-  // Headers, a blank line, and the body re-encoded under its declared encoding.
-  let saved = @moonmail.serialize(msg)
-  let again = @moonmail.serialize(@moonmail.parse(saved[:]))
-  println("--- serialize")
-  println("re-emitted   -> \{saved.length()} octets, stable: \{saved == again}")
 
   // --------------------------------------------------------------- pop3
   pop3_tour() catch {
