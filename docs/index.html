@@ -12,11 +12,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
 :root{
-  --font-display:"Instrument Serif",Georgia,serif;
-  --font-ui:"Figtree",system-ui,sans-serif;
-  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
-  --font-hand:"Caveat",cursive;
-  --font-stamp:"Special Elite","Courier New",monospace;
+  --font-display:"Instrument Serif","YouYuan","幼圆","SimYou",Georgia,serif;
+  --font-ui:"Figtree","YouYuan","幼圆","SimYou",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono","YouYuan","幼圆","SimYou",ui-monospace,monospace;
+  --font-hand:"Caveat","YouYuan","幼圆",cursive;
+  --font-stamp:"Special Elite","Courier New","YouYuan","幼圆",monospace;
 
   --bg:#f8f9f4;
   --paper:#ffffff;
@@ -187,7 +187,7 @@ html[data-theme="dark"] .ico-moon{display:none}
 .tag--show::before{width:62px}
 
 /* hero */
-.hero{position:relative;padding-bottom:8px}
+.hero{position:relative;isolation:isolate;padding-bottom:8px}
 .stage{position:relative;aspect-ratio:16/9.6;width:100%}
 .fan{display:contents}
 
@@ -443,8 +443,8 @@ html[data-theme="dark"] .ribbon--y{
   html[data-theme="dark"] .card--river{left:16%;top:60%;width:34%;--r:1.2deg}
   html[data-theme="dark"] .card--tall{left:2%;top:62%;width:16%;--r:2deg}
   html[data-theme="dark"] .card--back{left:52%;top:72%;width:20%;--r:-2deg}
-  html[data-theme="dark"] .ribbon{top:60%;transform:rotate(6deg)}
-  html[data-theme="dark"] .ribbon--y{left:56%;transform:rotate(-8deg)}
+  html[data-theme="dark"] .ribbon:not(.ribbon--y){top:60%;transform:rotate(6deg)}
+  html[data-theme="dark"] .ribbon--y{left:56%;top:-14%;transform:rotate(-8deg)}
   html[data-theme="dark"] .bow{left:52%;top:56%}
 }
 

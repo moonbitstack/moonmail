@@ -12,11 +12,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
 :root{
-  --font-display:"Instrument Serif",Georgia,serif;
-  --font-ui:"Figtree",system-ui,sans-serif;
-  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
-  --font-hand:"Caveat",cursive;
-  --font-stamp:"Special Elite","Courier New",monospace;
+  --font-display:"Instrument Serif","YouYuan","幼圆","SimYou",Georgia,serif;
+  --font-ui:"Figtree","YouYuan","幼圆","SimYou",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono","YouYuan","幼圆","SimYou",ui-monospace,monospace;
+  --font-hand:"Caveat","YouYuan","幼圆",cursive;
+  --font-stamp:"Special Elite","Courier New","YouYuan","幼圆",monospace;
 
   --bg:#f8f9f4;
   --paper:#ffffff;
@@ -1165,8 +1165,74 @@ input::-ms-reveal,input::-ms-clear{display:none}
       sendForm.hidden = !isSend;
       receiveForm.hidden = isSend;
       sendLabel.textContent = isSend ? 'Send the letter' : 'Open the mailbox';
+      carryOver(isSend ? protoEl.value : 'SMTP', isSend ? 'SMTP' : protoEl.value);
       notice(isSend ? 'Credentials stay in this tab. Nothing is stored or uploaded.' : 'Open a mailbox through the local post office.');
     });
+  });
+
+  /* ---------- settings carried across Send / Receive ---------- */
+  var smtpHost = $('smtpHost'), smtpPort = $('smtpPort'), smtpSec = $('smtpSec');
+  var smtpUser = $('smtpUser'), smtpPass = $('smtpPass');
+  var protoEl = $('proto'), recvHost = $('recvHost'), recvPort = $('recvPort');
+  var recvSec = $('recvSec'), recvUser = $('recvUser'), recvPass = $('recvPass');
+
+  /* a field counts as "auto" while it is empty or still holds a value we filled in,
+     so anything you typed yourself is never overwritten */
+  function isAuto(el) {
+    var auto = el.getAttribute('data-auto');
+    return el.value.trim() === '' || (auto !== null && el.value === auto);
+  }
+  function setAuto(el, value) { el.value = value; el.setAttribute('data-auto', value); }
+
+  /* one account, two protocols: whichever side you type in wins */
+  [[smtpUser, recvUser], [smtpPass, recvPass]].forEach(function (pair) {
+    pair.forEach(function (el) {
+      el.addEventListener('input', function () {
+        var twin = el === pair[0] ? pair[1] : pair[0];
+        if (twin.value !== el.value) twin.value = el.value;
+      });
+    });
+  });
+
+  /* smtp.qq.com <-> imap.qq.com <-> pop.qq.com */
+  function hostFor(host, to) {
+    var domain = host.trim().replace(/^(smtp|imap|pop3?|mail)\./i, '');
+    if (!domain) return '';
+    return (to === 'IMAP' ? 'imap.' : to === 'POP3' ? 'pop.' : 'smtp.') + domain;
+  }
+  function portFor(to) { return to === 'IMAP' ? '993' : to === 'POP3' ? '995' : '587'; }
+  function secFor(to) { return to === 'SMTP' ? 'STARTTLS' : 'TLS'; }
+
+  /* the fields that ship with a default start out auto */
+  setAuto(smtpPort, smtpPort.value);
+  setAuto(smtpSec, smtpSec.value);
+  setAuto(recvPort, recvPort.value);
+  setAuto(recvSec, recvSec.value);
+
+  function carryOver(from, to) {
+    var srcHost = from === 'SMTP' ? smtpHost : recvHost;
+    var dstHost = to === 'SMTP' ? smtpHost : recvHost;
+    if (srcHost.value.trim() && isAuto(dstHost)) {
+      var next = hostFor(srcHost.value, to);
+      if (next) setAuto(dstHost, next);
+    }
+    var dstPort = to === 'SMTP' ? smtpPort : recvPort;
+    var dstSec = to === 'SMTP' ? smtpSec : recvSec;
+    if (isAuto(dstPort)) setAuto(dstPort, portFor(to));
+    if (isAuto(dstSec)) setAuto(dstSec, secFor(to));
+  }
+
+  /* the username is usually the sender address — offer it as From */
+  smtpUser.addEventListener('input', function () {
+    var v = smtpUser.value.trim();
+    if (isAuto(fromEl) && v.indexOf('@') > 0) { setAuto(fromEl, v); updateCard(); }
+  });
+
+  protoEl.addEventListener('change', function () {
+    var to = protoEl.value;
+    var known = smtpHost.value.trim() || recvHost.value;
+    if (isAuto(recvHost) && known) setAuto(recvHost, hostFor(known, to));
+    if (isAuto(recvPort)) setAuto(recvPort, portFor(to));
   });
 
   /* ---------- notices ---------- */
@@ -1332,6 +1398,7 @@ input::-ms-reveal,input::-ms-clear{display:none}
       renderWire((j.transcript || []).map(function (l) { return [l.dir, l.text]; }), false);
       notice('Sent. The wire log has the conversation.', 'ok');
       $('smtpPass').value = '';
+      $('recvPass').value = '';
     } catch (e) {
       notice('Could not send: ' + e.message, 'warn');
     }
@@ -1393,7 +1460,10 @@ input::-ms-reveal,input::-ms-clear{display:none}
   });
   $('download').addEventListener('click', downloadEml);
   $('forget').addEventListener('click', function () {
-    ['smtpHost', 'smtpUser', 'smtpPass', 'from', 'recvHost', 'recvUser', 'recvPass'].forEach(function (id) { $(id).value = ''; });
+    ['smtpHost', 'smtpUser', 'smtpPass', 'from', 'recvHost', 'recvUser', 'recvPass'].forEach(function (id) {
+      $(id).value = '';
+      $(id).removeAttribute('data-auto');
+    });
     $('mailbox').innerHTML = '';
     notice('Credentials cleared from this tab.');
   });
