@@ -1,0 +1,20 @@
+// The surface the writing desk calls: one JSON document in, one out, so a page
+// can reach the whole library through a single imported function. Every answer
+// carries `ok`, and a refusal keeps its type instead of turning into an empty
+// list.
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonmail",
+  "moonbitstack/moonmail/jmap",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+}
+
+options(
+  link: {
+    "js": {
+      "exports": ["engine_call"],
+    },
+  },
+)
