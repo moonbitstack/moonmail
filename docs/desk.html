@@ -421,6 +421,8 @@ input::-ms-reveal,input::-ms-clear{display:none}
   background:repeating-linear-gradient(45deg,var(--green) 0 8px,var(--paper) 8px 16px,var(--coral) 16px 24px);
 }
 .tabs{display:flex;gap:7px;margin-bottom:16px}
+.tabs-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.tabs-row .tabs{margin-bottom:0}
 .tab{
   background:none;border:1px solid var(--paper-line);padding:6px 11px;
   font:700 9px var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--paper-ink-2);
@@ -491,7 +493,7 @@ input::-ms-reveal,input::-ms-clear{display:none}
 }
 .mini-btn:hover{border-color:var(--green);color:var(--paper-green)}
 .bridge[hidden],.form[hidden],.bridge-note[hidden]{display:none}
-.via{display:flex;align-items:center;gap:10px;margin:14px 0 0}
+.via{display:flex;align-items:center;gap:10px;margin:0}
 .via__k{font:600 7.5px var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--paper-ink-2)}
 .via__opt{
   background:none;border:0;padding:3px 0;cursor:pointer;
@@ -851,15 +853,17 @@ input::-ms-reveal,input::-ms-clear{display:none}
     <section class="col col--post">
       <div class="col-head"><span class="col-k">03</span> The post office</div>
       <div class="envelope">
-        <div class="tabs" role="tablist">
-          <button class="tab is-active" data-tab="send" role="tab" aria-selected="true">Send</button>
-          <button class="tab" data-tab="receive" role="tab" aria-selected="false">Receive</button>
-        </div>
+        <div class="tabs-row">
+          <div class="tabs" role="tablist">
+            <button class="tab is-active" data-tab="send" role="tab" aria-selected="true">Send</button>
+            <button class="tab" data-tab="receive" role="tab" aria-selected="false">Receive</button>
+          </div>
 
-        <div class="via" role="group" aria-label="How the letter leaves this page">
-          <span class="via__k">via</span>
-          <button class="via__opt is-active" data-mode="bridge" type="button">local office</button>
-          <button class="via__opt" data-mode="jmap" type="button">jmap</button>
+          <div class="via" role="group" aria-label="How the letter leaves this page">
+            <span class="via__k">via</span>
+            <button class="via__opt is-active" data-mode="bridge" type="button">local office</button>
+            <button class="via__opt" data-mode="jmap" type="button">jmap</button>
+          </div>
         </div>
 
         <form class="form" id="sendForm" autocomplete="off">
@@ -1737,8 +1741,6 @@ input::-ms-reveal,input::-ms-clear{display:none}
       if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
       renderWire((j.transcript || []).map(function (l) { return [l.dir, l.text]; }), false);
       notice('Sent. The wire log has the conversation.', 'ok');
-      $('smtpPass').value = '';
-      $('recvPass').value = '';
     } catch (e) {
       notice('Could not send: ' + e.message, 'warn');
     }
@@ -1814,7 +1816,6 @@ input::-ms-reveal,input::-ms-clear{display:none}
       });
       renderMailbox(messages);
       notice('Mailbox opened. ' + messages.length + ' message(s).', 'ok');
-      $('recvPass').value = '';
     } catch (e) {
       notice('Could not open the mailbox: ' + e.message, 'warn');
     }
