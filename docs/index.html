@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MoonMail — mail, freshly picked</title>
+<meta name="theme-color" content="#f8f9f4">
+<meta name="description" content="Parse, compose, sign and send email. One mailroom in MoonBit.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='6' fill='%232f6b3f'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-style='italic' font-size='38' fill='%23fff' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-display:"Instrument Serif",Georgia,serif;
+  --font-ui:"Figtree",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --font-hand:"Caveat",cursive;
+  --font-stamp:"Special Elite","Courier New",monospace;
+
+  --bg:#f8f9f4;
+  --paper:#ffffff;
+  --ink:#1f2b24;
+  --ink-2:#667a70;
+  --ink-3:#93a29a;
+  --green:#2f7d49;
+  --green-2:#4a8b5c;
+  --green-3:#e3f0e6;
+  --green-solid:#2f6b3f;
+  --cream:#f4efdf;
+  --yellow:#edbf49;
+  --yellow-2:#f7d97a;
+  --marigold:#e9b23a;
+  --coral:#c9604a;
+  --sky:#8fc3d6;
+  --line:#dbe5dc;
+
+  --shadow:0 26px 48px -30px rgba(31,43,36,.45), 0 3px 10px rgba(31,43,36,.07);
+  --shadow-sm:0 12px 26px -18px rgba(31,43,36,.4);
+
+  --bow-1:#4a8b5c;
+  --bow-2:#2f6b3f;
+  --bow-line:#f4efdf;
+  --toggle-bg:#1f2b24;
+  --toggle-fg:#f4efe2;
+
+  --paper-ink:#22302a;
+  --paper-ink-2:#5e6f66;
+  --paper-green:#2f6b3f;
+  --paper-line:#e2e8df;
+}
+
+html[data-theme="dark"]{
+  --bg:#0e1411;
+  --paper:#f4efe2;
+  --ink:#eef3ea;
+  --ink-2:#b6c3b9;
+  --ink-3:#7f9186;
+  --green:#8ccf9e;
+  --green-2:#a6d8b2;
+  --green-3:#1b2a22;
+  --green-solid:#2f7a4a;
+  --cream:#e8dfc8;
+  --yellow:#edbf49;
+  --yellow-2:#f4d47e;
+  --marigold:#f2bd4a;
+  --coral:#f08a70;
+  --sky:#8fc3d6;
+  --line:#26342c;
+
+  --shadow:0 30px 54px -28px rgba(0,0,0,.75), 0 4px 14px rgba(0,0,0,.35);
+  --shadow-sm:0 14px 28px -18px rgba(0,0,0,.7);
+
+  --bow-1:#2a7a68;
+  --bow-2:#1f5b52;
+  --bow-line:#f0d59a;
+  --toggle-bg:#f4efe2;
+  --toggle-fg:#1f2b24;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;color-scheme:light}
+html[data-theme="dark"]{color-scheme:dark}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-ui);font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  transition:background-color .5s ease,color .5s ease;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--green-3);color:var(--ink)}
+
+body::before{
+  content:"";position:fixed;inset:0;z-index:-3;pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 8% 4%, #e9f4ec 0%, rgba(233,244,236,0) 62%),
+    radial-gradient(55% 45% at 94% 8%, #eaf3f8 0%, rgba(234,243,248,0) 60%),
+    radial-gradient(55% 45% at 86% 96%, #f8f2e2 0%, rgba(248,242,226,0) 62%);
+}
+html[data-theme="dark"] body::before{
+  background:
+    radial-gradient(60% 45% at 8% 4%, #14271f 0%, rgba(20,39,31,0) 62%),
+    radial-gradient(55% 45% at 94% 8%, #16202c 0%, rgba(22,32,44,0) 60%),
+    radial-gradient(55% 45% at 86% 96%, #2a2113 0%, rgba(42,33,19,0) 62%);
+}
+
+.doodle{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:-2;pointer-events:none;
+  transition:opacity .55s ease;
+}
+.doodle--night{opacity:0}
+html[data-theme="dark"] .doodle--day{opacity:0}
+html[data-theme="dark"] .doodle--night{opacity:1}
+
+.grain{
+  position:fixed;inset:0;z-index:50;pointer-events:none;
+  opacity:.035;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+html[data-theme="dark"] .grain{mix-blend-mode:soft-light;opacity:.05}
+
+.page{
+  max-width:1440px;margin:0 auto;
+  padding:0 clamp(18px,4vw,56px);
+  position:relative;
+}
+
+/* header */
+.top{
+  position:relative;z-index:30;
+  display:flex;align-items:center;gap:16px;
+  height:92px;
+}
+.brand{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.brand__stamp{
+  width:54px;height:54px;background:var(--paper);padding:4px;
+  box-shadow:var(--shadow-sm);transform:rotate(-3deg);
+  outline:1px dashed rgba(255,255,255,.55);outline-offset:-3px;
+  transition:transform .3s ease;
+}
+.brand:hover .brand__stamp{transform:rotate(2deg)}
+.brand__stamp img{width:100%;height:100%;object-fit:cover}
+.brand__name{
+  font-family:var(--font-display);font-weight:400;
+  font-size:30px;letter-spacing:-.01em;
+}
+.nav{
+  margin-left:auto;display:flex;align-items:center;gap:24px;
+  font-weight:800;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+}
+.nav a{
+  padding:6px 0;border-bottom:2px solid transparent;
+  transition:color .2s ease,border-color .2s ease;
+}
+.nav a:hover{color:var(--green);border-color:var(--green)}
+
+.tagtree .tag--theme{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-width:84px;border:0;cursor:pointer;
+  background:var(--toggle-bg);color:var(--toggle-fg);
+}
+.tagtree .tag--theme svg{width:16px;height:16px;flex:0 0 auto;fill:currentColor;stroke:none}
+html[data-theme="light"] .ico-sun{display:none}
+html[data-theme="dark"] .ico-moon{display:none}
+
+.tagtree{
+  position:absolute;right:0;top:74px;
+  display:flex;flex-direction:column;align-items:flex-end;gap:14px;
+  z-index:31;
+}
+.tag{
+  position:relative;display:inline-block;
+  background:var(--green-solid);color:#fff;
+  font:600 10.5px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;
+  padding:9px 14px;
+  box-shadow:0 10px 18px -12px rgba(31,43,36,.55);
+  transition:transform .2s ease;
+}
+.tag:hover{transform:translateX(-3px)}
+.tag::before{
+  content:"";position:absolute;right:100%;top:50%;
+  width:24px;height:1px;background:var(--ink);opacity:.24;
+}
+.tag--show{background:var(--yellow);color:var(--paper-ink);margin-right:38px}
+.tag--show::before{width:62px}
+
+/* hero */
+.hero{position:relative;padding-bottom:8px}
+.stage{position:relative;aspect-ratio:16/9.6;width:100%}
+.fan{display:contents}
+
+.intro{
+  position:absolute;left:2.5%;top:2%;width:31%;
+  z-index:12;
+}
+.kicker{
+  display:inline-flex;align-items:center;gap:9px;
+  margin:0 0 12px;
+  font:700 9.5px var(--font-mono);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--green);
+}
+.kicker::before{content:"";width:22px;height:1px;background:var(--green)}
+h1{
+  margin:0;
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(46px,5.4vw,80px);
+  line-height:.9;letter-spacing:-.015em;
+}
+h1 em{font-style:italic;color:var(--green)}
+h1 .dot{color:var(--coral)}
+.lede{
+  margin:16px 0 0;max-width:33ch;
+  font-size:14.5px;line-height:1.7;color:var(--ink-2);
+}
+.cta{display:flex;align-items:center;gap:18px;margin-top:22px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--green-solid);color:#fff;
+  font:600 10px var(--font-mono);letter-spacing:.15em;text-transform:uppercase;
+  padding:12px 16px;
+  box-shadow:0 12px 22px -14px rgba(31,43,36,.75);
+  transition:transform .2s ease,background .2s ease;
+}
+.btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.link{
+  font:600 10px var(--font-mono);letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink);border-bottom:1.5px solid var(--green);padding-bottom:3px;
+  transition:color .2s ease;
+}
+.link:hover{color:var(--green)}
+
+/* cards */
+.card{
+  position:absolute;margin:0;background:var(--paper);
+  box-shadow:var(--shadow);
+  transform:rotate(var(--r,0));
+  transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease,left .55s ease,top .55s ease;
+}
+.card:hover{transform:rotate(0) translateY(-5px);box-shadow:0 34px 56px -30px rgba(31,43,36,.5),0 4px 12px rgba(31,43,36,.08)}
+.card__img{position:absolute;overflow:hidden;background:#e7ede7}
+.card__img img{width:100%;height:100%;object-fit:cover;transition:transform .7s ease,filter .4s ease}
+.card:hover .card__img img{transform:scale(1.035)}
+
+.card--frame{padding:13px}
+.card--frame .card__img{inset:13px}
+
+.card--edges-v{padding:0 13px}
+.card--edges-v .card__img{inset:0 13px}
+
+.card--edges-h{padding:13px 0}
+.card--edges-h .card__img{inset:13px 0}
+
+html[data-theme="dark"] .card__img img,
+html[data-theme="dark"] .pick__img img,
+html[data-theme="dark"] .brand__stamp img{
+  filter:saturate(.92) brightness(.88) contrast(1.03);
+}
+
+.card--tall{
+  left:-3%;top:61%;width:16%;aspect-ratio:3/4.2;
+  --r:-2deg;z-index:4;
+}
+.card--rain{
+  left:36%;top:4%;width:30%;aspect-ratio:16/10;
+  --r:1deg;z-index:6;
+}
+.card--river{
+  left:19%;top:54%;width:34%;aspect-ratio:16/10;
+  --r:-1.4deg;z-index:5;
+}
+.card--bamboo{
+  left:58%;top:36%;width:26%;aspect-ratio:4/3;
+  --r:3.5deg;z-index:7;
+}
+.card--back{
+  left:78%;top:73%;width:20%;aspect-ratio:4/3;
+  --r:2deg;z-index:3;
+  padding:14px;
+}
+
+.mark{
+  position:absolute;z-index:3;top:22px;left:24px;
+  font:800 clamp(20px,2.4vw,34px)/1 var(--font-ui);
+  letter-spacing:.03em;color:#fff;
+  -webkit-text-stroke:1.2px rgba(20,30,24,.4);
+  text-shadow:0 2px 14px rgba(0,0,0,.45);
+}
+.mark--pop{
+  color:#f7f2e1;
+  -webkit-text-stroke:1.3px rgba(16,36,24,.62);
+  text-shadow:0 3px 16px rgba(8,18,12,.5);
+}
+.mark--pop::after{
+  content:"";position:absolute;left:1px;right:-5px;bottom:-4px;height:1.5px;
+  background:#f7f2e1;border-radius:2px;
+  transform:rotate(-1.2deg);
+  box-shadow:0 1px 0 rgba(16,36,24,.35);
+}
+
+/* correction tape */
+.tape{
+  position:absolute;z-index:4;
+  background:linear-gradient(180deg,#ffffff 0 2px,#fafbf6 2px calc(100% - 2px),#e6eae2 calc(100% - 2px) 100%);
+  color:var(--paper-ink);
+  padding:6px 12px;
+  font:600 9.5px/1.2 var(--font-stamp);letter-spacing:.08em;text-transform:uppercase;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 4px rgba(31,43,36,.1),0 9px 18px -14px rgba(31,43,36,.45);
+  clip-path:polygon(0 14%,4% 2%,12% 12%,20% 4%,30% 12%,42% 3%,54% 11%,66% 2%,78% 12%,90% 4%,100% 13%,99% 88%,90% 98%,78% 89%,66% 99%,54% 90%,42% 98%,30% 89%,18% 98%,8% 89%,1% 96%);
+  transform:rotate(-1deg);
+}
+.card--rain .tape{right:8%;bottom:8%}
+.tape--hand{
+  font:600 18px var(--font-hand);letter-spacing:.01em;text-transform:none;
+  color:var(--paper-green);padding:5px 14px;transform:rotate(-4deg);
+}
+.card--tall .tape--hand{left:7%;top:9%;bottom:auto}
+
+/* torn paper note */
+.paper{
+  position:absolute;z-index:4;
+  left:12%;bottom:15%;width:54%;
+  background:var(--paper);padding:16px 16px 14px;
+  box-shadow:0 14px 28px -18px rgba(31,43,36,.4);
+  transform:rotate(-1.2deg);
+  clip-path:polygon(0 2%,12% 0,26% 1.5%,40% 0,56% 1%,72% 0,86% 1.5%,100% 0,99% 99%,84% 97.5%,68% 100%,52% 98%,36% 100%,20% 98%,0 100%);
+}
+.paper::before{
+  content:"";position:absolute;left:12px;top:1px;width:52px;height:15px;
+  background:color-mix(in srgb,#e6c37a 80%,transparent);
+  transform:rotate(-3deg);
+  clip-path:polygon(0 10%,100% 0,99% 90%,0 100%);
+  box-shadow:0 1px 3px rgba(31,43,36,.14);
+}
+.paper__k{
+  display:block;margin-bottom:4px;
+  font:700 9px var(--font-mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--paper-green);
+}
+.paper__t{display:block;font:600 13px/1.35 var(--font-ui);color:var(--paper-ink)}
+
+/* washi tape */
+.washi{
+  position:absolute;z-index:5;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 3px,transparent 3px 8px),
+    color-mix(in srgb,var(--washi-color,#9cc5a6) 78%,transparent);
+  opacity:.88;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 2px 5px rgba(31,43,36,.14);
+  clip-path:polygon(0 10%,5% 0,12% 8%,20% 1%,30% 9%,40% 2%,50% 9%,60% 1%,70% 8%,80% 2%,90% 9%,100% 3%,99% 88%,90% 98%,80% 90%,70% 99%,60% 91%,50% 98%,40% 90%,30% 99%,20% 91%,10% 98%,1% 90%);
+}
+.washi--rain{right:-14px;top:-13px;width:92px;height:28px;transform:rotate(14deg);--washi-color:#a9c9b1}
+.washi--tall{left:26%;top:-11px;width:70px;height:24px;transform:rotate(-7deg);--washi-color:#e6c37a}
+
+/* postcard back */
+.back{position:relative;height:100%;display:flex;gap:12px}
+.back__stamp{
+  position:absolute;right:0;top:0;width:40px;height:48px;
+  background:var(--green-solid);color:#fff;
+  display:grid;place-items:center;
+  font-family:var(--font-display);font-style:italic;font-size:25px;
+  outline:1px dashed rgba(255,255,255,.55);outline-offset:-4px;
+}
+.back__lines{flex:1;display:flex;flex-direction:column;gap:9px;padding-top:6px}
+.back__to{font:600 18px var(--font-hand);color:var(--paper-green);margin-bottom:2px}
+.back__line{height:1px;background:var(--paper-line);width:78%}
+.back__vert{position:absolute;left:56%;top:0;bottom:0;width:1px;background:var(--paper-line)}
+.back__post{
+  position:absolute;right:4px;bottom:2px;width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--paper-ink-2);color:var(--paper-ink-2);
+  display:grid;place-items:center;text-align:center;
+  font:500 6.5px/1.15 var(--font-stamp);letter-spacing:.06em;text-transform:uppercase;
+  transform:rotate(-12deg);opacity:.7;
+}
+
+/* ribbons */
+.ribbon{
+  position:absolute;z-index:2;
+  left:-1%;top:49%;width:102%;height:52px;
+  transform:rotate(-7deg);
+  background:linear-gradient(180deg,
+    #cddccf 0 1px,
+    #ffffff 1px 6px,
+    #2f6b3f 6px 8px,
+    #4a8b5c 8px calc(100% - 8px),
+    #2f6b3f calc(100% - 8px) calc(100% - 6px),
+    #ffffff calc(100% - 6px) calc(100% - 1px),
+    #cddccf calc(100% - 1px) 100%);
+  box-shadow:0 18px 32px -22px rgba(31,43,36,.45);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%);
+  transition:transform .55s ease,top .55s ease;
+}
+.ribbon--y{
+  left:50%;top:-14%;width:42px;height:118%;
+  transform:rotate(9deg);z-index:1;
+  background:linear-gradient(90deg,
+    #e6d9b0 0 1px,
+    #ffffff 1px 5px,
+    #e0a92e 5px 7px,
+    #f7d97a 7px calc(100% - 7px),
+    #e0a92e calc(100% - 7px) calc(100% - 5px),
+    #ffffff calc(100% - 5px) calc(100% - 1px),
+    #e6d9b0 calc(100% - 1px) 100%);
+  box-shadow:0 18px 32px -24px rgba(31,43,36,.35);
+  transition:transform .55s ease,left .55s ease;
+}
+.bow{
+  position:absolute;z-index:10;
+  left:46%;top:44%;width:clamp(72px,7.6vw,104px);
+  transform:rotate(-6deg);
+  filter:drop-shadow(0 12px 16px rgba(31,43,36,.28));
+  transition:transform .55s ease,left .55s ease,top .55s ease;
+}
+
+/* dark arrangement */
+html[data-theme="dark"] .ribbon{
+  background:linear-gradient(180deg,
+    #d9b25a 0 1px,
+    #f6efdd 1px 6px,
+    #b98a2e 6px 8px,
+    #1f5b52 8px calc(100% - 8px),
+    #b98a2e calc(100% - 8px) calc(100% - 6px),
+    #f6efdd calc(100% - 6px) calc(100% - 1px),
+    #d9b25a calc(100% - 1px) 100%);
+}
+html[data-theme="dark"] .ribbon--y{
+  background:linear-gradient(90deg,
+    #8c6a2a 0 1px,
+    #f6efdd 1px 5px,
+    #b98a2e 5px 7px,
+    #e0b45a 7px calc(100% - 7px),
+    #b98a2e calc(100% - 7px) calc(100% - 5px),
+    #f6efdd calc(100% - 5px) calc(100% - 1px),
+    #8c6a2a calc(100% - 1px) 100%);
+}
+
+@media (min-width:901px){
+  html[data-theme="dark"] .card--rain{left:36%;top:2%;width:30%;--r:-1.2deg}
+  html[data-theme="dark"] .card--bamboo{left:64%;top:34%;width:26%;--r:-3deg}
+  html[data-theme="dark"] .card--river{left:16%;top:60%;width:34%;--r:1.2deg}
+  html[data-theme="dark"] .card--tall{left:2%;top:62%;width:16%;--r:2deg}
+  html[data-theme="dark"] .card--back{left:52%;top:72%;width:20%;--r:-2deg}
+  html[data-theme="dark"] .ribbon{top:60%;transform:rotate(6deg)}
+  html[data-theme="dark"] .ribbon--y{left:56%;transform:rotate(-8deg)}
+  html[data-theme="dark"] .bow{left:52%;top:56%}
+}
+
+/* divider */
+.divider{
+  display:flex;align-items:center;gap:16px;
+  margin:clamp(28px,5vw,64px) 0 clamp(26px,4vw,50px);
+  color:var(--ink-3);
+}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.divider svg{flex:0 0 auto;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* picks */
+.picks-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+  margin-bottom:clamp(24px,3.4vw,44px);flex-wrap:wrap;
+}
+.picks-head .eyebrow{
+  margin:0;font:700 9.5px var(--font-mono);letter-spacing:.26em;text-transform:uppercase;color:var(--green);
+  white-space:nowrap;
+}
+.picks-head h2{
+  margin:.3em 0 0;
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(36px,4.8vw,62px);line-height:.95;letter-spacing:-.02em;
+}
+.picks-head h2 em{font-style:italic;color:var(--green)}
+.picks-head p{
+  margin:0;max-width:32ch;
+  font-size:13px;line-height:1.6;color:var(--ink-2);
+}
+
+.picks{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:clamp(18px,2.6vw,38px);
+  padding-bottom:clamp(20px,4vw,48px);
+}
+.pick{
+  position:relative;background:var(--paper);padding:13px;
+  box-shadow:var(--shadow);
+  transform:rotate(var(--r,0));
+  transition:transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.pick:hover{transform:rotate(0) translateY(-5px)}
+.pick:nth-child(1){--r:-1.5deg}
+.pick:nth-child(2){--r:1.1deg;margin-top:30px}
+.pick:nth-child(3){--r:-1.9deg;margin-top:10px}
+.pick__img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#e7ede7}
+.pick__img img{width:100%;height:100%;object-fit:cover;transition:transform .7s ease,filter .4s ease}
+.pick:hover .pick__img img{transform:scale(1.035)}
+.pick__mask{
+  position:absolute;left:6%;bottom:6%;
+  background:var(--paper);padding:10px 12px;
+  box-shadow:0 8px 18px -12px rgba(31,43,36,.35);
+  clip-path:polygon(0 4%,10% 0,22% 3%,34% 0,48% 3%,62% 0,76% 3%,90% 0,100% 3%,99% 96%,88% 100%,74% 97%,60% 100%,46% 97%,32% 100%,18% 97%,0 100%);
+}
+.pick__tag{
+  display:inline-block;margin-bottom:6px;
+  background:var(--green-solid);color:#fff;
+  font:600 9px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;
+  padding:5px 8px;
+}
+.pick__tag--coral{background:var(--coral)}
+.pick__tag--yellow{background:var(--yellow);color:var(--paper-ink)}
+.pick__title{display:block;font:700 13px var(--font-ui);color:var(--paper-ink)}
+.pick__text{
+  position:relative;padding:14px 4px 4px;
+  font-size:12.5px;line-height:1.6;color:var(--paper-ink-2);
+}
+.pick__no{
+  position:absolute;top:16px;right:16px;
+  font:600 9px var(--font-mono);letter-spacing:.12em;color:var(--paper-ink-2);opacity:.6;
+}
+
+/* footer */
+.footer{
+  margin-top:clamp(28px,5vw,64px);
+  padding:clamp(26px,4vw,46px) 0 clamp(34px,5vw,60px);
+  border-top:1px dashed var(--line);
+  display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;
+}
+.footer__mark{font-family:var(--font-display);font-size:clamp(30px,4.2vw,46px);line-height:.9}
+.footer__note{
+  margin:8px 0 0;
+  font:500 9.5px var(--font-mono);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);
+}
+.footer__links{
+  display:flex;gap:18px;flex-wrap:wrap;
+  font:600 10px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);
+}
+.footer__links a{padding-bottom:2px;border-bottom:1px solid transparent;transition:color .2s ease,border-color .2s ease}
+.footer__links a:hover{color:var(--green);border-color:var(--green)}
+
+/* scrollbar */
+@supports selector(::-webkit-scrollbar){
+  html::-webkit-scrollbar{width:10px;height:10px}
+  html::-webkit-scrollbar-track{background:transparent}
+  html::-webkit-scrollbar-thumb{
+    border-radius:99px;border:3px solid transparent;background-clip:content-box;
+    background-color:color-mix(in srgb,var(--green) 34%,transparent);
+  }
+  html.at-top::-webkit-scrollbar-thumb{background:transparent}
+}
+@supports not selector(::-webkit-scrollbar){
+  html{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--green) 34%,transparent) transparent}
+  html.at-top{scrollbar-color:transparent transparent}
+}
+
+/* responsive */
+@media (max-width:1080px){
+  .intro{width:34%}
+  .card--bamboo{left:60%;width:25%}
+}
+@media (max-width:900px){
+  .top{height:auto;flex-wrap:wrap;gap:12px;padding:14px 0 0}
+  .brand__name{font-size:26px}
+  .nav{margin-left:auto;gap:16px;font-size:10.5px}
+  .tagtree{position:static;flex-direction:row;align-items:center;gap:10px;margin-left:auto;width:100%;justify-content:flex-end}
+  .tag::before{display:none}
+  .tag--show{margin-right:0}
+
+  .stage{aspect-ratio:auto;display:flex;flex-direction:column;gap:0;padding:18px 0 2px}
+  .intro{position:relative;left:auto;top:auto;width:100%;order:1;margin-bottom:4px}
+  h1{font-size:clamp(48px,12vw,82px)}
+  .lede{max-width:38ch}
+
+  .ribbon--y,.bow{display:none}
+
+  /* the deck: three postcards fanned like a hand of cards */
+  .fan{
+    order:2;position:relative;display:block;
+    width:min(86%,420px);margin:22px auto 10px;aspect-ratio:1/.56;
+  }
+  .fan .card{
+    position:absolute;left:50%;top:50%;margin:0;width:56%;
+    transform:translate(-50%,-50%) translate(var(--fx,0),var(--fy,0)) rotate(var(--fr,0deg));
+    transition:transform .45s cubic-bezier(.2,.7,.2,1);
+  }
+  .fan .card:hover,.fan .card:focus-within{
+    transform:translate(-50%,-50%) translate(var(--fx,0),var(--fy,0)) rotate(var(--fr,0deg));
+  }
+  .fan .card--rain{--fx:-42%;--fy:-4%;--fr:-9deg;z-index:3}
+  .fan .card--river{--fx:0;--fy:0;--fr:-1deg;z-index:4}
+  .fan .card--bamboo{--fx:42%;--fy:5%;--fr:8deg;z-index:5}
+  .card--tall,.card--back{display:none}
+  .washi,.paper,.tape{display:none}
+  .fan .mark{font-size:16px;top:9px;left:10px;letter-spacing:.01em}
+  .fan .card--rain,.fan .card--river{aspect-ratio:16/11}
+
+  /* the ribbon slips behind the deck instead of sitting above it */
+  .ribbon{
+    position:absolute;left:-7%;width:114%;top:58%;height:26px;z-index:1;
+    transform:rotate(-4deg);
+  }
+  .picks{grid-template-columns:1fr;gap:28px}
+  .pick{margin-top:0!important}
+  .pick:nth-child(1),.pick:nth-child(2),.pick:nth-child(3){--r:0deg}
+  .picks-head p{text-align:left;max-width:none}
+  .footer{flex-direction:column;align-items:flex-start}
+}
+@media (max-width:640px){
+  .picks{gap:20px}
+  .pick__img{aspect-ratio:16/10}
+  .pick__mask{padding:8px 10px}
+  .pick__text{padding:12px 2px 2px;font-size:12px}
+  .fan{width:min(88%,330px);margin-top:22px}
+  .fan .mark{font-size:16px;top:9px;left:10px;letter-spacing:.01em}
+}
+@media (max-width:480px){
+  .page{padding-left:14px;padding-right:14px}
+  .nav{gap:13px;font-size:10px}
+  .tag{font-size:9.5px;padding:7px 10px}
+  .brand__stamp{width:46px;height:46px}
+  .brand__name{font-size:24px}
+  .lede{font-size:13.5px}
+  .card--tall{width:70%}
+  .card--bamboo{width:92%}
+  .paper{width:70%;padding:12px 12px}
+  .paper__t{font-size:12px}
+}
+
+@media (max-height:560px) and (orientation:landscape){
+  .top{height:auto;padding:10px 0 0;gap:10px}
+  .brand__stamp{width:40px;height:40px}
+  .brand__name{font-size:22px}
+  .nav{font-size:10px;gap:14px}
+  .tag{font-size:9px;padding:5px 9px}
+  .tagtree{gap:8px}
+  h1{font-size:clamp(28px,8.4vh,44px)}
+  .kicker{margin-bottom:7px}
+  .lede{margin-top:10px;font-size:13px;line-height:1.55;max-width:58ch}
+  .cta{margin-top:12px}
+  .stage{padding-top:14px;gap:16px}
+  .mast h1{font-size:clamp(30px,8.6vh,46px)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .card:hover,.pick:hover,.btn:hover,.tag:hover{transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<svg class="doodle doodle--day" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <filter id="wob" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="tile" width="280" height="280" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#8fb39a" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity=".3">
+        <path d="M30 208 C48 176 60 146 88 120"/>
+        <path d="M88 120 C80 108 84 98 94 96 C102 104 100 114 88 120 Z"/>
+        <path d="M64 148 C54 138 56 126 66 124 C74 132 74 142 64 148 Z"/>
+        <path d="M46 178 C36 170 36 158 46 156 C54 164 54 174 46 178 Z"/>
+        <path d="M190 66 c8 -10 18 -4 14 6 c10 -2 14 8 4 12 c4 10 -8 14 -12 4 c-10 4 -14 -8 -4 -12 c-6 -8 0 -14 8 -10 Z"/>
+        <circle cx="196" cy="74" r="2.6"/>
+        <path d="M198 208 c10 -12 22 -6 18 4 c-6 8 -16 8 -18 -4 Z"/>
+        <path d="M44 44 l32 11 l-14 6 l-8 13 l-4 -15 z"/>
+        <path d="M62 55 l7 6"/>
+        <circle cx="140" cy="40" r="1.5"/>
+        <circle cx="160" cy="228" r="1.5"/>
+        <path d="M118 252 q10 -7 20 0 t20 0"/>
+      </g>
+    </pattern>
+  </defs>
+
+  <rect width="1440" height="900" fill="url(#tile)"/>
+
+  <g fill="none" stroke="#7fa88c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".26" filter="url(#wob)">
+    <path d="M-20 250 C70 215 140 155 205 55"/>
+    <path d="M42 214 C22 196 20 174 36 164 C52 176 58 198 42 214 Z"/>
+    <path d="M100 168 C84 148 86 128 102 120 C116 134 118 154 100 168 Z"/>
+    <path d="M154 112 C142 92 146 74 162 68 C174 82 172 100 154 112 Z"/>
+
+    <path d="M1190 150 l64 22 l-28 11 l-17 28 l-7 -32 z"/>
+    <path d="M1228 177 l16 11"/>
+    <path d="M1090 190 q38 -22 72 -6 q28 13 18 38" stroke-dasharray="4 6"/>
+
+    <path d="M1150 806 q8 -26 40 -22 q9 -24 36 -17 q24 4 24 27 q18 2 16 20 h-116 q-13 -5 0 -8 Z" opacity=".5"/>
+    <path d="M40 880 q6 -30 18 -48 M52 880 q2 -34 12 -54 M64 880 q-2 -26 6 -44"/>
+  </g>
+</svg>
+
+<svg class="doodle doodle--night" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <pattern id="nightTile" width="320" height="320" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#9fbfa9" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity=".34">
+        <circle cx="40" cy="50" r="1.4" fill="#d8e8dc" stroke="none"/>
+        <circle cx="120" cy="30" r="1" fill="#d8e8dc" stroke="none"/>
+        <circle cx="210" cy="90" r="1.2" fill="#d8e8dc" stroke="none"/>
+        <circle cx="280" cy="40" r="1" fill="#d8e8dc" stroke="none"/>
+        <circle cx="80" cy="200" r="1" fill="#d8e8dc" stroke="none"/>
+        <circle cx="240" cy="250" r="1.3" fill="#d8e8dc" stroke="none"/>
+        <path d="M170 180 l6 -12 l6 12 l-12 -4 z" fill="#e6c47a" stroke="none" opacity=".55"/>
+        <path d="M60 120 q20 -12 40 0" stroke-dasharray="3 6"/>
+        <path d="M250 150 a18 18 0 1 0 0 26 a14 14 0 1 1 0 -26 Z" fill="#e6c47a" stroke="none" opacity=".26"/>
+      </g>
+    </pattern>
+  </defs>
+
+  <rect width="1440" height="900" fill="url(#nightTile)"/>
+
+  <g fill="none" stroke="#9fbfa9" stroke-width="1.2" opacity=".3" filter="url(#wob)">
+    <path d="M1060 120 l60 -20 l40 30 l70 -10 l30 40" stroke-dasharray="2 6"/>
+    <circle cx="1060" cy="120" r="2.6" fill="#e6c47a" stroke="none"/>
+    <circle cx="1120" cy="100" r="2" fill="#e6c47a" stroke="none"/>
+    <circle cx="1160" cy="130" r="2" fill="#e6c47a" stroke="none"/>
+    <circle cx="1230" cy="120" r="2" fill="#e6c47a" stroke="none"/>
+    <path d="M180 720 a34 34 0 1 0 0 48 a26 26 0 1 1 0 -48 Z" fill="#e6c47a" stroke="none" opacity=".3"/>
+    <path d="M1260 700 q30 -18 58 -4" stroke-dasharray="3 7"/>
+    <path d="M1240 760 l4 -9 l4 9 l-9 -3 z" fill="#e6c47a" stroke="none"/>
+  </g>
+</svg>
+
+<div class="grain" aria-hidden="true"></div>
+
+<div class="page">
+  <header class="top">
+    <a class="brand" href="#" aria-label="MoonMail home">
+      <span class="brand__stamp"><img src="images/meadow.jpg" alt=""></span>
+      <span class="brand__name">MoonMail</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#top" class="is-active" aria-current="page">Home</a>
+      <a href="guide.html">Guide</a>
+      <a href="api.html">API</a>
+    </nav>
+    <div class="tagtree">
+      <a class="tag" href="https://github.com/moonbitstack/moonmail">GitHub</a>
+      <a class="tag tag--show" href="desk.html">Showcase</a>
+      <button class="tag tag--theme" id="theme" aria-label="Switch to night mode">
+        <svg class="ico-sun" viewBox="180 180 660 660" aria-hidden="true"><path d="M511.59 384.64A127.4 127.4 0 1 0 601.68 422a127.42 127.42 0 0 0-90.09-37.31z m0 191a63.69 63.69 0 1 1 45-18.65 63.81 63.81 0 0 1-45 18.69z m309.29-86.29L746 416.48v-107a31.84 31.84 0 0 0-31.86-31.84h-105.4l-74.54-74.79a31.86 31.86 0 0 0-45.23 0L416 277.67H309a31.84 31.84 0 0 0-31.85 31.84v107l-74.86 72.91a31.86 31.86 0 0 0 0 45.22l74.86 74.5v105.35A31.84 31.84 0 0 0 309 746.33h107l74.54 74.82a31.86 31.86 0 0 0 45.23 0l74.53-74.82h105.47a31.84 31.84 0 0 0 31.85-31.84V609.11l74.85-74.5a31.85 31.85 0 0 0-1.59-45.22z m-129 84.06a31.77 31.77 0 0 0-9.56 22.6v86.61h-86.64a31.86 31.86 0 0 0-22.62 9.55l-61.47 61.45-61.48-61.45a31.86 31.86 0 0 0-22.61-9.55h-86.64v-86.57a31.88 31.88 0 0 0-9.56-22.6L269.82 512l61.48-61.45a31.88 31.88 0 0 0 9.56-22.6v-86.61h86.64a31.86 31.86 0 0 0 22.61-9.55l61.48-61.45 61.47 61.45a31.86 31.86 0 0 0 22.62 9.55h86.64V428a31.77 31.77 0 0 0 9.56 22.6l61.47 61.4z" fill="currentColor"/></svg>
+        <svg class="ico-moon" viewBox="0 0 1024 1024" aria-hidden="true"><path d="M504.023579 991.285895C226.250105 991.285895 0.323368 765.305263 0.323368 487.477895c0-226.896842 153.061053-426.684632 372.197053-485.807158a39.720421 39.720421 0 0 1 43.870316 59.392 371.712 371.712 0 0 0-57.236211 197.847579c0 205.716211 167.397053 373.059368 373.221053 373.059368 69.955368 0 138.509474-19.887158 198.117053-57.505684a39.612632 39.612632 0 0 1 59.445894 43.816421 504.131368 504.131368 0 0 1-485.914947 373.005474zM304.074105 113.502316a424.852211 424.852211 0 0 0-224.471579 374.029473c0 234.064842 190.410105 424.474947 424.421053 424.474948a424.690526 424.690526 0 0 0 374.191158-225.118316c-46.942316 16.114526-96.202105 24.360421-145.839158 24.360421-249.532632 0-452.500211-202.913684-452.500211-452.338526 0-49.475368 8.192-98.627368 24.198737-145.408z" fill="currentColor"/><path d="M951.026526 369.610105h-315.823158l-31.474526-87.740631 189.386105-155.75579h-157.911579V27.001263h296.04379l31.420631 87.740632-189.33221 155.755789h177.690947z" fill="currentColor"/></svg>
+        <span id="themeLabel">Night</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="stage">
+        <div class="fan">
+          <figure class="card card--tall card--edges-v">
+            <div class="card__img">
+              <img src="images/lake.jpg" alt="A clear turquoise lake ringed by pines">
+            </div>
+            <span class="washi washi--tall" aria-hidden="true"></span>
+            <span class="tape tape--hand">a letter from the lake</span>
+          </figure>
+
+          <figure class="card card--rain card--frame">
+            <div class="card__img">
+              <img src="images/rainforest.jpg" alt="Lush green rainforest leaves in sunlight">
+            </div>
+            <span class="washi washi--rain" aria-hidden="true"></span>
+            <span class="mark">SMTP</span>
+            <span class="tape">EHLO · AUTH · DATA</span>
+          </figure>
+
+          <figure class="card card--river card--frame">
+            <div class="card__img">
+              <img src="images/river.jpg" alt="A turquoise river winding through forested hills">
+            </div>
+            <span class="mark">IMAP</span>
+            <div class="paper">
+              <span class="paper__k">the message</span>
+              <span class="paper__t">One letter, parsed into parts.</span>
+            </div>
+          </figure>
+
+          <figure class="card card--bamboo card--frame">
+            <div class="card__img">
+              <img src="images/bamboo.jpg" alt="A bright green bamboo grove">
+            </div>
+            <span class="mark mark--pop">POP3</span>
+          </figure>
+
+          <figure class="card card--back">
+            <div class="back">
+              <div class="back__lines">
+                <span class="back__to">to: you</span>
+                <span class="back__line"></span>
+                <span class="back__line"></span>
+                <span class="back__line"></span>
+                <span class="back__line" style="width:52%"></span>
+              </div>
+              <span class="back__vert"></span>
+              <span class="back__stamp">m</span>
+              <span class="back__post">moon<br>mail<br>0.1.0</span>
+            </div>
+          </figure>
+          <div class="ribbon" aria-hidden="true"></div>
+          <div class="ribbon ribbon--y" aria-hidden="true"></div>
+
+          <div class="bow" aria-hidden="true">
+            <svg viewBox="0 0 130 96">
+              <path d="M58 48 C30 22 4 20 9 42 C12 58 40 58 58 48 Z" fill="var(--bow-1)" stroke="var(--bow-line)" stroke-width="4"/>
+              <path d="M72 48 C100 22 126 20 121 42 C118 58 90 58 72 48 Z" fill="var(--bow-1)" stroke="var(--bow-line)" stroke-width="4"/>
+              <path d="M56 52 C44 68 30 82 35 89 C42 95 56 72 62 56 Z" fill="var(--bow-2)" stroke="var(--bow-line)" stroke-width="3"/>
+              <path d="M74 52 C86 68 100 82 95 89 C88 95 74 72 68 56 Z" fill="var(--bow-2)" stroke="var(--bow-line)" stroke-width="3"/>
+              <circle cx="65" cy="49" r="11" fill="var(--bow-2)" stroke="var(--bow-line)" stroke-width="4"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="intro">
+          <p class="kicker">a fresh take on email</p>
+          <h1>Mail,<br><em>freshly</em><br>picked<span class="dot">.</span></h1>
+          <p class="lede">Parse a letter, compose one with attachments, sign it, and send it over SMTP, IMAP and POP3. One mailroom, seven packages, no ceremony.</p>
+          <div class="cta">
+            <a class="btn" href="guide.html">Read the guide
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a class="link" href="api.html">Browse the API</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 21c0-6 3-10 8-12-1 7-3 10-8 12Z"/><path d="M12 21c0-6-3-10-8-12 1 7 3 10 8 12Z"/><path d="M12 21v-8"/></svg>
+    </div>
+
+    <section id="picks" class="picks-section">
+      <div class="picks-head">
+        <div>
+          <p class="eyebrow">fresh from the mailroom</p>
+          <h2>Pick a <em>card</em></h2>
+        </div>
+        <p>Read the guide, browse the API, or watch the machines talk. Every card is a way in.</p>
+      </div>
+
+      <div class="picks">
+        <article class="pick">
+          <span class="pick__no">01</span>
+          <div class="pick__img">
+            <img src="images/desert.jpg" alt="Golden desert dunes under a pale sky">
+            <div class="pick__mask">
+              <span class="pick__tag">Guide</span>
+              <span class="pick__title">Start with a letter</span>
+            </div>
+          </div>
+          <p class="pick__text">Parse a message, read its headers and parts, then write one back with the right nesting.</p>
+        </article>
+
+        <article class="pick">
+          <span class="pick__no">02</span>
+          <div class="pick__img">
+            <img src="images/autumn.jpg" alt="An orange autumn forest with a soft path">
+            <div class="pick__mask">
+              <span class="pick__tag pick__tag--coral">API</span>
+              <span class="pick__title">Seven packages</span>
+            </div>
+          </div>
+          <p class="pick__text">Root, DKIM, SASL, SMTP, IMAP, POP3 and a native net layer. Small surfaces, no surprises.</p>
+        </article>
+
+        <article class="pick">
+          <span class="pick__no">03</span>
+          <div class="pick__img">
+            <img src="images/coast.jpg" alt="Clear blue sea and sky">
+            <div class="pick__mask">
+              <span class="pick__tag pick__tag--yellow">Showcase</span>
+              <span class="pick__title">Watch it move</span>
+            </div>
+          </div>
+          <p class="pick__text">Take a letter apart, sign it, then run a whole SMTP conversation in the browser.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>
+        <div class="footer__mark">MoonMail</div>
+        <p class="footer__note">0.1.0 · MIT · moonbitstack</p>
+      </div>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="guide.html">Guide</a>
+        <a href="api.html">API</a>
+        <a href="desk.html">Showcase</a>
+        <a href="https://github.com/moonbitstack/moonmail">GitHub</a>
+      </nav>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('theme');
+  var themeLabel = document.getElementById('themeLabel');
+  var meta = document.querySelector('meta[name="theme-color"]');
+  var KEY = 'moonmail-theme';
+
+  function apply(theme) {
+    root.setAttribute('data-theme', theme);
+    btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to day mode' : 'Switch to night mode');
+    if (themeLabel) themeLabel.textContent = theme === 'dark' ? 'Day' : 'Night';
+    meta.setAttribute('content', theme === 'dark' ? '#0e1411' : '#f8f9f4');
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var forced = null;
+  try { forced = new URLSearchParams(location.search).get('theme'); } catch (e) {}
+  apply(forced === 'dark' || forced === 'light' ? forced : (saved === 'dark' ? 'dark' : 'light'));
+
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+
+  var mark = function () { root.classList.toggle('at-top', window.scrollY <= 4); };
+  window.addEventListener('scroll', mark, { passive: true });
+  mark();
+})();
+</script>
+</body>
+</html>
