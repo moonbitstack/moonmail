@@ -383,3 +383,25 @@ test "imap refuses malformed and oversized responses" {
     Some(Exceeded(limit=4, got=5)),
   )
 }
+
+///|
+test "imap says who it is, which 163 will not open a mailbox without" {
+  let client = opened("IMAP4rev1 ID")
+  let _ = client.login("me@example.com", "auth-code")
+  let _ = client.next_write() // A0001 LOGIN, answered below
+  let _ = client.feed(crlf("A0001 OK logged in"))
+  let tag = client.id([("name", "moonmail"), ("version", "0.1")])
+  assert_eq(tag, 2)
+  inspect(
+    wire(client.next_write()),
+    content="A0002 ID (\"name\" \"moonmail\" \"version\" \"0.1\")\r\n",
+  )
+}
+
+///|
+test "imap refuses to introduce itself to a server that never asked" {
+  let plain = opened("IMAP4rev1")
+  let _ = plain.login("u", "p")
+  let refused = refusal(() => plain.id([("name", "moonmail")]))
+  assert_eq(refused, Some(Unsupported("ID")))
+}

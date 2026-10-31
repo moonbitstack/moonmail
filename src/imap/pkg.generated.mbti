@@ -39,6 +39,7 @@ pub fn Client::expunge(Self) -> Int32 raise Refused
 pub fn Client::feed(Self, BytesView) -> Array[Event] raise Refused
 pub fn Client::fetch(Self, String, String, uid? : Bool, changedsince? : Int64) -> Int32 raise Refused
 pub fn Client::has(Self, String) -> Bool
+pub fn Client::id(Self, Array[(String, String)]) -> Int32 raise Refused
 pub fn Client::idle(Self) -> Int32 raise Refused
 pub fn Client::list(Self, String, String) -> Int32 raise Refused
 pub fn Client::login(Self, String, String) -> Int32 raise Refused

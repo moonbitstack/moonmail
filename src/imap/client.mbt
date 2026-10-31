@@ -299,6 +299,34 @@ pub fn Client::enable(
 }
 
 ///|
+/// `ID` (RFC 2971): say who this client is.
+///
+/// Servers that care about it do not ask politely. 163 and 126 answer `SELECT`
+/// with "Unsafe Login" until they have heard it, so a client can authenticate
+/// successfully and then find every mailbox shut; the failure looks like a
+/// permissions problem rather than a missing sentence. The pairs are the fields
+/// the RFC names: `name`, `version`, `vendor`, and optionally `support-url` and
+/// `address`.
+pub fn Client::id(
+  self : Client,
+  fields : Array[(String, String)],
+) -> Int32 raise Refused {
+  self.expect(["authenticated", "selected"])
+  self.needs("ID")
+  let mut line = "ID ("
+  let mut first = true
+  for pair in fields {
+    if !first {
+      line = line + " "
+    }
+    first = false
+    line = line + quoted(pair.0) + " " + quoted(pair.1)
+  }
+  line = line + ")"
+  self.enqueue(line)
+}
+
+///|
 /// Open a mailbox read-write. `condstore` asks for mod-sequences on it
 /// (RFC 7162).
 pub fn Client::select(
