@@ -1,0 +1,143 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/jmap"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn created_id(Response, String, String) -> String raise Refused
+
+pub fn discovery_url(String) -> String
+
+pub fn email_ids(Response, String) -> Array[String] raise Refused
+
+pub fn emails(Response, String) -> Array[Email] raise Refused
+
+pub fn identities(Response, String) -> Array[Identity] raise Refused
+
+pub fn mailboxes(Response, String) -> Array[Mailbox] raise Refused
+
+pub fn resolve(String, String) -> String raise Refused
+
+// Errors
+pub(all) suberror Refused {
+  Malformed(at~ : String)
+  NotAnObject
+  Missing(name~ : String)
+  WrongType(name~ : String)
+  BadUrl(url~ : String)
+  Failed(call~ : String, kind~ : String, description~ : String)
+} derive(Eq, @debug.Debug)
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub(all) struct Call {
+  name : String
+  args : Json
+  tag : String
+} derive(Eq, @debug.Debug)
+pub fn Call::equal(Self, Self) -> Bool
+pub fn Call::not_equal(Self, Self) -> Bool
+pub fn Call::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Draft {
+  from : String?
+  to : Array[String]
+  cc : Array[String]
+  bcc : Array[String]
+  subject : String
+  text : String
+}
+pub fn Draft::new(to~ : Array[String], subject~ : String, text~ : String) -> Self
+
+pub(all) struct Email {
+  id : String
+  subject : String
+  from : String?
+  received_at : String?
+  preview : String
+  unread : Bool
+} derive(Eq, @debug.Debug)
+pub fn Email::equal(Self, Self) -> Bool
+pub fn Email::not_equal(Self, Self) -> Bool
+pub fn Email::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Identity {
+  id : String
+  name : String?
+  email : String
+} derive(Eq, @debug.Debug)
+pub fn Identity::equal(Self, Self) -> Bool
+pub fn Identity::not_equal(Self, Self) -> Bool
+pub fn Identity::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Invocation {
+  name : String
+  args : Json
+  tag : String
+} derive(Eq, @debug.Debug)
+pub fn Invocation::equal(Self, Self) -> Bool
+pub fn Invocation::not_equal(Self, Self) -> Bool
+pub fn Invocation::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Mailbox {
+  id : String
+  name : String
+  role : String?
+  parent_id : String?
+  total : Int32
+  unread : Int32
+} derive(Eq, @debug.Debug)
+pub fn Mailbox::equal(Self, Self) -> Bool
+pub fn Mailbox::not_equal(Self, Self) -> Bool
+pub fn Mailbox::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Request {
+  capabilities : Array[String]
+  calls : Array[Call]
+} derive(Eq, @debug.Debug)
+pub fn Request::call(Self, String, Json) -> String
+pub fn Request::email_get(Self, String, Array[String], Array[String]) -> String
+pub fn Request::email_query(Self, String, String, Int32) -> String
+pub fn Request::email_set_draft(Self, String, String, Draft) -> String
+pub fn Request::email_submission_set(Self, String, String, String) -> String
+pub fn Request::equal(Self, Self) -> Bool
+pub fn Request::identity_get(Self, String) -> String
+pub fn Request::mailbox_get(Self, String) -> String
+pub fn Request::new() -> Self
+pub fn Request::not_equal(Self, Self) -> Bool
+pub fn Request::to_json(Self) -> Json
+pub fn Request::to_repr(Self) -> @debug.Repr
+pub fn Request::to_string(Self) -> String
+
+pub(all) struct Response {
+  invocations : Array[Invocation]
+  session_state : String
+} derive(Eq, @debug.Debug)
+pub fn Response::answer(Self, String) -> Invocation raise Refused
+pub fn Response::equal(Self, Self) -> Bool
+pub fn Response::invocation(Self, String) -> Invocation?
+pub fn Response::not_equal(Self, Self) -> Bool
+pub fn Response::parse(String) -> Self raise Refused
+pub fn Response::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Session {
+  username : String?
+  account_id : String
+  api_url : String
+  download_url : String?
+  upload_url : String?
+  event_source_url : String?
+  state : String
+} derive(Eq, @debug.Debug)
+pub fn Session::equal(Self, Self) -> Bool
+pub fn Session::not_equal(Self, Self) -> Bool
+pub fn Session::parse(String, String) -> Self raise Refused
+pub fn Session::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits
