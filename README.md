@@ -186,6 +186,13 @@ The office is a plugin, not part of the library: it lives on the `postoffice`
 branch, and `moon run src/postoffice` serves the page and the three endpoints
 it calls.
 
+One limit is worth stating rather than discovering: the bundled TLS client
+speaks TLS 1.3 only. A server that offers just 1.2 does not answer with a
+version error — it hangs up during the handshake, which reads like a wrong
+password if you are holding one. Personal QQ Mail is such a server; 163, 126,
+Tencent Exmail, Aliyun and Fastmail all negotiate 1.3 and work. Reaching a
+1.2-only server needs a client that speaks it, or JMAP.
+
 ## Over a socket
 
 `@moonmail/net` carries the state machines over moonnet. `StartTls` refuses a
