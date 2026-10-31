@@ -9,13 +9,13 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='6' fill='%232f6b3f'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-style='italic' font-size='38' fill='%23fff' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&family=Special+Elite&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --font-display:"Instrument Serif","YouYuan","幼圆","SimYou",Georgia,serif;
-  --font-ui:"Figtree","YouYuan","幼圆","SimYou",system-ui,sans-serif;
+  --font-display:"Instrument Serif","Noto Serif SC","YouYuan","幼圆","SimYou",Georgia,serif;
+  --font-ui:"Figtree","Noto Sans SC","YouYuan","幼圆","SimYou",system-ui,sans-serif;
   /* The letter itself: Latin in Figtree, Chinese in HarmonyOS Sans SC. */
-  --font-reading:"Figtree","HarmonyOS Sans SC","HarmonyOS Sans","鸿蒙 Sans SC","YouYuan","幼圆",system-ui,sans-serif;
+  --font-reading:"Figtree","Noto Sans SC","HarmonyOS Sans SC","HarmonyOS Sans","鸿蒙 Sans SC","YouYuan","幼圆",system-ui,sans-serif;
   --font-mono:"IBM Plex Mono","YouYuan","幼圆","SimYou",ui-monospace,monospace;
   --font-hand:"Caveat","YouYuan","幼圆",cursive;
   --font-stamp:"Special Elite","Courier New","YouYuan","幼圆",monospace;
@@ -255,14 +255,14 @@ html[data-theme="dark"] .postcard__front .postcard__img img{filter:saturate(.94)
 }
 .postcard__to b{color:var(--paper-ink);text-transform:none;letter-spacing:0;word-break:break-all}
 .postcard__note h3{
-  margin:0 0 6px;font-family:var(--font-display);font-weight:400;
+  margin:0 0 6px;font-family:"YouYuan","幼圆","SimYou",var(--font-display);font-weight:400;
   font-size:20px;line-height:1.05;letter-spacing:-.01em;color:var(--paper-ink);
 }
 .postcard__body{
   max-height:7.6em;overflow:hidden;
   -webkit-mask-image:linear-gradient(#000 74%,rgba(0,0,0,.05));
   mask-image:linear-gradient(#000 74%,rgba(0,0,0,.05));
-  font:500 10.5px/1.5 var(--font-reading);color:var(--paper-ink);
+  font:500 10.5px/1.5 "HarmonyOS Sans SC","HarmonyOS Sans","鸿蒙 Sans SC",var(--font-reading);color:var(--paper-ink);
 }
 .postcard__body p{margin:0 0 .55em}
 .postcard__body h2,.postcard__body h3,.postcard__body h4{
@@ -1731,39 +1731,127 @@ input::-ms-reveal,input::-ms-clear{display:none}
       + '</style>';
   }
 
-  // The card stock the reader picked, as bytes the message can carry. Fetched
-  // once per image and kept: sending three letters should not download the
-  // photograph three times.
-  var cardCache = {};
-  async function cardImage() {
-    var src = (cardImg && cardImg.getAttribute('src')) || '';
-    if (!src) return null;
-    if (cardCache[src]) return cardCache[src];
-    var res = await fetch(src);
-    if (!res.ok) return null;
-    var blob = await res.blob();
-    var data = await new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () { resolve(String(reader.result).split(',')[1]); };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+  // The card, as a picture of itself.
+  //
+  // An email client runs none of this page and fetches none of its assets, so a
+  // replica in HTML would come out as a different card in every client. Drawing
+  // the real element instead means the recipient gets the card the reader is
+  // looking at: same photograph, same tape, same torn edge, same type.
+  //
+  // The element is serialised into an SVG `foreignObject` and drawn to a canvas.
+  // An SVG used as an image may not fetch anything, so the photograph goes in as
+  // a data URL — which is also why the card's own faces are the local ones: a
+  // webfont would silently fall back inside the picture.
+  async function cardPng() {
+    var node = document.querySelector('.postcard__front');
+    if (!node) return null;
+    if (document.fonts && document.fonts.ready) {
+      try { await document.fonts.ready; } catch (e) {}
+    }
+    var rect = node.getBoundingClientRect();
+    var width = Math.round(rect.width), height = Math.round(rect.height);
+    if (!width || !height) return null;
+
+    var clone = node.cloneNode(true);
+    var photo = clone.querySelector('img');
+    if (photo) {
+      var res = await fetch(photo.getAttribute('src'));
+      var blob = await res.blob();
+      photo.setAttribute('src', await new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () { resolve(String(reader.result)); };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }));
+    }
+
+    var css = [];
+    for (var i = 0; i < document.styleSheets.length; i++) {
+      try {
+        var rules = document.styleSheets[i].cssRules;
+        for (var j = 0; j < rules.length; j++) css.push(rules[j].cssText);
+      } catch (e) { /* a cross-origin sheet cannot be read; fonts are not needed */ }
+    }
+
+    // Parse as HTML, serialise as XHTML: an SVG is XML and the card's void
+    // elements are not self-closed in HTML.
+    var host = document.createElement('div');
+    host.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+    host.setAttribute('style', 'width:' + width + 'px;height:' + height + 'px;position:relative;');
+    host.innerHTML = '<style>' + css.join('\n') + '</style>' + clone.outerHTML;
+
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">'
+      + '<foreignObject width="100%" height="100%">'
+      + new XMLSerializer().serializeToString(host)
+      + '</foreignObject></svg>';
+
+    var image = new Image();
+    await new Promise(function (resolve, reject) {
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     });
-    var out = { name: src.split('/').pop(), type: blob.type || 'image/jpeg', cid: 'moonmail-card', data: data };
-    cardCache[src] = out;
-    return out;
+
+    var scale = 2;
+    var canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f4efe2';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    // a photograph, not a diagram: JPEG is a fifth of the bytes for the
+    // same picture on a client that only ever shows it at 600px
+    return canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+  }
+
+  ///|
+  function base64OfText(text) {
+    var bytes = new TextEncoder().encode(text);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  ///|
+  function fileNameFor(subject) {
+    var stem = (subject || 'letter').replace(/[\\/:*?"<>|\s]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    return (stem || 'letter') + '.md';
+  }
+
+  ///|
+  // The message: the card, and the whole letter beside it. The card only has so
+  // much paper, so whatever did not fit travels as Markdown the reader can open.
+  function cardMessageHtml(d) {
+    return '<div style="margin:0;padding:24px 12px;background:#efe9da;">'
+      + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">'
+      + '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;border-collapse:collapse;">'
+      + '<tr><td style="padding:0;font-size:0;line-height:0;">'
+      + '<img src="cid:moonmail-card" alt="' + esc(d.subject || 'A letter from the desk') + '" width="600" style="display:block;width:100%;height:auto;border:0;outline:none;">'
+      + '</td></tr>'
+      + '<tr><td style="padding:14px 4px 0 4px;text-align:center;font-family:Courier New,monospace;font-size:10px;line-height:1.7;color:#8a9a90;">'
+      + esc(d.from || '') + ' &middot; the whole letter travelled as ' + esc(fileNameFor(d.subject))
+      + '</td></tr>'
+      + '</table></td></tr></table></div>';
   }
 
   async function writeLetter() {
     var d = gather();
-    var card = await cardImage().catch(function () { return null; });
+    var subject = d.subject || 'A letter from the desk';
+    var letter = d.text + '\n\n--\n' + DISCLAIMER;
+
+    var png = await cardPng().catch(function () { return null; });
+    var tasks = [{ name: fileNameFor(subject), type: 'text/markdown; charset=utf-8', data: base64OfText(letter) }];
+
     var built = engineCall('compose', {
       from: d.from || userEl.value,
       to: splitList(d.to),
       cc: splitList(d.cc),
-      subject: d.subject || 'A letter from the desk',
-      text: d.text + '\n\n--\n' + DISCLAIMER,
-      html: postcardHtml(d, card),
-      image: card || undefined
+      subject: subject,
+      text: letter,
+      html: png ? cardMessageHtml(d) : postcardHtml(d, null),
+      image: png ? { name: 'card.jpg', type: 'image/jpeg', cid: 'moonmail-card', data: png } : undefined,
+      attachments: tasks
     });
     return built;
   }
