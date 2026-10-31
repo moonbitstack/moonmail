@@ -1,0 +1,30 @@
+// The post office this repository ships: a local server that serves the writing
+// desk and does the two things a page cannot do itself — open an SMTP socket
+// and open an IMAP or POP3 one. It exists so that a reader can clone, run one
+// command, and send a letter from the page in the browser next to it.
+//
+//     moon run src/postoffice
+//
+// Nothing here is a second implementation of the protocols: `/send` drives
+// @moonmail/net, which drives the state machines in @moonmail/smtp, the same
+// code the library publishes.
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonmail",
+  "moonbitstack/moonmail/net",
+  "moonbitstack/moonmail/imap",
+  "moonbitstack/moonmime",
+  "moonbitstack/moonmail/sasl",
+  "moonbitstack/moontls/tls",
+  "moonbitstack/mooncred/x509",
+  "moonbitstack/moonbase/base64",
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/socket",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/io",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
+}
