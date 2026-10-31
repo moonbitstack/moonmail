@@ -1319,18 +1319,38 @@ input::-ms-reveal,input::-ms-clear{display:none}
     return serverEl.value.trim().replace(/\/+$/, '');
   }
 
-  function basicAuth() {
+  /* Some JMAP servers take HTTP basic auth, some take a bearer token (Fastmail
+     mints those in its settings). Try basic first, and if the server says no,
+     ask again the other way before showing the reader a failure. */
+  var authMode = 'basic';
+
+  function authHeaders() {
+    if (authMode === 'bearer') {
+      return { Authorization: 'Bearer ' + passEl.value.trim() };
+    }
     var bytes = new TextEncoder().encode(userEl.value + ':' + passEl.value);
     var binary = '';
     for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    return 'Basic ' + btoa(binary);
+    return { Authorization: 'Basic ' + btoa(binary) };
+  }
+
+  async function send(url, init) {
+    init = init || {};
+    init.headers = Object.assign({}, init.headers, authHeaders());
+    var res = await fetch(url, init);
+    if (res.status === 401 && authMode === 'basic' && passEl.value.trim()) {
+      authMode = 'bearer';
+      init.headers = Object.assign({}, init.headers, authHeaders());
+      res = await fetch(url, init);
+    }
+    return res;
   }
 
   async function openSession() {
     var base = serverBase();
     if (!base) throw new Error('add a JMAP server first');
     var url = base + '/.well-known/jmap';
-    var res = await fetch(url, { headers: { Authorization: basicAuth(), Accept: 'application/json' } });
+    var res = await send(url, { headers: { Accept: 'application/json' } });
     if (!res.ok) throw new Error(url + ' answered ' + res.status);
     var body = await res.text();
     session = engineCall('jmap.session', { base: url, body: body });
@@ -1343,9 +1363,9 @@ input::-ms-reveal,input::-ms-clear{display:none}
 
   async function callJmap(built) {
     if (!session) await openSession();
-    var res = await fetch(session.apiUrl, {
+    var res = await send(session.apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: basicAuth() },
+      headers: { 'Content-Type': 'application/json' },
       body: built.body
     });
     var text = await res.text();
@@ -1368,7 +1388,7 @@ input::-ms-reveal,input::-ms-clear{display:none}
   }
 
   function forgetSession() {
-    session = null; boxes = null; identitiesCache = null;
+    session = null; boxes = null; identitiesCache = null; authMode = 'basic';
     sessionEl.value = '';
     sessionDot.className = 'bridge-dot';
   }
