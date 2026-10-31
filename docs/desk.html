@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The writing desk — MoonMail</title>
 <meta name="theme-color" content="#f8f9f4">
-<meta name="description" content="Write a letter, pick a card, and send it over JMAP. Runs in your browser.">
+<meta name="description" content="Write a letter, pick a card, and send it — through a local office or straight to a JMAP server.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='6' fill='%232f6b3f'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-style='italic' font-size='38' fill='%23fff' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -490,6 +490,16 @@ input::-ms-reveal,input::-ms-clear{display:none}
   font:600 8px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--paper-ink);
 }
 .mini-btn:hover{border-color:var(--green);color:var(--paper-green)}
+.bridge[hidden],.form[hidden],.bridge-note[hidden]{display:none}
+.via{display:flex;align-items:center;gap:10px;margin:14px 0 0}
+.via__k{font:600 7.5px var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--paper-ink-2)}
+.via__opt{
+  background:none;border:0;padding:3px 0;cursor:pointer;
+  font:600 9px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--paper-ink-2);border-bottom:1px solid transparent;
+}
+.via__opt:hover{color:var(--paper-green)}
+.via__opt.is-active{color:var(--paper-green);border-bottom-color:var(--paper-green)}
 .bridge-dot{width:8px;height:8px;border-radius:50%;background:var(--paper-line);margin-bottom:8px}
 .bridge-dot.is-ok{background:var(--green)}
 .bridge-dot.is-off{background:var(--coral)}
@@ -736,9 +746,9 @@ input::-ms-reveal,input::-ms-clear{display:none}
   <section class="intro">
     <p class="kicker">showcase · the writing desk</p>
     <h1>Write a letter,<br><em>pick a card</em><span class="dot">.</span></h1>
-    <p class="lede">Compose with moonmail, watch it become a postcard, then send it over JMAP — no helper, no socket, just the server you name.</p>
+    <p class="lede">Compose with moonmail, watch it become a postcard, then send it: through the local post office, or straight to a JMAP server.</p>
     <div class="stamps">
-      <span class="stamp">One session</span>
+      <span class="stamp">One tab</span>
       <span class="stamp stamp--coral">No upload</span>
       <span class="stamp stamp--yellow">No storage</span>
     </div>
@@ -846,21 +856,57 @@ input::-ms-reveal,input::-ms-clear{display:none}
           <button class="tab" data-tab="receive" role="tab" aria-selected="false">Receive</button>
         </div>
 
-        <form class="form" id="jmapForm" autocomplete="off">
+        <div class="via" role="group" aria-label="How the letter leaves this page">
+          <span class="via__k">via</span>
+          <button class="via__opt is-active" data-mode="bridge" type="button">local office</button>
+          <button class="via__opt" data-mode="jmap" type="button">jmap</button>
+        </div>
+
+        <form class="form" id="sendForm" autocomplete="off">
+          <label><span>SMTP host</span><input id="smtpHost" placeholder="smtp.example.com"></label>
+          <div class="row">
+            <label><span>Port</span><input id="smtpPort" value="587" inputmode="numeric"></label>
+            <label><span>Security</span><select id="smtpSec"><option>STARTTLS</option><option>TLS</option><option>None</option></select></label>
+          </div>
+          <label><span>Username</span><input id="smtpUser" autocomplete="off"></label>
+          <label><span>Password</span><input id="smtpPass" type="password" autocomplete="new-password"></label>
+          <label><span>From</span><input id="from" type="email" placeholder="you@example.com" autocomplete="off"></label>
+        </form>
+
+        <form class="form" id="receiveForm" autocomplete="off" hidden>
+          <div class="row">
+            <label><span>Protocol</span><select id="proto"><option>IMAP</option><option>POP3</option></select></label>
+            <label><span>Security</span><select id="recvSec"><option>TLS</option><option>STARTTLS</option></select></label>
+          </div>
+          <label><span>Host</span><input id="recvHost" placeholder="imap.example.com"></label>
+          <div class="row">
+            <label><span>Port</span><input id="recvPort" value="993" inputmode="numeric"></label>
+            <label><span>Mailbox</span><input id="mailboxName" value="INBOX"></label>
+          </div>
+          <label><span>Username</span><input id="recvUser" autocomplete="off"></label>
+          <label><span>Password</span><input id="recvPass" type="password" autocomplete="new-password"></label>
+        </form>
+
+        <form class="form" id="jmapForm" autocomplete="off" hidden>
           <label><span>JMAP server</span><input id="server" placeholder="https://mail.example.com" spellcheck="false"></label>
           <div class="row">
             <label><span>Username</span><input id="username" autocomplete="off" spellcheck="false"></label>
             <label><span>Password</span><input id="password" type="password" autocomplete="new-password"></label>
           </div>
-          <label><span>From</span><input id="from" type="email" placeholder="you@example.com" autocomplete="off"></label>
         </form>
 
-        <div class="bridge">
-          <label><span>Session</span><input id="sessionUrl" placeholder="opens with the first call" readonly></label>
+        <div class="bridge" id="bridgeRow">
+          <label><span>Local post office</span><input id="bridge" value="http://127.0.0.1:12000"></label>
           <button class="mini-btn" id="check" type="button">Check</button>
+          <span class="bridge-dot" id="bridgeDot" aria-hidden="true"></span>
+        </div>
+        <div class="bridge" id="sessionRow" hidden>
+          <label><span>Session</span><input id="sessionUrl" placeholder="opens with the first call" readonly></label>
+          <button class="mini-btn" id="checkJmap" type="button">Check</button>
           <span class="bridge-dot" id="sessionDot" aria-hidden="true"></span>
         </div>
-        <p class="bridge-note">Nothing but this server is contacted. JMAP runs over HTTPS, so the page speaks the protocol itself — no SMTP socket, no local helper.</p>
+        <p class="bridge-note" id="bridgeNote">Browsers can’t open SMTP sockets; the local post office does the sending. This page only talks to 127.0.0.1.</p>
+        <p class="bridge-note" id="jmapNote" hidden>JMAP is JSON over HTTPS, so this page reaches the server itself. Fill the server and a password or an API token.</p>
 
         <button class="send-btn" id="send" type="button">
           <span id="sendLabel">Send the letter</span>
@@ -873,7 +919,7 @@ input::-ms-reveal,input::-ms-clear{display:none}
         <div class="mailbox" id="mailbox"></div>
 
         <div class="privacy">
-          <b>Stays in this tab.</b> The page talks only to the server you named, over HTTPS. Your password is never written to storage, logged, or sent anywhere else.
+          <b>Stays in this tab.</b> Your password goes to the address you typed above — a local office, or your own server — and nowhere else: not to storage, not to a log, not to us.
         </div>
       </div>
       <div class="post-foot">
@@ -1283,9 +1329,9 @@ input::-ms-reveal,input::-ms-clear{display:none}
   }
 
   /* ---------- the engine ---------- */
-  /* moonmail compiled to a module: every request document below is built by
-     `jmap.request`, every answer is read by `jmap.read`, and the .eml is
-     written by `compose`. Nothing here reimplements the protocols. */
+  /* moonmail compiled to a module. The bridge path sends what `compose`
+     writes; the JMAP path sends what `jmap.request` builds. Neither is
+     reimplemented here. */
   var engine = null;
   var engineStatus = $('engineStatus'), engineText = $('engineText');
   (async function loadEngine() {
@@ -1308,16 +1354,93 @@ input::-ms-reveal,input::-ms-clear{display:none}
     return parsed.value;
   }
 
-  /* ---------- the session ---------- */
+  /* ---------- which way out ---------- */
+  var mode = 'bridge';
+  var currentTab = 'send';
+  var sendForm = $('sendForm'), receiveForm = $('receiveForm'), jmapForm = $('jmapForm');
+  var bridgeRow = $('bridgeRow'), sessionRow = $('sessionRow');
+  var bridgeNote = $('bridgeNote'), jmapNote = $('jmapNote');
+  var sendLabel = $('sendLabel');
+
+  function paint() {
+    var sending = currentTab === 'send';
+    var jmap = mode === 'jmap';
+    sendForm.hidden = jmap || !sending;
+    receiveForm.hidden = jmap || sending;
+    jmapForm.hidden = !jmap;
+    bridgeRow.hidden = jmap;
+    sessionRow.hidden = !jmap;
+    bridgeNote.hidden = jmap;
+    jmapNote.hidden = !jmap;
+    sendLabel.textContent = sending ? 'Send the letter' : 'Open the mailbox';
+    document.querySelectorAll('.via__opt').forEach(function (button) {
+      button.classList.toggle('is-active', button.getAttribute('data-mode') === mode);
+    });
+    document.querySelectorAll('.tab').forEach(function (tab) {
+      var on = tab.getAttribute('data-tab') === currentTab;
+      tab.classList.toggle('is-active', on);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var previous = currentTab;
+      currentTab = tab.getAttribute('data-tab');
+      if (mode === 'bridge') {
+        carryOver(previous === 'send' ? protoEl.value : 'SMTP', currentTab === 'send' ? 'SMTP' : protoEl.value);
+      }
+      paint();
+      notice(currentTab === 'send'
+        ? 'Credentials stay in this tab. Nothing is stored or uploaded.'
+        : 'The same account, read instead of written.');
+    });
+  });
+
+  document.querySelectorAll('.via__opt').forEach(function (button) {
+    button.addEventListener('click', function () {
+      mode = button.getAttribute('data-mode');
+      paint();
+      notice(mode === 'jmap'
+        ? 'JMAP: the page talks to the server itself, over HTTPS.'
+        : 'Local office: the page hands the letter to 127.0.0.1, and that sends it.');
+    });
+  });
+
+  /* ---------- the local post office ---------- */
+  var bridgeEl = $('bridge'), bridgeDot = $('bridgeDot');
+  var bridgeOk = false;
+  function bridgeBase() { return bridgeEl.value.trim().replace(/\/+$/, ''); }
+
+  async function checkBridge(silent) {
+    var base = bridgeBase();
+    try {
+      var ctl = new AbortController();
+      var timer = setTimeout(function () { ctl.abort(); }, 2200);
+      var res = await fetch(base + '/health', { signal: ctl.signal, headers: { Accept: 'application/json' } });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      bridgeOk = true;
+      bridgeDot.className = 'bridge-dot is-ok';
+      if (!silent) notice('Local post office reached.', 'ok');
+      return true;
+    } catch (e) {
+      bridgeOk = false;
+      bridgeDot.className = 'bridge-dot is-off';
+      if (!silent) notice('No local post office at ' + base + ' — start the bridge or use “Download .eml”.', 'warn');
+      return false;
+    }
+  }
+  $('check').addEventListener('click', function () { checkBridge(false); });
+
+  /* ---------- the JMAP session ---------- */
   var serverEl = $('server'), userEl = $('username'), passEl = $('password');
   var sessionEl = $('sessionUrl'), sessionDot = $('sessionDot');
   var session = null;
   var boxes = null;
   var identitiesCache = null;
 
-  function serverBase() {
-    return serverEl.value.trim().replace(/\/+$/, '');
-  }
+  function serverBase() { return serverEl.value.trim().replace(/\/+$/, ''); }
 
   /* Some JMAP servers take HTTP basic auth, some take a bearer token (Fastmail
      mints those in its settings). Try basic first, and if the server says no,
@@ -1393,7 +1516,12 @@ input::-ms-reveal,input::-ms-clear{display:none}
     sessionDot.className = 'bridge-dot';
   }
 
-  $('check').addEventListener('click', async function () {
+  function pick(list, role) {
+    for (var i = 0; i < list.length; i++) if (list[i].role === role) return list[i];
+    return list[0] || null;
+  }
+
+  $('checkJmap').addEventListener('click', async function () {
     try {
       forgetSession();
       await openSession();
@@ -1406,16 +1534,71 @@ input::-ms-reveal,input::-ms-clear{display:none}
     }
   });
 
-  function pick(list, role) {
-    for (var i = 0; i < list.length; i++) if (list[i].role === role) return list[i];
-    return list[0] || null;
+  /* ---------- settings carried across Send / Receive ---------- */
+  var smtpHost = $('smtpHost'), smtpPort = $('smtpPort'), smtpSec = $('smtpSec');
+  var smtpUser = $('smtpUser'), smtpPass = $('smtpPass');
+  var protoEl = $('proto'), recvHost = $('recvHost'), recvPort = $('recvPort');
+  var recvSec = $('recvSec'), recvUser = $('recvUser'), recvPass = $('recvPass');
+
+  function isAuto(el) {
+    var auto = el.getAttribute('data-auto');
+    return el.value.trim() === '' || (auto !== null && el.value === auto);
   }
+  function setAuto(el, value) { el.value = value; el.setAttribute('data-auto', value); }
+
+  [[smtpUser, recvUser], [smtpPass, recvPass]].forEach(function (pair) {
+    pair.forEach(function (el) {
+      el.addEventListener('input', function () {
+        var twin = el === pair[0] ? pair[1] : pair[0];
+        if (twin.value !== el.value) twin.value = el.value;
+      });
+    });
+  });
+
+  function hostFor(host, to) {
+    var domain = host.trim().replace(/^(smtp|imap|pop3?|mail)\./i, '');
+    if (!domain) return '';
+    return (to === 'IMAP' ? 'imap.' : to === 'POP3' ? 'pop.' : 'smtp.') + domain;
+  }
+  function portFor(to) { return to === 'IMAP' ? '993' : to === 'POP3' ? '995' : '587'; }
+  function secFor(to) { return to === 'SMTP' ? 'STARTTLS' : 'TLS'; }
+
+  setAuto(smtpPort, smtpPort.value);
+  setAuto(smtpSec, smtpSec.value);
+  setAuto(recvPort, recvPort.value);
+  setAuto(recvSec, recvSec.value);
+
+  function carryOver(from, to) {
+    var srcHost = from === 'SMTP' ? smtpHost : recvHost;
+    var dstHost = to === 'SMTP' ? smtpHost : recvHost;
+    if (srcHost.value.trim() && isAuto(dstHost)) {
+      var next = hostFor(srcHost.value, to);
+      if (next) setAuto(dstHost, next);
+    }
+    var dstPort = to === 'SMTP' ? smtpPort : recvPort;
+    var dstSec = to === 'SMTP' ? smtpSec : recvSec;
+    if (isAuto(dstPort)) setAuto(dstPort, portFor(to));
+    if (isAuto(dstSec)) setAuto(dstSec, secFor(to));
+  }
+
+  smtpUser.addEventListener('input', function () {
+    var v = smtpUser.value.trim();
+    if (isAuto(fromEl) && v.indexOf('@') > 0) { setAuto(fromEl, v); updateCard(); }
+  });
+
+  protoEl.addEventListener('change', function () {
+    var to = protoEl.value;
+    var known = smtpHost.value.trim() || recvHost.value;
+    if (isAuto(recvHost) && known) setAuto(recvHost, hostFor(known, to));
+    if (isAuto(recvPort)) setAuto(recvPort, portFor(to));
+  });
 
   /* ---------- wire ---------- */
   var wireLog = $('wireLog'), wireHint = $('wireHint');
   function renderWire(lines, sample) {
     wireLog.innerHTML = lines.map(function (line) {
       var dir = line[0], text = String(line[1]);
+      if (/AUTH/i.test(text) && text.length > 16) text = text.slice(0, 14) + ' ••••••••';
       var safe = esc(text);
       var m = safe.match(/^(\d{3})/);
       if (m) {
@@ -1426,25 +1609,51 @@ input::-ms-reveal,input::-ms-clear{display:none}
     }).join('');
     wireHint.textContent = sample ? 'Sample transcript — no network.' : 'Live conversation.';
   }
-  var SAMPLE_WIRE = [
-    ['C', 'Mailbox/get — the mailboxes this account has'],
-    ['S', '5 mailboxes: Inbox, Drafts, Sent, Archive, Trash'],
-    ['C', 'Email/query — newest first in Inbox'],
-    ['S', '10 ids'],
-    ['C', 'Email/get — subject, from, receivedAt, preview'],
-    ['S', '10 letters'],
-    ['C', 'Email/set — a draft, with textBody and bodyValues'],
-    ['S', 'created: draft → e-9f31'],
-    ['C', 'EmailSubmission/set — hand e-9f31 to the submission server'],
-    ['S', 'created: submission → s-4c07']
+
+  var SAMPLE_BRIDGE = [
+    ['S', '220 desk.local ESMTP MoonMail'],
+    ['C', 'EHLO desk.local'],
+    ['S', '250-desk.local greets you'],
+    ['S', '250-SIZE 10240000'],
+    ['S', '250-8BITMIME'],
+    ['S', '250-STARTTLS'],
+    ['S', '250 AUTH PLAIN LOGIN'],
+    ['C', 'STARTTLS'],
+    ['S', '220 2.0.0 Ready to start TLS'],
+    ['C', 'AUTH PLAIN ••••••••'],
+    ['S', '235 2.7.0 Authentication successful'],
+    ['C', 'MAIL FROM:<you@example.com> SIZE=4821'],
+    ['S', '250 2.1.0 Ok'],
+    ['C', 'RCPT TO:<friend@example.com>'],
+    ['S', '250 2.1.5 Ok'],
+    ['C', 'DATA'],
+    ['S', '354 End data with <CR><LF>.<CR><LF>'],
+    ['S', '250 2.0.0 Ok: queued as 7F3A'],
+    ['C', 'QUIT'],
+    ['S', '221 2.0.0 Bye']
   ];
-  $('sampleWire').addEventListener('click', function () { renderWire(SAMPLE_WIRE, true); });
+  var SAMPLE_JMAP = [
+    ['C', 'Mailbox/get — the mailboxes this account has'],
+    ['S', 'Mailbox/get — 5 mailboxes'],
+    ['C', 'Email/query — newest first in Inbox'],
+    ['S', 'Email/query — 10 ids'],
+    ['C', 'Email/get — subject, from, receivedAt, preview'],
+    ['S', 'Email/get — 10 letters'],
+    ['C', 'Email/set — a draft, with textBody and bodyValues'],
+    ['S', 'Email/set — created: draft → e-9f31'],
+    ['C', 'EmailSubmission/set — hand e-9f31 to the submission server'],
+    ['S', 'EmailSubmission/set — created: submission → s-4c07']
+  ];
+  $('sampleWire').addEventListener('click', function () {
+    renderWire(mode === 'jmap' ? SAMPLE_JMAP : SAMPLE_BRIDGE, true);
+  });
 
   /* ---------- payload ---------- */
   function gather() {
     return {
       to: toEl.value.trim(),
       cc: ccEl.value.trim(),
+      bcc: $('bcc') && $('bcc').value.trim(),
       subject: subjectEl.value.trim(),
       text: bodyEl.value,
       from: fromEl.value.trim()
@@ -1456,63 +1665,90 @@ input::-ms-reveal,input::-ms-clear{display:none}
     return value.split(',').map(function (part) { return part.trim(); }).filter(function (part) { return part; });
   }
 
+  function bytesToBase64(bytes) {
+    if (typeof bytes === 'string') bytes = new TextEncoder().encode(bytes);
+    var out = '', chunk = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunk) {
+      out += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(out);
+  }
+
+  function writeLetter() {
+    var d = gather();
+    var built = engineCall('compose', {
+      from: d.from || userEl.value,
+      to: splitList(d.to),
+      cc: splitList(d.cc),
+      subject: d.subject || 'A letter from the desk',
+      text: d.text + '\n\n--\n' + DISCLAIMER,
+      html: md(d.text) + '<p style="color:#667a70;font-size:12px">' + esc(DISCLAIMER) + '</p>'
+    });
+    return built;
+  }
+
   function renderMailbox(letters) {
     var box = $('mailbox');
     if (!letters.length) {
-      box.innerHTML = '<p class="hint">Nothing in the inbox yet.</p>';
+      box.innerHTML = '<p class="hint">The mailbox is empty.</p>';
       return;
     }
     box.innerHTML = letters.map(function (letter) {
-      var when = letter.receivedAt ? letter.receivedAt.slice(0, 16).replace('T', ' ') : '';
       return '<div class="mail-item' + (letter.unread ? ' is-unread' : '') + '">'
         + '<b>' + esc(letter.from || 'unknown sender') + '</b>'
-        + '<span>' + esc(letter.subject) + (when ? ' · ' + esc(when) : '') + '</span>'
-        + '<p>' + esc(letter.preview) + '</p>'
+        + '<span>' + esc(letter.subject || '(no subject)') + (letter.when ? ' · ' + esc(letter.when) : '') + '</span>'
+        + '<p>' + esc(letter.preview || '') + '</p>'
         + '</div>';
     }).join('');
   }
 
-  async function openMailbox() {
+  /* ---------- send, the local way ---------- */
+  async function sendViaBridge() {
+    var d = gather();
+    if (!d.to || !d.from) { notice('Add a recipient and a From address first.', 'warn'); return; }
+    if (!engine) { notice('The engine is still loading — one moment.', 'warn'); return; }
+    var host = $('smtpHost').value.trim(), username = $('smtpUser').value, password = $('smtpPass').value;
+    if (!host || !username || !password) { notice('Fill in the SMTP host, username and password.', 'warn'); return; }
+    if (!bridgeOk) {
+      var ok = await checkBridge(true);
+      if (!ok) { notice('No local post office at ' + bridgeBase() + '. Start the bridge, or download the .eml and send it with moonmail/net.', 'warn'); return; }
+    }
     try {
-      if (!session) await openSession();
-      var lines = [];
-      var list = await mailboxes();
-      lines.push(['C', 'Mailbox/get · ' + list.length + ' mailboxes']);
-      var inbox = pick(list, 'inbox');
-      if (!inbox) throw new Error('this account has no inbox');
-      lines.push(['S', 'Mailbox/get · Inbox holds ' + inbox.total + ', ' + inbox.unread + ' unread']);
-
-      var query = engineCall('jmap.request', {
-        op: 'query', account: session.accountId, mailbox: inbox.id, limit: 10
+      var letter = writeLetter();
+      var payload = {
+        host: host,
+        port: Number($('smtpPort').value || 0),
+        security: $('smtpSec').value,
+        username: username,
+        password: password,
+        from: d.from,
+        to: d.to,
+        cc: d.cc,
+        bcc: d.bcc,
+        subject: d.subject,
+        message: bytesToBase64(letter.message)
+      };
+      var res = await fetch(bridgeBase() + '/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-      var ids = engineCall('jmap.read', { op: 'query', tag: query.tag, body: await callJmap(query) });
-      lines.push(['S', 'Email/query · ' + ids.length + ' ids, newest first']);
-
-      var letters = [];
-      if (ids.length) {
-        var get = engineCall('jmap.request', { op: 'get', account: session.accountId, ids: ids });
-        letters = engineCall('jmap.read', { op: 'get', tag: get.tag, body: await callJmap(get) });
-        lines.push(['S', 'Email/get · ' + letters.length + ' letters']);
-      }
-      renderWire(lines, false);
-      renderMailbox(letters);
-      notice('Mailbox opened. ' + letters.length + ' recent letter(s).', 'ok');
+      var j = await res.json();
+      if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+      renderWire((j.transcript || []).map(function (l) { return [l.dir, l.text]; }), false);
+      notice('Sent. The wire log has the conversation.', 'ok');
+      $('smtpPass').value = '';
+      $('recvPass').value = '';
     } catch (e) {
-      sessionDot.className = 'bridge-dot is-off';
-      notice('Could not open the mailbox: ' + e.message, 'warn');
+      notice('Could not send: ' + e.message, 'warn');
     }
   }
 
-  async function sendLetter() {
+  /* ---------- send, the JMAP way ---------- */
+  async function sendViaJmap() {
     var d = gather();
-    if (!d.to || splitList(d.to).length === 0) {
-      notice('Add a recipient first.', 'warn');
-      return;
-    }
-    if (!engine) {
-      notice('The engine is still loading — one moment.', 'warn');
-      return;
-    }
+    if (!d.to || splitList(d.to).length === 0) { notice('Add a recipient first.', 'warn'); return; }
+    if (!engine) { notice('The engine is still loading — one moment.', 'warn'); return; }
     try {
       if (!session) await openSession();
       var lines = [];
@@ -1550,21 +1786,87 @@ input::-ms-reveal,input::-ms-clear{display:none}
     }
   }
 
-  function downloadEml() {
-    if (!engine) {
-      notice('The engine is still loading — one moment.', 'warn');
-      return;
-    }
-    var d = gather();
+  /* ---------- read back ---------- */
+  async function openViaBridge() {
+    if (!engine) { notice('The engine is still loading — one moment.', 'warn'); return; }
+    var ok = await checkBridge(true);
+    if (!ok) { notice('No local post office at ' + bridgeBase() + '.', 'warn'); return; }
+    var cfg = {
+      protocol: protoEl.value,
+      host: recvHost.value.trim(),
+      port: Number(recvPort.value || 0),
+      security: recvSec.value,
+      username: recvUser.value,
+      password: recvPass.value,
+      mailbox: $('mailboxName').value.trim() || 'INBOX'
+    };
+    if (!cfg.host || !cfg.username || !cfg.password) { notice('Fill in the receive host, username and password.', 'warn'); return; }
     try {
-      var built = engineCall('compose', {
-        from: d.from || userEl.value,
-        to: splitList(d.to),
-        cc: splitList(d.cc),
-        subject: d.subject || 'A letter from the desk',
-        text: d.text + '\n\n--\n' + DISCLAIMER
+      var res = await fetch(bridgeBase() + '/receive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg)
       });
-      var blob = new Blob([built.message], { type: 'message/rfc822' });
+      var j = await res.json();
+      if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+      var messages = (j.messages || []).map(function (m) {
+        return { from: m.from, subject: m.subject, when: m.date, preview: m.preview, unread: m.unread };
+      });
+      renderMailbox(messages);
+      notice('Mailbox opened. ' + messages.length + ' message(s).', 'ok');
+      $('recvPass').value = '';
+    } catch (e) {
+      notice('Could not open the mailbox: ' + e.message, 'warn');
+    }
+  }
+
+  async function openViaJmap() {
+    try {
+      if (!session) await openSession();
+      var lines = [];
+      var list = await mailboxes();
+      lines.push(['C', 'Mailbox/get · ' + list.length + ' mailboxes']);
+      var inbox = pick(list, 'inbox');
+      if (!inbox) throw new Error('this account has no inbox');
+      lines.push(['S', 'Mailbox/get · Inbox holds ' + inbox.total + ', ' + inbox.unread + ' unread']);
+
+      var query = engineCall('jmap.request', {
+        op: 'query', account: session.accountId, mailbox: inbox.id, limit: 10
+      });
+      var ids = engineCall('jmap.read', { op: 'query', tag: query.tag, body: await callJmap(query) });
+      lines.push(['S', 'Email/query · ' + ids.length + ' ids, newest first']);
+
+      var letters = [];
+      if (ids.length) {
+        var get = engineCall('jmap.request', { op: 'get', account: session.accountId, ids: ids });
+        letters = engineCall('jmap.read', { op: 'get', tag: get.tag, body: await callJmap(get) });
+        lines.push(['S', 'Email/get · ' + letters.length + ' letters']);
+      }
+      renderWire(lines, false);
+      renderMailbox(letters.map(function (letter) {
+        return {
+          from: letter.from,
+          subject: letter.subject,
+          when: letter.receivedAt ? letter.receivedAt.slice(0, 16).replace('T', ' ') : '',
+          preview: letter.preview,
+          unread: letter.unread
+        };
+      }));
+      notice('Mailbox opened. ' + letters.length + ' recent letter(s).', 'ok');
+    } catch (e) {
+      sessionDot.className = 'bridge-dot is-off';
+      notice('Could not open the mailbox: ' + e.message, 'warn');
+    }
+  }
+
+  function sendLetter() { return mode === 'jmap' ? sendViaJmap() : sendViaBridge(); }
+  function openMailbox() { return mode === 'jmap' ? openViaJmap() : openViaBridge(); }
+
+  function downloadEml() {
+    if (!engine) { notice('The engine is still loading — one moment.', 'warn'); return; }
+    try {
+      var letter = writeLetter();
+      var blob = new Blob([letter.message], { type: 'message/rfc822' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
@@ -1573,7 +1875,7 @@ input::-ms-reveal,input::-ms-clear{display:none}
       a.click();
       a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      notice('Wrote ' + built.bytes + ' bytes of MIME with moonmail. Send it with any client.', 'ok');
+      notice('Wrote ' + letter.bytes + ' bytes of MIME with moonmail. Send it with any client.', 'ok');
     } catch (e) {
       notice('Could not build the message: ' + e.message, 'warn');
     }
@@ -1584,11 +1886,21 @@ input::-ms-reveal,input::-ms-clear{display:none}
   });
   $('download').addEventListener('click', downloadEml);
   $('forget').addEventListener('click', function () {
-    ['server', 'username', 'password', 'from'].forEach(function (id) { $(id).value = ''; });
+    ['smtpHost', 'smtpUser', 'smtpPass', 'from', 'recvHost', 'recvUser', 'recvPass', 'server', 'username', 'password']
+      .forEach(function (id) {
+        var el = $(id);
+        if (!el) return;
+        el.value = '';
+        el.removeAttribute('data-auto');
+      });
     forgetSession();
+    bridgeDot.className = 'bridge-dot';
+    bridgeOk = false;
     $('mailbox').innerHTML = '';
     notice('Credentials cleared from this tab.');
   });
+
+  paint();
 
   /* ---------- init ---------- */
   updateCard();
