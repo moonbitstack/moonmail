@@ -180,36 +180,6 @@ fn smtp_tour(raw : Bytes) -> Unit raise @smtp.Refused {
 }
 
 ///|
-/// An in-memory NNTP server.
-struct NntpScript {
-  inbox : Array[String]
-  sent : Array[String]
-}
-
-///|
-fn NntpScript::new(lines : Array[String]) -> NntpScript {
-  let inbox : Array[String] = []
-  let n = lines.length()
-  for i in 0..<n {
-    inbox.push(lines[n - 1 - i])
-  }
-  { inbox, sent: [], }
-}
-
-///|
-impl @nntp.NntpIo for NntpScript with fn write_line(self, line) -> Unit raise @nntp.NntpError {
-  self.sent.push(line)
-}
-
-///|
-impl @nntp.NntpIo for NntpScript with fn read_line(self) -> String raise @nntp.NntpError {
-  match self.inbox.pop() {
-    Some(line) => line
-    None => raise @nntp.NntpError::Io(msg="tour nntp script ended")
-  }
-}
-
-///|
 /// A client session against a recorded server: the server's lines go in one
 /// by one, and the client's writes in between are dropped.
 fn imap_tour() -> Unit raise @imap.Refused {
@@ -347,24 +317,6 @@ fn main {
     e => println("smtp tour stopped: " + @debug.to_string(e))
   }
 
-  // --------------------------------------------------------------- nntp
-  let nntp_script = NntpScript::new([
-    "200 posting ok", "211 2 1 2 comp.lang.moonbit", "220 1 <m1@example.com>", "Subject: hi",
-    "", "body", ".",
-  ])
-  let nntp = @nntp.Nntp::new(nntp_script as &@nntp.NntpIo)
-  let _ = nntp.greeting() catch { _ => "" }
-  let mut group_count = 0
-  let _ = try {
-    group_count = nntp.group("comp.lang.moonbit").count
-  } catch {
-    _ => ()
-  }
-  let article = nntp.article("1") catch { _ => "" }
-  println("--- nntp")
-  println("group count  -> \{group_count}")
-  println("article len  -> \{article.length()}")
-
   // --------------------------------------------------------------- imap
   imap_tour() catch {
     e => println("imap tour stopped: " + @debug.to_string(e))
@@ -414,65 +366,6 @@ fn main {
   }
   println("set bytes     -> \{set_body.length()}")
   println("created id    -> \{created_id}")
-
-  // --------------------------------------------------------------- mapi
-  //
-  // MAPI over HTTP: the ROP buffer framing, a little-endian size and the ROPs.
-  let rops = @mapi.RopBuffer::new()
-  rops.add(@mapi.rop_logon, 0, b""[:])
-  rops.add(@mapi.rop_release, 0, b""[:])
-  let framed = rops.encode()
-  // A full request sequence: log on, open the inbox, ask for a hierarchy
-  // table, then release what was opened. The payload builders lay the fields
-  // out per MS-OXCROPS; none of this has been checked against a live server.
-  let session = @mapi.RopBuffer::new()
-  session.add(@mapi.rop_logon, 0, @mapi.LogonRequest::new("alice").encode()[:])
-  session.add(
-    @mapi.rop_open_folder,
-    1,
-    @mapi.rop_open_folder_request(1, 2, 258L)[:],
-  )
-  session.add(
-    @mapi.rop_get_hierarchy_table,
-    1,
-    @mapi.rop_get_table_request(2, 3, 0)[:],
-  )
-  session.add(
-    @mapi.rop_set_columns,
-    1,
-    @mapi.rop_set_columns_request(3, 0, [
-      @mapi.prop_tag(@mapi.pid_tag_display_name, @mapi.pt_unicode),
-      @mapi.prop_tag(@mapi.pid_tag_content_count, @mapi.pt_long),
-    ])[:],
-  )
-  session.add(
-    @mapi.rop_query_rows,
-    1,
-    @mapi.rop_query_rows_request(3, 0, true, 50)[:],
-  )
-  session.add(@mapi.rop_release, 1, @mapi.rop_release_request(3)[:])
-  let session_bytes = session.encode()
-  println("--- mapi")
-  println("rop bytes     -> \{framed.length()}")
-  println("rop size      -> \{@mapi.rop_size(framed[:]) catch { _ => -1 }}")
-  println("session rops  -> \{session.count()}")
-  println(
-    "session size  -> \{@mapi.rop_size(session_bytes[:]) catch { _ => -1 }}",
-  )
-
-  // ---------------------------------------------------------- extensions
-  //
-  // The smaller pieces each protocol grew: overview rows on NNTP.
-  let over_script = NntpScript::new([
-    "200 posting ok", "224 overview information follows", "1\tSubject one\talice@example.com",
-    "2\tSubject two\tbob@example.com", ".",
-  ])
-  let news = @nntp.Nntp::new(over_script as &@nntp.NntpIo)
-  let _ = news.greeting() catch { _ => "" }
-  let rows = news.over("1-2") catch { _ => [] }
-
-  println("--- extensions")
-  println("over rows    -> \{rows.length()}")
 
   // --------------------------------------------------------------- dkim
   //

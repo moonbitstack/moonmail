@@ -1,6 +1,0 @@
-// NNTP client (RFC 3977): the dialogue a client has with a news server, kept
-// free of sockets so a caller supplies the transport.
-// https://www.rfc-editor.org/rfc/rfc3977
-import {
-  "moonbitlang/core/encoding/utf8",
-}

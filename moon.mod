@@ -14,13 +14,12 @@ keywords = [
   "smtp",
   "imap",
   "pop3",
-  "nntp",
   "dkim",
   "mime",
   "moonbit",
 ]
 
-description = "Email for MoonBit: the message model, MIME and DKIM, and the POP3, SMTP, LMTP, NNTP, IMAP and JMAP dialogues."
+description = "Email for MoonBit: the message model, MIME and DKIM, and SMTP, LMTP, IMAP, POP3 and JMAP."
 
 source = "src"
 

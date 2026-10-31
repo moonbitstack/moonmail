@@ -6,7 +6,6 @@ package "moonbitstack/moonmail/examples/tour"
 // Errors
 
 // Types and methods
-type NntpScript
 
 // Type aliases
 

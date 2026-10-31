@@ -2,9 +2,9 @@
 
 Email for MoonBit: read an RFC 5322 message into a tree and write it back out,
 the MIME transfer encodings it carries, DKIM signing and verification, and the
-POP3, SMTP/LMTP, NNTP and IMAP dialogues. Bytes in, data out — no sockets, no
-files. Every protocol talks over a transport trait you implement, so a socket,
-a TLS stream and a test all look alike.
+SMTP/LMTP, IMAP and POP3 dialogues. The protocols are state machines with no
+I/O, octets in and replies out, so a socket, a TLS stream and a test all look
+alike; `@moonmail/net` carries them over moonnet.
 
 ```moonbit
 let msg = @moonmail.parse(raw[:])
@@ -46,8 +46,6 @@ moon run src/examples/tour
 - **Over a socket** (`@moonmail/net`, native and wasm) — the SMTP, LMTP, IMAP
   and POP3 state machines on moonnet: implicit TLS, STARTTLS that a server must
   offer, or the clear; sending one message in one call.
-- **NNTP** (`@moonmail/nntp`) — RFC 3977 news: groups, articles, posting,
-  `LISTGROUP`, `OVER`/`HDR`, `NEWGROUPS`/`NEWNEWS`, `AUTHINFO`, `CAPABILITIES`.
 - **IMAP** (`@moonmail/imap`) — IMAP4rev2 client with no I/O (RFC 9051) that
   also speaks to IMAP4rev1 servers: the response grammar with literals and
   response codes, pipelined UID commands, `IDLE`, `CONDSTORE`, `LITERAL+`,
@@ -56,10 +54,6 @@ moon run src/examples/tour
   method responses as JSON; `Email/set`, `Mailbox/set` and
   `EmailSubmission/set` with their result parsing, `Identity/get`,
   `Thread/get`, and a draft builder; `@moonmail/jmap/fetch` posts over moonfetch.
-- **MAPI** (`@moonmail/mapi`) — the MS-OXCMAPIHTTP envelope, the MS-OXCROPS ROP
-  buffer framing, property tags with the common `PidTag` ids, and request
-  builders for logon, open folder/message, tables, columns, rows and
-  `GetPropertiesSpecific`. See the caveat below.
 - **DKIM** (`@moonmail/dkim`) — RFC 6376 canonicalization (simple and relaxed),
   body hash, and RSA-SHA256 sign and verify.
 
@@ -158,19 +152,6 @@ imap.authenticate(@sasl.OAuthBearer::new(token, username="alice@example.com"))
 A mechanism of your own implements `name`, `start` and `step`, and `finish`
 when it expects proof from the server.
 
-## NNTP
-
-```moonbit
-let nntp = @nntp.Nntp::new(connection as &@nntp.NntpIo)
-try {
-  let _ = nntp.greeting()
-  let group = nntp.group("comp.lang.moonbit")
-  let article = nntp.article(group.last.to_string())
-} catch {
-  _ => ()
-}
-```
-
 ## IMAP
 
 Each command returns its tag number; `feed` reports untagged responses as
@@ -229,17 +210,8 @@ let result = @jmap.parse_set_response(response.responses[0].arguments)
 
 ## What it is not
 
-No network layer of its own: every protocol talks over a trait you implement.
-JMAP ships a moonfetch adapter (native).
-
-**MAPI is the honest half of the story.** The envelope, the ROP framing, the
-property tags and the request builders follow MS-OXCMAPIHTTP and MS-OXCROPS, and
-the tests pin their byte layout — but none of it has been checked against a live
-Exchange server, so treat those octets as a starting point. Reading ROP
-*responses* is only done as far as the shared header and the logon reply;
-per-operation row data is left to the caller. `STARTTLS` is likewise the command
-only: the TLS upgrade is the transport's job, since this library holds no TLS
-stack.
+The protocol packages open no socket; `@moonmail/net` does that on the native
+and wasm backends, and JMAP ships a moonfetch adapter.
 
 ## The gate
 
