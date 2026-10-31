@@ -15578,6 +15578,26 @@ function _M0FP312moonbitstack8moonmail6engine5field(input, name) {
     return undefined;
   }
 }
+function _M0FP312moonbitstack8moonmail6engine4flag(input, name) {
+  if (input.$tag === 6) {
+    const _Object = input;
+    const _map = _Object._0;
+    const _bind = _M0MPB3Map3getGsRPB4JsonE(_map, name);
+    if (_bind === undefined) {
+      return false;
+    } else {
+      const _Some = _bind;
+      const _x = _Some;
+      if (_x.$tag === 1) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+}
 function _M0FP312moonbitstack8moonmail6engine4list(input, name) {
   const out = [];
   if (input.$tag === 6) {
@@ -15694,37 +15714,94 @@ function _M0FP312moonbitstack8moonmail6engine7compose(input) {
         }
       }
     }
+    const _bind$3 = _M0FP312moonbitstack8moonmail6engine5field(input, "attachments");
+    if (_bind$3 === undefined) {
+    } else {
+      const _Some = _bind$3;
+      const _x = _Some;
+      if (_x.$tag === 5) {
+        const _Array = _x;
+        const _items = _Array._0;
+        const _bind$4 = _items.length;
+        let _tmp = 0;
+        while (true) {
+          const _ = _tmp;
+          if (_ < _bind$4) {
+            const item = _items[_];
+            let bytes;
+            let _try_err$2;
+            _L$2: {
+              _L$3: {
+                const _bind$5 = _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail6engine4text(item, "data"), "");
+                const _bind$6 = _M0FP312moonbitstack8moonbase6base646decode(new _M0TPC16string10StringView(_bind$5, 0, _bind$5.length), undefined, -1, -1);
+                if (_bind$6.$tag === 1) {
+                  const _ok = _bind$6;
+                  bytes = _ok._0;
+                } else {
+                  const _err = _bind$6;
+                  _try_err$2 = _err._0;
+                  break _L$3;
+                }
+                break _L$2;
+              }
+              bytes = undefined;
+            }
+            if (bytes === undefined) {
+            } else {
+              const _Some$2 = bytes;
+              const _data = _Some$2;
+              if (_data.length > 0) {
+                const name = _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail6engine4text(item, "name"), "attachment");
+                const kind = _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail6engine4text(item, "type"), "application/octet-stream");
+                const _bind$5 = _M0FP312moonbitstack8moonmail6engine4text(item, "cid");
+                if (_bind$5 === undefined) {
+                  _M0MPC15array5Array4pushGRP312moonbitstack8moonmail4jmap10InvocationE(attachments, _M0MP212moonbitstack8moonmail10Attachment11new_2einner(name, _data, kind, _M0FP312moonbitstack8moonmail6engine4flag(item, "inline"), undefined));
+                } else {
+                  const _Some$3 = _bind$5;
+                  const _cid = _Some$3;
+                  _M0MPC15array5Array4pushGRP312moonbitstack8moonmail4jmap10InvocationE(attachments, _M0MP212moonbitstack8moonmail10Attachment11new_2einner(name, _data, kind, true, _cid));
+                }
+              }
+            }
+            _tmp = _ + 1 | 0;
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+    }
     const carried = attachments.length === 0 ? _M0DTPC16option6OptionGRPB5ArrayGRP212moonbitstack8moonmail10AttachmentEE4None__ : new _M0DTPC16option6OptionGRPB5ArrayGRP212moonbitstack8moonmail10AttachmentEE4Some(attachments);
     const _tmp = _M0MPC15array5Array2atGUssEE(_M0MP212moonbitstack8moonmail7Address9mailboxes(sender), 0);
-    const _bind$3 = _M0FP312moonbitstack8moonmail6engine9addresses(_M0FP312moonbitstack8moonmail6engine4list(input, "to"));
+    const _bind$4 = _M0FP312moonbitstack8moonmail6engine9addresses(_M0FP312moonbitstack8moonmail6engine4list(input, "to"));
     let _tmp$2;
-    if (_bind$3.$tag === 1) {
-      const _ok = _bind$3;
-      _tmp$2 = _ok._0;
-    } else {
-      const _err = _bind$3;
-      _try_err = _err._0;
-      break _L;
-    }
-    const _tmp$3 = _tmp$2;
-    const _tmp$4 = _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail6engine4text(input, "subject"), "");
-    const _bind$4 = _M0FP312moonbitstack8moonmail6engine9addresses(_M0FP312moonbitstack8moonmail6engine4list(input, "cc"));
-    let _tmp$5;
     if (_bind$4.$tag === 1) {
       const _ok = _bind$4;
-      _tmp$5 = _ok._0;
+      _tmp$2 = _ok._0;
     } else {
       const _err = _bind$4;
       _try_err = _err._0;
       break _L;
     }
-    const _bind$5 = _M0MP212moonbitstack8moonmail7Message3new(_tmp, _tmp$3, _tmp$4, body_text, body_html, carried, new _M0DTPC16option6OptionGRPB5ArrayGRP212moonbitstack8moonmail7AddressEE4Some(_tmp$5), undefined, undefined);
-    let message;
+    const _tmp$3 = _tmp$2;
+    const _tmp$4 = _M0MPC16option6Option10unwrap__orGsE(_M0FP312moonbitstack8moonmail6engine4text(input, "subject"), "");
+    const _bind$5 = _M0FP312moonbitstack8moonmail6engine9addresses(_M0FP312moonbitstack8moonmail6engine4list(input, "cc"));
+    let _tmp$5;
     if (_bind$5.$tag === 1) {
       const _ok = _bind$5;
-      message = _ok._0;
+      _tmp$5 = _ok._0;
     } else {
       const _err = _bind$5;
+      _try_err = _err._0;
+      break _L;
+    }
+    const _bind$6 = _M0MP212moonbitstack8moonmail7Message3new(_tmp, _tmp$3, _tmp$4, body_text, body_html, carried, new _M0DTPC16option6OptionGRPB5ArrayGRP212moonbitstack8moonmail7AddressEE4Some(_tmp$5), undefined, undefined);
+    let message;
+    if (_bind$6.$tag === 1) {
+      const _ok = _bind$6;
+      message = _ok._0;
+    } else {
+      const _err = _bind$6;
       _try_err = _err._0;
       break _L;
     }

@@ -75,6 +75,18 @@ fn text(input : Json, name : String) -> String? {
 }
 
 ///|
+fn flag(input : Json, name : String) -> Bool {
+  match input {
+    Json::Object(map) =>
+      match map.get(name) {
+        Some(Json::True) => true
+        _ => false
+      }
+    _ => false
+  }
+}
+
+///|
 fn field(input : Json, name : String) -> Json? {
   match input {
     Json::Object(map) => map.get(name)
@@ -165,6 +177,43 @@ fn compose(input : Json) -> String {
         }
       }
       None => ()
+    }
+    // Files the page hands over: an inline picture shown by `cid:`, or a plain
+    // attachment such as the Markdown the card could not hold.
+    match field(input, "attachments") {
+      Some(Json::Array(items)) =>
+        for item in items {
+          let bytes = try {
+            Some(@base64.decode(text(item, "data").unwrap_or("")))
+          } catch {
+            _ => None
+          }
+          match bytes {
+            Some(data) =>
+              if data.length() > 0 {
+                let name = text(item, "name").unwrap_or("attachment")
+                let kind = text(item, "type").unwrap_or("application/octet-stream")
+                // `id` is what makes a part inline: give it one and the picture
+                // is shown by `cid:`; leave it out and the file is an attachment.
+                match text(item, "cid") {
+                  Some(cid) =>
+                    attachments.push(
+                      @moonmail.Attachment::new(
+                        name, data, media_type=kind, inline=true, id=cid,
+                      ),
+                    )
+                  None =>
+                    attachments.push(
+                      @moonmail.Attachment::new(
+                        name, data, media_type=kind, inline=flag(item, "inline"),
+                      ),
+                    )
+                }
+              }
+            None => ()
+          }
+        }
+      _ => ()
     }
     let carried : Array[@moonmail.Attachment]? = if attachments.is_empty() {
       None
