@@ -75,6 +75,14 @@ fn text(input : Json, name : String) -> String? {
 }
 
 ///|
+fn field(input : Json, name : String) -> Json? {
+  match input {
+    Json::Object(map) => map.get(name)
+    _ => None
+  }
+}
+
+///|
 fn list(input : Json, name : String) -> Array[String] {
   let out : Array[String] = []
   match input {
@@ -129,6 +137,40 @@ fn compose(input : Json) -> String {
     let sender = @moonmail.parse_address(from[:])
     let body_text = text(input, "text")
     let body_html = text(input, "html")
+    // The card the reader picked travels with the letter: an inline part the
+    // HTML body shows by `cid:`, so the photograph arrives as part of the
+    // message rather than as a link that a client may refuse to load.
+    let attachments : Array[@moonmail.Attachment] = []
+    match field(input, "image") {
+      Some(image) => {
+        let carried = try {
+          Some(@base64.decode(text(image, "data").unwrap_or("")))
+        } catch {
+          _ => None
+        }
+        match carried {
+          Some(data) =>
+            if data.length() > 0 {
+              attachments.push(
+                @moonmail.Attachment::new(
+                  text(image, "name").unwrap_or("card.jpg"),
+                  data,
+                  media_type=text(image, "type").unwrap_or("image/jpeg"),
+                  inline=true,
+                  id=text(image, "cid").unwrap_or("card"),
+                ),
+              )
+            }
+          None => ()
+        }
+      }
+      None => ()
+    }
+    let carried : Array[@moonmail.Attachment]? = if attachments.is_empty() {
+      None
+    } else {
+      Some(attachments)
+    }
     let message = @moonmail.Message::new(
       from=@moonmail.Address::mailboxes(sender)[0],
       to=addresses(list(input, "to")),
@@ -136,6 +178,7 @@ fn compose(input : Json) -> String {
       subject=text(input, "subject").unwrap_or(""),
       text?=body_text,
       html?=body_html,
+      attachments?=carried,
     )
     let bytes = message.encode()
     ok(
