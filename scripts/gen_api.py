@@ -98,6 +98,18 @@ PACKAGES = [
         "specs": ["RFC 1939", "RFC 2449"],
     },
     {
+        "dir": "src/jmap",
+        "anchor": "jmap",
+        "path": "moonmail/jmap",
+        "title": "The protocol that fits in a page",
+        "photo": "meadow",
+        "alt": "A green meadow under soft light",
+        "tilt": ".3deg",
+        "blurb": "JMAP as documents: the session, the request envelope, the "
+                 "answers. No socket, which is how a browser can speak it.",
+        "specs": ["RFC 8620", "RFC 8621", "no I/O"],
+    },
+    {
         "dir": "src/net",
         "anchor": "net",
         "path": "moonmail/net",

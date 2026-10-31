@@ -623,9 +623,9 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
   <section class="mast">
     <p class="kicker">the catalogue · api reference</p>
     <h1>Every part,<br>on its own <em>card</em><span class="dot">.</span></h1>
-    <p class="lede">Seven packages, one mailroom. Each card below states what a package is for; the slips hanging under it are what the package exposes, in the order you are likely to reach for them.</p>
+    <p class="lede">Eight packages, one mailroom. Each card below states what a package is for; the slips hanging under it are what the package exposes, in the order you are likely to reach for them.</p>
     <div class="facts">
-      <span class="fact" style="--r:-1.4deg"><b>7</b><span>packages</span></span>
+      <span class="fact" style="--r:-1.4deg"><b>8</b><span>packages</span></span>
       <span class="fact" style="--r:1.1deg"><b>3</b><span>protocols</span></span>
       <span class="fact" style="--r:-.8deg"><b>6</b><span>sasl mechanisms</span></span>
       <span class="fact" style="--r:1.6deg"><b>0.1.0</b><span>interface</span></span>
@@ -647,7 +647,8 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
         <li class="rail__item"><a class="rail__tag" href="#smtp" style="--tilt:.55deg"><span class="rail__no">04</span><span class="rail__name">smtp</span><span class="rail__count">12</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#imap" style="--tilt:-.6deg"><span class="rail__no">05</span><span class="rail__name">imap</span><span class="rail__count">10</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#pop3" style="--tilt:.5deg"><span class="rail__no">06</span><span class="rail__name">pop3</span><span class="rail__count">8</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#net" style="--tilt:-.45deg"><span class="rail__no">07</span><span class="rail__name">net</span><span class="rail__count">6</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#jmap" style="--tilt:.3deg"><span class="rail__no">07</span><span class="rail__name">jmap</span><span class="rail__count">17</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#net" style="--tilt:-.45deg"><span class="rail__no">08</span><span class="rail__name">net</span><span class="rail__count">6</span></a></li>
       
       </ul>
       <div class="rail__plumb" aria-hidden="true">
@@ -1367,12 +1368,161 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
         </div>
       </section>
 
+      <section class="pkg" id="jmap" data-pkg="jmap">
+        <div class="pkg__wire" aria-hidden="true"></div>
+        <figure class="cover" style="--r:.3deg">
+          <div class="cover__photo">
+            <img src="images/meadow.jpg" alt="A green meadow under soft light">
+            <span class="cover__no">07</span>
+            <span class="cover__tape" aria-hidden="true"></span>
+          </div>
+          <figcaption class="cover__text">
+            <span class="cover__path">moonmail/jmap</span>
+            <h2 class="cover__name">The protocol that fits in a page</h2>
+            <p class="cover__desc">JMAP as documents: the session, the request envelope, the answers. No socket, which is how a browser can speak it.</p>
+            <div class="cover__foot">
+              <span class="chip chip--spec">RFC 8620</span>
+              <span class="chip chip--spec">RFC 8621</span>
+              <span class="chip chip--spec">no I/O</span>
+              <span class="chip chip--count">17 entries</span>
+            </div>
+          </figcaption>
+        </figure>
+
+        <div class="thread">
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>created_id</b>(<i>Response</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>discovery_url</b>(<i>String</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_ids</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>String</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>emails</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Email</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>identities</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Identity</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailboxes</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Mailbox</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>resolve</b>(<i>String</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Call</b> { <b>name</b> : <i>String</i>; <b>args</b> : <i>Json</i>; <b>tag</b> : <i>String</i> }</code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Draft</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>from</b> : <i>String</i>?</code></li>
+              <li><code><b>to</b> : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>cc</b> : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>bcc</b> : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>subject</b> : <i>String</i></code></li>
+              <li><code><b>text</b> : <i>String</i></code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>Draft::new</b>(to~ : <i>Array</i>[<i>String</i>], subject~ : <i>String</i>, text~ : <i>String</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Email</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>id</b> : <i>String</i></code></li>
+              <li><code><b>subject</b> : <i>String</i></code></li>
+              <li><code><b>from</b> : <i>String</i>?</code></li>
+              <li><code><b>received_at</b> : <i>String</i>?</code></li>
+              <li><code><b>preview</b> : <i>String</i></code></li>
+              <li><code><b>unread</b> : <i>Bool</i></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Identity</b> { <b>id</b> : <i>String</i>; <b>name</b> : <i>String</i>?; <b>email</b> : <i>String</i> }</code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Invocation</b> { <b>name</b> : <i>String</i>; <b>args</b> : <i>Json</i>; <b>tag</b> : <i>String</i> }</code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Mailbox</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>id</b> : <i>String</i></code></li>
+              <li><code><b>name</b> : <i>String</i></code></li>
+              <li><code><b>role</b> : <i>String</i>?</code></li>
+              <li><code><b>parent_id</b> : <i>String</i>?</code></li>
+              <li><code><b>total</b> : <i>Int32</i></code></li>
+              <li><code><b>unread</b> : <i>Int32</i></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Request</b> { <b>capabilities</b> : <i>Array</i>[<i>String</i>]; <b>calls</b> : <i>Array</i>[<i>Call</i>] }</code>
+            <code class="sig"><span class="k">fn</span> <b>Request::call</b>(<i>Self</i>, <i>String</i>, <i>Json</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_get</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_query</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Int32</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_set_draft</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Draft</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_submission_set</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::identity_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::mailbox_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::new</b>() -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::to_json</b>(<i>Self</i>) -&gt; <i>Json</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::to_string</b>(<i>Self</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Response</b> { <b>invocations</b> : <i>Array</i>[<i>Invocation</i>]; <b>session_state</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>Response::answer</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Invocation</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Response::invocation</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Invocation</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Response::parse</b>(<i>String</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Session</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>username</b> : <i>String</i>?</code></li>
+              <li><code><b>account_id</b> : <i>String</i></code></li>
+              <li><code><b>api_url</b> : <i>String</i></code></li>
+              <li><code><b>download_url</b> : <i>String</i>?</code></li>
+              <li><code><b>upload_url</b> : <i>String</i>?</code></li>
+              <li><code><b>event_source_url</b> : <i>String</i>?</code></li>
+              <li><code><b>state</b> : <i>String</i></code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>Session::parse</b>(<i>String</i>, <i>String</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Malformed</b>(at~ : <i>String</i>)</code></li>
+              <li><code><b>NotAnObject</b></code></li>
+              <li><code><b>Missing</b>(name~ : <i>String</i>)</code></li>
+              <li><code><b>WrongType</b>(name~ : <i>String</i>)</code></li>
+              <li><code><b>BadUrl</b>(url~ : <i>String</i>)</code></li>
+              <li><code><b>Failed</b>(call~ : <i>String</i>, kind~ : <i>String</i>, description~ : <i>String</i>)</code></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
       <section class="pkg" id="net" data-pkg="net">
         <div class="pkg__wire" aria-hidden="true"></div>
         <figure class="cover" style="--r:-.45deg">
           <div class="cover__photo">
             <img src="images/coast.jpg" alt="Clear blue sea and sky">
-            <span class="cover__no">07</span>
+            <span class="cover__no">08</span>
             <span class="cover__tape" aria-hidden="true"></span>
           </div>
           <figcaption class="cover__text">
