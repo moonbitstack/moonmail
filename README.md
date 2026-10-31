@@ -1,8 +1,8 @@
 # moonmail
 
 Email for MoonBit: read an RFC 5322 message into a tree and write it back out,
-the MIME transfer encodings it carries, DKIM signing and verification, and the
-SMTP/LMTP, IMAP and POP3 dialogues. The protocols are state machines with no
+the MIME transfer encodings it carries, DKIM signing and verification, the
+SMTP/LMTP, IMAP and POP3 dialogues, and JMAP over HTTP. The protocols are state machines with no
 I/O, octets in and replies out, so a socket, a TLS stream and a test all look
 alike; `@moonmail/net` carries them over moonnet.
 
@@ -121,6 +121,38 @@ while server.next() is Some(request) {
 
 `lmtp=true` on either side speaks LMTP, where the message gets one reply per
 accepted recipient.
+
+## JMAP
+
+SMTP, IMAP and POP3 begin with a socket, and a browser has none: no API it can
+call opens a TCP connection, so no amount of WebAssembly puts the three on a
+page. That is a limit of the host, not of the library, and it leaves a program
+that only has a page with no way to send or read mail at all.
+
+JMAP is the way out. RFC 8620 puts the same three jobs — list the mailboxes,
+read a letter, send one — over HTTPS as JSON documents, which a page can fetch
+like any other resource. `@moonmail/jmap` therefore builds and reads documents
+and never touches a socket: `Session::parse` resolves the discovery document,
+`Request` writes the method calls, `Response` matches the answers back by tag.
+The same code runs natively and in a page.
+
+The writing desk on the [site](https://moonbitstack.github.io/moonmail/desk.html)
+is that idea with nothing else behind it: a static page, a JMAP server, and a
+password. No helper to install, no port to open.
+
+```moonbit nocheck
+let request = @jmap.Request::new()
+let tag = request.mailbox_get(account_id)          // Mailbox/get
+let body = request.to_string()                     // POST this to session.api_url
+
+let answer = @jmap.Response::parse(reply)
+for box in @jmap.mailboxes(answer, tag) {
+  println("\{box.name}: \{box.unread} unread of \{box.total}")
+}
+```
+
+A server that does not speak JMAP cannot be reached from a page, whatever the
+client does; for those, use `@moonmail/net` from a native program or a relay.
 
 ## Over a socket
 
