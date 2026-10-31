@@ -70,3 +70,30 @@ jobs:
       - name: interfaces are up to date
         run: |
           moon info --target all && git diff --exit-code
+
+  # The pages in docs/ are published by GitHub Pages straight from master. The api page is
+  # generated from the pkg.generated.mbti files, so a change to an interface without a matching
+  # change to the page would ship a reference that lies. The build job above already proves the
+  # .mbti files match the source; this job only has to prove the page matches the .mbti files,
+  # which is why it needs no toolchain and finishes in seconds.
+  docs:
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: api page matches the interfaces
+        run: |
+          python3 scripts/gen_api.py
+          if [ -n "$(git status --porcelain docs/)" ]; then
+            git --no-pager diff --stat -- docs/
+            git --no-pager diff -- docs/api.html | head -60
+            echo "::error file=docs/api.html::docs/ is out of date — run python3 scripts/gen_api.py and commit the result"
+            exit 1
+          fi
+
+      - name: pages are self-contained
+        run: python3 scripts/check_docs.py
