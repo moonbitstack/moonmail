@@ -1,6 +1,6 @@
 name = "moonbitstack/moonmail"
 
-version = "0.1.2"
+version = "0.1.3"
 
 readme = "README.md"
 
@@ -12,10 +12,26 @@ keywords = [
   "email",
   "mail",
   "smtp",
+  "lmtp",
   "imap",
   "pop3",
-  "dkim",
+  "jmap",
   "mime",
+  "dkim",
+  "sasl",
+  "starttls",
+  "xoauth2",
+  "oauthbearer",
+  "scram",
+  "cram-md5",
+  "client",
+  "server",
+  "rfc5321",
+  "rfc5322",
+  "rfc9051",
+  "rfc1939",
+  "rfc6376",
+  "rfc8620",
   "moonbit",
 ]
 
