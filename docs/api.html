@@ -1421,7 +1421,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           </article>
           <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">struct</span> <b>Call</b> { <b>name</b> : <i>String</i>; <b>args</b> : <i>Json</i>; <b>tag</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">struct</span> <b>Call</b> { <b>name</b> : <i>String</i>; <b>args</b> : @json.<i>Json</i>; <b>tag</b> : <i>String</i> }</code>
           </article>
           <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--type">struct</span>
@@ -1454,7 +1454,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           </article>
           <article class="slip" style="--r:.14deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">struct</span> <b>Invocation</b> { <b>name</b> : <i>String</i>; <b>args</b> : <i>Json</i>; <b>tag</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">struct</span> <b>Invocation</b> { <b>name</b> : <i>String</i>; <b>args</b> : @json.<i>Json</i>; <b>tag</b> : <i>String</i> }</code>
           </article>
           <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--type">struct</span>
@@ -1471,19 +1471,19 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Request</b> { <b>capabilities</b> : <i>Array</i>[<i>String</i>]; <b>calls</b> : <i>Array</i>[<i>Call</i>] }</code>
-            <code class="sig"><span class="k">fn</span> <b>Request::call</b>(<i>Self</i>, <i>String</i>, <i>Json</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::call</b>(<i>Self</i>, <i>String</i>, @json.<i>Json</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_destroy</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_get</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_mark_seen</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Bool</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_move</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_query</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Int32</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_set_draft</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Draft</i>) -&gt; <i>String</i></code>
-            <code class="sig"><span class="k">fn</span> <b>Request::email_set_update</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Array</i>[(<i>String</i>, <i>Json</i>)]) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_set_update</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Array</i>[(<i>String</i>, @json.<i>Json</i>)]) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_submission_set</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::identity_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::mailbox_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::new</b>() -&gt; <i>Self</i></code>
-            <code class="sig"><span class="k">fn</span> <b>Request::to_json</b>(<i>Self</i>) -&gt; <i>Json</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::to_json</b>(<i>Self</i>) -&gt; @json.<i>Json</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::to_string</b>(<i>Self</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::using_capability</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i></code>
           </article>
