@@ -4,6 +4,7 @@
 ///|
 /// What this package refuses: a document that is not a JMAP document, a field
 /// it needed and did not find, or an error the server answered with.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   /// The body was not JSON at all.
   Malformed(at~ : String)
@@ -19,7 +20,7 @@ pub(all) suberror Refused {
   /// The server answered `error`. `type` is the registered problem type from
   /// RFC 8620 section 3.6.2, not an HTTP status.
   Failed(call~ : String, kind~ : String, description~ : String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}

@@ -6,6 +6,7 @@
 /// `/.well-known/jmap`. Every URL the document gives may be absolute or
 /// relative to the discovery URL, and the account the mail capabilities live
 /// under has to be picked before any method can be called.
+#derive(Eq, Debug)
 pub(all) struct Session {
   /// The user the server recognised, when it says.
   username : String?
@@ -19,7 +20,7 @@ pub(all) struct Session {
   event_source_url : String?
   /// The `sessionState` to send back when the server offers state strings.
   state : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Session with Eq::{equal, not_equal}

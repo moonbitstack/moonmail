@@ -10,12 +10,13 @@ import {
 pub let limits : Limits
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror Refused {
   Malformed(String)
   Exceeded(limit~ : Int32, got~ : Int32)
   Order(String)
   Unsupported(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
 pub fn Refused::to_repr(Self) -> @debug.Repr
@@ -62,6 +63,7 @@ pub fn Client::uid_expunge(Self, String) -> Int32 raise Refused
 pub fn Client::unselect(Self) -> Int32 raise Refused
 pub fn Client::unsubscribe(Self, String) -> Int32 raise Refused
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Code {
   Alert
   Capability(Array[String])
@@ -78,29 +80,32 @@ pub(all) enum Code {
   CopyUid(Int64, String, String)
   Closed
   Other(String, String?)
-} derive(Eq, @debug.Debug)
+}
 pub fn Code::equal(Self, Self) -> Bool
 pub fn Code::not_equal(Self, Self) -> Bool
 pub fn Code::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Event {
   Data(Response)
   Done(Int32, Status, Code?, String)
   Sasl(@sasl.Refused)
-} derive(Eq, @debug.Debug)
+}
 pub fn Event::equal(Self, Self) -> Bool
 pub fn Event::not_equal(Self, Self) -> Bool
 pub fn Event::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Limits {
   line : Int32
   literal : Int32
-} derive(Eq, @debug.Debug)
+}
 pub fn Limits::equal(Self, Self) -> Bool
 pub fn Limits::new(line? : Int32, literal? : Int32) -> Self
 pub fn Limits::not_equal(Self, Self) -> Bool
 pub fn Limits::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Response {
   Condition(String, Code?, String)
   Capability(Array[String])
@@ -115,37 +120,40 @@ pub(all) enum Response {
   Fetch(Int64, Map[String, Value])
   Namespace(Value, Value, Value)
   Other(String, Array[Value])
-} derive(Eq, @debug.Debug)
+}
 pub fn Response::equal(Self, Self) -> Bool
 pub fn Response::not_equal(Self, Self) -> Bool
 pub fn Response::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum State {
   NotAuthenticated
   Authenticated
   Selected(String)
   Logout
-} derive(Eq, @debug.Debug)
+}
 pub fn State::equal(Self, Self) -> Bool
 pub fn State::not_equal(Self, Self) -> Bool
 pub fn State::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Status {
   Ok
   No
   Bad
-} derive(Eq, @debug.Debug)
+}
 pub fn Status::equal(Self, Self) -> Bool
 pub fn Status::not_equal(Self, Self) -> Bool
 pub fn Status::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Value {
   Nil
   Number(Int64)
   Atom(String)
   Text(Bytes)
   List(Array[Value])
-} derive(Eq, @debug.Debug)
+}
 pub fn Value::equal(Self, Self) -> Bool
 pub fn Value::list(Self) -> Array[Self]?
 pub fn Value::not_equal(Self, Self) -> Bool

@@ -15,19 +15,21 @@ pub let signed : Array[String]
 pub fn verify(BytesView, (String) -> String? raise, now~ : Int64) -> Array[Verdict]
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror Refused {
   Missing(String)
   Malformed(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
 pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum Canon {
   Simple
   Relaxed
-} derive(Eq, @debug.Debug)
+}
 pub fn Canon::equal(Self, Self) -> Bool
 pub fn Canon::not_equal(Self, Self) -> Bool
 pub fn Canon::to_repr(Self) -> @debug.Repr
@@ -37,12 +39,13 @@ pub(all) enum Key {
   Ed25519(@ed25519.PrivateKey)
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Verdict {
   Pass(domain~ : String, selector~ : String)
   Fail(domain~ : String, reason~ : String)
   PermError(String)
   TempError(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Verdict::equal(Self, Self) -> Bool
 pub fn Verdict::not_equal(Self, Self) -> Bool
 pub fn Verdict::to_repr(Self) -> @debug.Repr

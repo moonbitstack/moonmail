@@ -16,12 +16,13 @@ pub struct Imap {
 ///|
 /// What came back for one command: the untagged responses that arrived while
 /// it ran, and its completion.
+#derive(Eq, Debug)
 pub(all) struct Reply {
   data : Array[@imap.Response]
   status : @imap.Status
   code : @imap.Code?
   text : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Reply with Eq::{equal, not_equal}

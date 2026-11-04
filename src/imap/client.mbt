@@ -3,12 +3,13 @@
 
 ///|
 /// Where the session stands (RFC 9051 section 3).
+#derive(Eq, Debug)
 pub(all) enum State {
   NotAuthenticated
   Authenticated
   Selected(String)
   Logout
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend State with Eq::{equal, not_equal}
@@ -24,11 +25,12 @@ pub extend State with Debug::{to_repr}
 /// tagged `BAD` that answers it follows. `Sasl` in place of the tagged `OK`
 /// means the server claimed success without the proof the mechanism needs:
 /// the session is not to be trusted.
+#derive(Eq, Debug)
 pub(all) enum Event {
   Data(Response)
   Done(Int32, Status, Code?, String)
   Sasl(@sasl.Refused)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Event with Eq::{equal, not_equal}

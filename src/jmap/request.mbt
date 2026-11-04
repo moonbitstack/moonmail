@@ -5,11 +5,12 @@
 /// One method call in a request: the name, its arguments, and the tag the
 /// answer comes back under. Tags are how a server that reorders or batches
 /// calls still lets a client match them up.
+#derive(Eq, Debug)
 pub(all) struct Call {
   name : String
   args : Json
   tag : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Call with Eq::{equal, not_equal}
@@ -21,10 +22,11 @@ pub extend Call with Debug::{to_repr}
 /// A request document: the capabilities it uses and the calls it makes. RFC
 /// 8620 section 3 makes one POST carry the whole lot, which is why the builders
 /// below append rather than return a finished body.
+#derive(Eq, Debug)
 pub(all) struct Request {
   capabilities : Array[String]
   calls : Array[Call]
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Request with Eq::{equal, not_equal}

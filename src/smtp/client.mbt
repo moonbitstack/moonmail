@@ -3,11 +3,12 @@
 
 ///|
 /// What a message body is, as `BODY=` declares it (RFC 6152, RFC 3030).
+#derive(Eq, Debug)
 pub(all) enum Body {
   SevenBit
   EightBit
   Binary
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Body with Eq::{equal, not_equal}
@@ -18,10 +19,11 @@ pub extend Body with Debug::{to_repr}
 ///|
 /// How much of a bounced message a delivery status notification returns
 /// (RFC 3461 `RET=`).
+#derive(Eq, Debug)
 pub(all) enum Ret {
   Full
   Headers
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Ret with Eq::{equal, not_equal}
@@ -32,11 +34,12 @@ pub extend Ret with Debug::{to_repr}
 ///|
 /// When a recipient wants a delivery status notification (RFC 3461
 /// `NOTIFY=`). An empty list asks for none.
+#derive(Eq, Debug)
 pub(all) enum Notify {
   Success
   Failure
   Delay
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Notify with Eq::{equal, not_equal}
@@ -48,6 +51,7 @@ pub extend Notify with Debug::{to_repr}
 /// The command a reply answers. `Greeting` is the server's opening, or a reply
 /// it sent unprompted, such as a `421` before it closes. `Delivery` is one of
 /// the per-recipient replies LMTP sends after the message.
+#derive(Eq, Debug)
 pub(all) enum Command {
   Greeting
   Hello(String)
@@ -64,7 +68,7 @@ pub(all) enum Command {
   Expn(String)
   Help
   Quit
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Command with Eq::{equal, not_equal}
@@ -81,10 +85,11 @@ pub extend Command with Debug::{to_repr}
 /// server's reply to that follows as `Reply(Auth(_), _)`. `Sasl` in place of a
 /// `235` means the server claimed success without the proof the mechanism
 /// needs, as SCRAM's signature: the session is not to be trusted.
+#derive(Eq, Debug)
 pub(all) enum Event {
   Reply(Command, Reply)
   Sasl(@sasl.Refused)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Event with Eq::{equal, not_equal}

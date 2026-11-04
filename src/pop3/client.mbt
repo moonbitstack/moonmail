@@ -5,12 +5,13 @@
 /// What a session cannot go on with: a response that does not parse, one over
 /// its limit, a command asked for in the wrong state, or one that needs a
 /// capability the server did not announce.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   Malformed(String)
   Exceeded(limit~ : Int32, got~ : Int32)
   Order(String)
   Unsupported(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}
@@ -25,10 +26,11 @@ pub extend Refused with Debug::{to_repr}
 /// - `message`: the largest multi-line response, which is how a message
 ///   arrives; 150 MB, the largest message Exchange Online lets an
 ///   administrator allow.
+#derive(Eq, Debug)
 pub(all) struct Limits {
   line : Int32
   message : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Limits with Eq::{equal, not_equal}
@@ -49,11 +51,12 @@ pub fn Limits::new(
 
 ///|
 /// Where the session stands (RFC 1939 section 3).
+#derive(Eq, Debug)
 pub(all) enum State {
   Authorization
   Transaction
   Update
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend State with Eq::{equal, not_equal}
@@ -63,6 +66,7 @@ pub extend State with Debug::{to_repr}
 
 ///|
 /// The command a reply answers. `Greeting` is the server's opening.
+#derive(Eq, Debug)
 pub(all) enum Command {
   Greeting
   User(String)
@@ -80,7 +84,7 @@ pub(all) enum Command {
   Rset
   Noop
   Quit
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Command with Eq::{equal, not_equal}
@@ -92,6 +96,7 @@ pub extend Command with Debug::{to_repr}
 /// A reply, read by the shape its command gives it. `Err` is any `-ERR`;
 /// `Listing` and `Uids` answer `LIST` and `UIDL` for one message or all;
 /// `Content` is a message or its top, dot-unstuffed, CRLF line ends kept.
+#derive(Eq, Debug)
 pub(all) enum Reply {
   Greeting(text~ : String, timestamp~ : String?)
   Ok(String)
@@ -101,7 +106,7 @@ pub(all) enum Reply {
   Uids(Array[(Int32, String)])
   Content(Bytes)
   Capabilities(Array[String])
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Reply with Eq::{equal, not_equal}
@@ -114,10 +119,11 @@ pub extend Reply with Debug::{to_repr}
 /// SASL mechanism refusing the server. `Sasl` during the exchange means `*`
 /// has gone out to cancel it; in place of the `+OK` it means the server
 /// claimed success without the proof the mechanism needs.
+#derive(Eq, Debug)
 pub(all) enum Event {
   Reply(Command, Reply)
   Sasl(@sasl.Refused)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Event with Eq::{equal, not_equal}

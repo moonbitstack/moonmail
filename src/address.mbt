@@ -5,10 +5,11 @@
 /// One mailbox: an address and the display name in front of it, decoded.
 /// `address` is the addr-spec, its user part quoted only where a dot-atom
 /// cannot carry it.
+#derive(Eq, Debug)
 pub(all) struct Mailbox {
   name : String?
   address : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Mailbox with Eq::{equal, not_equal}
@@ -24,10 +25,11 @@ pub fn Mailbox::new(address : String, name? : String) -> Mailbox {
 ///|
 /// One entry of an address list: a mailbox, or a named group of them, which
 /// may be empty (`undisclosed-recipients:;`).
+#derive(Eq, Debug)
 pub(all) enum Address {
   Mailbox(Mailbox)
   Group(name~ : String, members~ : Array[Mailbox])
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Address with Eq::{equal, not_equal}

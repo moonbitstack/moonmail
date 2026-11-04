@@ -5,9 +5,10 @@
 /// The header of a message: fields in order, names compared without regard to
 /// case, each value as written with its folding taken out. Encoded words stay
 /// encoded here; the readers on `Message` decode them.
+#derive(Eq, Debug)
 pub struct Headers {
   priv fields : Array[(String, String)]
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Headers with Eq::{equal, not_equal}

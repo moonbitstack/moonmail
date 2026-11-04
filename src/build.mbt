@@ -4,13 +4,14 @@
 ///|
 /// A file that travels with a message. `inline` with an `id` makes it a part
 /// an HTML body shows by `cid:`; otherwise it is offered as an attachment.
+#derive(Eq, Debug)
 pub(all) struct Attachment {
   name : String
   media_type : String
   data : Bytes
   inline : Bool
   id : String?
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Attachment with Eq::{equal, not_equal}

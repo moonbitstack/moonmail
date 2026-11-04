@@ -13,13 +13,14 @@ import {
 // Values
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror Rejected {
   Reply(@smtp.Command, @smtp.Reply)
   Done(@imap.Status, @imap.Code?, String)
   Err(@pop3.Command, String)
   Sasl(@sasl.Refused)
   Closed
-} derive(Eq, @debug.Debug)
+}
 pub fn Rejected::equal(Self, Self) -> Bool
 pub fn Rejected::not_equal(Self, Self) -> Bool
 pub fn Rejected::to_repr(Self) -> @debug.Repr
@@ -49,12 +50,13 @@ pub async fn Pop3::quit(Self) -> Unit
 pub async fn Pop3::retr(Self, Int32) -> Bytes
 pub async fn Pop3::run(Self) -> Array[@pop3.Event]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Reply {
   data : Array[@imap.Response]
   status : @imap.Status
   code : @imap.Code?
   text : String
-} derive(Eq, @debug.Debug)
+}
 pub fn Reply::equal(Self, Self) -> Bool
 pub fn Reply::not_equal(Self, Self) -> Bool
 pub fn Reply::to_repr(Self) -> @debug.Repr

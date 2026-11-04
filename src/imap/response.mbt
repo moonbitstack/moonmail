@@ -5,12 +5,13 @@
 /// What a session cannot go on with: a response that does not parse, one over
 /// its limit, a command asked for in the wrong state, or one that needs a
 /// capability the server did not announce.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   Malformed(String)
   Exceeded(limit~ : Int32, got~ : Int32)
   Order(String)
   Unsupported(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}
@@ -25,10 +26,11 @@ pub extend Refused with Debug::{to_repr}
 ///   `imaplib`'s `_MAXLINE`.
 /// - `literal`: the largest literal, which is how messages arrive; 150 MB,
 ///   the largest message Exchange Online lets an administrator allow.
+#derive(Eq, Debug)
 pub(all) struct Limits {
   line : Int32
   literal : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Limits with Eq::{equal, not_equal}
@@ -51,13 +53,14 @@ pub fn Limits::new(
 /// A piece of a response, as RFC 9051's grammar builds them: `NIL`, a number,
 /// an atom, a string (quoted or literal, as octets), or a parenthesised list.
 /// A fetch key such as `BODY[HEADER.FIELDS (DATE)]<0>` is one atom.
+#derive(Eq, Debug)
 pub(all) enum Value {
   Nil
   Number(Int64)
   Atom(String)
   Text(Bytes)
   List(Array[Value])
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Value with Eq::{equal, not_equal}
@@ -98,11 +101,12 @@ pub fn Value::list(self : Value) -> Array[Value]? {
 
 ///|
 /// How a tagged command completed.
+#derive(Eq, Debug)
 pub(all) enum Status {
   Ok
   No
   Bad
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Status with Eq::{equal, not_equal}
@@ -114,6 +118,7 @@ pub extend Status with Debug::{to_repr}
 /// A response code, the bracketed part of a status response (RFC 9051
 /// section 7.1, RFC 4315, RFC 7162). One this package does not know comes as
 /// `Other` with its name and the text after it.
+#derive(Eq, Debug)
 pub(all) enum Code {
   Alert
   Capability(Array[String])
@@ -130,7 +135,7 @@ pub(all) enum Code {
   CopyUid(Int64, String, String)
   Closed
   Other(String, String?)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Code with Eq::{equal, not_equal}
@@ -143,6 +148,7 @@ pub extend Code with Debug::{to_repr}
 /// `OK`, `NO`, `BAD`, `PREAUTH` or `BYE`. A `Fetch` maps each data item's name,
 /// in upper case and as written for `BODY[...]`, to its value. A response this
 /// package does not know comes as `Other`, its name and its values.
+#derive(Eq, Debug)
 pub(all) enum Response {
   Condition(String, Code?, String)
   Capability(Array[String])
@@ -157,7 +163,7 @@ pub(all) enum Response {
   Fetch(Int64, Map[String, Value])
   Namespace(Value, Value, Value)
   Other(String, Array[Value])
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Response with Eq::{equal, not_equal}

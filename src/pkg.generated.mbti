@@ -19,6 +19,7 @@ pub fn parse_addresses(StringView) -> Array[Address] raise Refused
 pub fn parse_date(StringView) -> @moondate.Moment raise Refused
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror Refused {
   Header(at~ : Int32)
   Address(at~ : Int32)
@@ -26,46 +27,50 @@ pub(all) suberror Refused {
   Encoding(at~ : Int32)
   Charset(name~ : String)
   Date
-} derive(Eq, @debug.Debug)
+}
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
 pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum Address {
   Mailbox(Mailbox)
   Group(name~ : String, members~ : Array[Mailbox])
-} derive(Eq, @debug.Debug)
+}
 pub fn Address::encode(Self, utf8? : Bool) -> String
 pub fn Address::equal(Self, Self) -> Bool
 pub fn Address::mailboxes(Self) -> Array[Mailbox]
 pub fn Address::not_equal(Self, Self) -> Bool
 pub fn Address::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Attachment {
   name : String
   media_type : String
   data : Bytes
   inline : Bool
   id : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn Attachment::equal(Self, Self) -> Bool
 pub fn Attachment::new(String, Bytes, media_type? : String, inline? : Bool, id? : String) -> Self
 pub fn Attachment::not_equal(Self, Self) -> Bool
 pub fn Attachment::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Body {
   Leaf(Bytes)
   Multipart(Array[Message])
   Embedded(Message)
-} derive(Eq, @debug.Debug)
+}
 pub fn Body::equal(Self, Self) -> Bool
 pub fn Body::not_equal(Self, Self) -> Bool
 pub fn Body::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Headers {
   // private fields
-} derive(Eq, @debug.Debug)
+}
 pub fn Headers::add(Self, String, String) -> Unit raise Refused
 pub fn Headers::all(Self, StringView) -> Array[String]
 pub fn Headers::equal(Self, Self) -> Bool
@@ -78,20 +83,22 @@ pub fn Headers::remove(Self, StringView) -> Unit
 pub fn Headers::set(Self, String, String) -> Unit raise Refused
 pub fn Headers::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Mailbox {
   name : String?
   address : String
-} derive(Eq, @debug.Debug)
+}
 pub fn Mailbox::encode(Self, utf8? : Bool) -> String
 pub fn Mailbox::equal(Self, Self) -> Bool
 pub fn Mailbox::new(String, name? : String) -> Self
 pub fn Mailbox::not_equal(Self, Self) -> Bool
 pub fn Mailbox::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Message {
   headers : Headers
   body : Body
-} derive(Eq, @debug.Debug)
+}
 pub fn Message::addresses(Self, StringView) -> Array[Address] raise Refused
 pub fn Message::attachments(Self) -> Array[Attachment]
 pub fn Message::bcc(Self) -> Array[Address] raise Refused

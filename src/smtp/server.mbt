@@ -12,6 +12,7 @@
 /// keyword in upper case with its value as written, `None` for a keyword with
 /// no value. `Data` is the whole message, dot-unstuffed, or every `BDAT` chunk
 /// joined.
+#derive(Eq, Debug)
 pub(all) enum Request {
   Hello(String, extended~ : Bool)
   StartTls
@@ -24,7 +25,7 @@ pub(all) enum Request {
   Expn(String)
   Rset
   Quit
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Request with Eq::{equal, not_equal}

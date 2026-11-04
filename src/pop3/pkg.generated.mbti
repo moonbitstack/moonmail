@@ -10,12 +10,13 @@ import {
 pub let limits : Limits
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror Refused {
   Malformed(String)
   Exceeded(limit~ : Int32, got~ : Int32)
   Order(String)
   Unsupported(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
 pub fn Refused::to_repr(Self) -> @debug.Repr
@@ -47,6 +48,7 @@ pub fn Client::top(Self, Int32, Int32) -> Unit raise Refused
 pub fn Client::uidl(Self, message? : Int32) -> Unit raise Refused
 pub fn Client::user(Self, String) -> Unit raise Refused
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Command {
   Greeting
   User(String)
@@ -64,28 +66,31 @@ pub(all) enum Command {
   Rset
   Noop
   Quit
-} derive(Eq, @debug.Debug)
+}
 pub fn Command::equal(Self, Self) -> Bool
 pub fn Command::not_equal(Self, Self) -> Bool
 pub fn Command::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Event {
   Reply(Command, Reply)
   Sasl(@sasl.Refused)
-} derive(Eq, @debug.Debug)
+}
 pub fn Event::equal(Self, Self) -> Bool
 pub fn Event::not_equal(Self, Self) -> Bool
 pub fn Event::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Limits {
   line : Int32
   message : Int32
-} derive(Eq, @debug.Debug)
+}
 pub fn Limits::equal(Self, Self) -> Bool
 pub fn Limits::new(line? : Int32, message? : Int32) -> Self
 pub fn Limits::not_equal(Self, Self) -> Bool
 pub fn Limits::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Reply {
   Greeting(text~ : String, timestamp~ : String?)
   Ok(String)
@@ -95,16 +100,17 @@ pub(all) enum Reply {
   Uids(Array[(Int32, String)])
   Content(Bytes)
   Capabilities(Array[String])
-} derive(Eq, @debug.Debug)
+}
 pub fn Reply::equal(Self, Self) -> Bool
 pub fn Reply::not_equal(Self, Self) -> Bool
 pub fn Reply::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum State {
   Authorization
   Transaction
   Update
-} derive(Eq, @debug.Debug)
+}
 pub fn State::equal(Self, Self) -> Bool
 pub fn State::not_equal(Self, Self) -> Bool
 pub fn State::to_repr(Self) -> @debug.Repr

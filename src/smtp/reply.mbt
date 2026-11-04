@@ -5,12 +5,13 @@
 /// What a session cannot go on with: a line that does not parse, one over its
 /// limit, a command asked for out of sequence, or one that needs an extension
 /// the server did not offer.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   Malformed(String)
   Exceeded(limit~ : Int32, got~ : Int32)
   Order(String)
   Unsupported(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}
@@ -22,10 +23,11 @@ pub extend Refused with Debug::{to_repr}
 /// One SMTP reply: a three-digit code and the text of each line, without the
 /// code and the separator. A multi-line reply writes `250-` before every line
 /// but the last, which gets `250 `.
+#derive(Eq, Debug)
 pub(all) struct Reply {
   code : Int32
   lines : Array[String]
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Reply with Eq::{equal, not_equal}
@@ -109,11 +111,12 @@ pub fn Reply::encode(self : Reply) -> Bytes {
 ///   `smtpd_recipient_limit`.
 /// - `size`: the largest message, in octets, a server takes and announces in
 ///   `SIZE`; Postfix's `message_size_limit`.
+#derive(Eq, Debug)
 pub(all) struct Limits {
   line : Int32
   recipients : Int32
   size : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Limits with Eq::{equal, not_equal}

@@ -5,10 +5,11 @@
 /// How a header field or the body is flattened before it is hashed (RFC 6376
 /// section 3.4). `Simple` keeps the octets; `Relaxed` survives what gateways
 /// do to white space and header case.
+#derive(Eq, Debug)
 pub(all) enum Canon {
   Simple
   Relaxed
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Canon with Eq::{equal, not_equal}
@@ -29,12 +30,13 @@ pub(all) enum Key {
 /// result names). `Fail` is a signature that was checked and did not hold;
 /// `PermError` one that cannot be checked, ever; `TempError` one whose key
 /// could not be fetched this time.
+#derive(Eq, Debug)
 pub(all) enum Verdict {
   Pass(domain~ : String, selector~ : String)
   Fail(domain~ : String, reason~ : String)
   PermError(String)
   TempError(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Verdict with Eq::{equal, not_equal}
@@ -44,13 +46,14 @@ pub extend Verdict with Debug::{to_repr}
 
 ///|
 /// Why a message cannot be signed.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   /// The message has no `From`, which every signature must cover.
   Missing(String)
   /// A value that would break the signature field: a domain, selector or
   /// field name with `;`, `=` or white space in it.
   Malformed(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}

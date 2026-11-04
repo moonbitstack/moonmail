@@ -5,11 +5,12 @@
 /// One answer in a response: the method name, its arguments, and the tag the
 /// call was made under. An `error` answer arrives as
 /// `"error"` with the original name in `args`, which `raised` unwraps.
+#derive(Eq, Debug)
 pub(all) struct Invocation {
   name : String
   args : Json
   tag : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Invocation with Eq::{equal, not_equal}
@@ -20,10 +21,11 @@ pub extend Invocation with Debug::{to_repr}
 ///|
 /// A response document: one invocation per call, in whatever order the server
 /// chose. Tags, not positions, say which is which.
+#derive(Eq, Debug)
 pub(all) struct Response {
   invocations : Array[Invocation]
   session_state : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Response with Eq::{equal, not_equal}

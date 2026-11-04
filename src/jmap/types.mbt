@@ -5,6 +5,7 @@
 /// A mailbox as `Mailbox/get` reports it. Role is the well-known name — `inbox`,
 /// `sent`, `drafts`, `trash` — and says what the mailbox is for regardless of
 /// what it is called in the user's language.
+#derive(Eq, Debug)
 pub(all) struct Mailbox {
   id : String
   name : String
@@ -12,7 +13,7 @@ pub(all) struct Mailbox {
   parent_id : String?
   total : Int32
   unread : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Mailbox with Eq::{equal, not_equal}
@@ -23,6 +24,7 @@ pub extend Mailbox with Debug::{to_repr}
 ///|
 /// A letter as `Email/get` reports it, reduced to what a list shows. `from` is
 /// the first sender, already written the way a header writes it.
+#derive(Eq, Debug)
 pub(all) struct Email {
   id : String
   subject : String
@@ -30,7 +32,7 @@ pub(all) struct Email {
   received_at : String?
   preview : String
   unread : Bool
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Email with Eq::{equal, not_equal}
@@ -41,11 +43,12 @@ pub extend Email with Debug::{to_repr}
 ///|
 /// An address the account may send from (RFC 8621 section 6). A submission
 /// names one of these.
+#derive(Eq, Debug)
 pub(all) struct Identity {
   id : String
   name : String?
   email : String
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Identity with Eq::{equal, not_equal}

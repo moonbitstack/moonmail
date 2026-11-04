@@ -5,6 +5,7 @@
 /// What this package refuses, and where it stopped reading. `at` is an octet
 /// offset into the message for `Header`, `Boundary` and `Encoding`, and a
 /// UTF-16 code unit offset into the address text for `Address`.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   /// A field with no colon, or a name with a character RFC 5322 section 2.2
   /// keeps out of names.
@@ -20,7 +21,7 @@ pub(all) suberror Refused {
   Charset(name~ : String)
   /// A date that does not read as an RFC 5322 date-time.
   Date
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}

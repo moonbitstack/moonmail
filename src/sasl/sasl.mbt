@@ -3,6 +3,7 @@
 
 ///|
 /// Why an authentication cannot go on.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   /// The character for which SASLprep refuses a string: one it prohibits, one
   /// unassigned in Unicode 3.2, or the one that breaks its bidi rule.
@@ -14,7 +15,7 @@ pub(all) suberror Refused {
   /// The server could not prove it knows the password: SCRAM's `v=` was wrong
   /// or never came.
   Signature
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}

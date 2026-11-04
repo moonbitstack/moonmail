@@ -5,11 +5,12 @@
 /// What a message carries after its header: content with the transfer
 /// encoding taken off, the parts of a multipart body (their boundary is in
 /// `Content-Type`), or a whole message attached as `message/rfc822`.
+#derive(Eq, Debug)
 pub(all) enum Body {
   Leaf(Bytes)
   Multipart(Array[Message])
   Embedded(Message)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Body with Eq::{equal, not_equal}
@@ -20,10 +21,11 @@ pub extend Body with Debug::{to_repr}
 ///|
 /// A message, or one part of a multipart body: parts are messages too, as in
 /// Python's `email`.
+#derive(Eq, Debug)
 pub(all) struct Message {
   headers : Headers
   body : Body
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Message with Eq::{equal, not_equal}

@@ -18,13 +18,14 @@ pub(all) enum Security {
 /// Why a session stopped: the server refused a step it cannot go on from (an
 /// SMTP reply, an IMAP completion, a POP3 `-ERR`), a SASL mechanism refused
 /// the server, or the connection closed under it.
+#derive(Eq, Debug)
 pub(all) suberror Rejected {
   Reply(@smtp.Command, @smtp.Reply)
   Done(@imap.Status, @imap.Code?, String)
   Err(@pop3.Command, String)
   Sasl(@sasl.Refused)
   Closed
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Rejected with Eq::{equal, not_equal}
