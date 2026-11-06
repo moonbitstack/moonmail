@@ -411,7 +411,9 @@ async test "imap writes a UTF-8 mailbox name in modified UTF-7 to Dovecot" {
   let wanted = "郵件-" + @env.now().to_string()
   let _ = imap.wait(imap.client().create(wanted))
   let listed = imap.wait(imap.client().list("", wanted))
-  guard listed.data is [List(name~, ..)] else { fail("Dovecot did not list it") }
+  guard listed.data is [List(name~, ..)] else {
+    fail("Dovecot did not list it")
+  }
   assert_eq(name, wanted)
   let _ = imap.wait(imap.client().select(wanted))
   let _ = imap.wait(imap.client().append(wanted, sample("utf7", "body")))
