@@ -399,3 +399,34 @@ async test "imap reads the mailbox imaptest filled" {
   assert_true(found >= expected)
   imap.logout()
 }
+
+///|
+async test "imap writes a UTF-8 mailbox name in modified UTF-7 to Dovecot" {
+  guard live() is Some(l) else { return }
+  let imap = @net.Imap::connect(l.host, Clear, port=l.imap)
+  imap.login(account, secret)
+  assert_false(imap.client().has("IMAP4rev2"))
+  // RFC 3501 section 5.1.3: toward a rev1 server a name goes out in modified
+  // UTF-7 and comes back the same way, so both directions are exercised here.
+  let wanted = "郵件-" + @env.now().to_string()
+  let _ = imap.wait(imap.client().create(wanted))
+  let listed = imap.wait(imap.client().list("", wanted))
+  guard listed.data is [List(name~, ..)] else { fail("Dovecot did not list it") }
+  assert_eq(name, wanted)
+  let _ = imap.wait(imap.client().select(wanted))
+  let _ = imap.wait(imap.client().append(wanted, sample("utf7", "body")))
+  assert_eq(imap.wait(imap.client().status(wanted, ["MESSAGES"])).status, Ok)
+  let _ = imap.wait(imap.client().close())
+  imap.logout()
+}
+
+///|
+async test "imap authenticates with SASL on Dovecot" {
+  guard live() is Some(l) else { return }
+  let imap = @net.Imap::connect(l.host, Clear, port=l.imap)
+  assert_true(imap.client().has("AUTH=PLAIN"))
+  imap.authenticate(@sasl.Plain::new(account, secret))
+  assert_true(imap.client().state() is Authenticated)
+  assert_eq(imap.wait(imap.client().select("INBOX")).status, Ok)
+  imap.logout()
+}
