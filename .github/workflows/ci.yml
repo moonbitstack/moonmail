@@ -149,7 +149,23 @@ jobs:
         env:
           MOONMAIL_IMAPTEST: 20
           MOONMAIL_IMAP_SERVER: 127.0.0.1:1142
-        run: moon test --target native -p moonbitstack/moonmail/net
+        run: |
+          # Which failure it is matters: a server that stopped is not a wrong
+          # answer, and the annotations should say which one happened.
+          if ! (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then
+            echo "::error::the IMAP server under test is no longer listening on 1142"
+            exit 1
+          fi
+          set +e
+          moon test --target native -p moonbitstack/moonmail/net 2>&1 | tee "$RUNNER_TEMP/tests.log"
+          exit "${PIPESTATUS[0]}"
+
+      - name: keep the test log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interop-testlog
+          path: ${{ runner.temp }}/tests.log
 
       # Strict on purpose: a teardown that cannot run is a bug in the harness,
       # and the trace is uploaded so it can be read without the run log.
