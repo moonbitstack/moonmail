@@ -43,6 +43,17 @@ jobs:
       - name: the pages are self-contained
         run: python3 scripts/check_docs.py
 
+      # The code an agent is handed has to compile against the module as
+      # published. A pull request that carries a version the registry does not
+      # have yet says so and passes; the release publishes and then checks.
+      - name: the skill's code compiles
+        run: |
+          set +e
+          python3 scripts/check_skill.py
+          code=$?
+          if [ "$code" -eq 2 ]; then echo "::notice::the version in moon.mod is not published yet"; exit 0; fi
+          exit "$code"
+
       - name: setup pages
         if: github.event_name == 'push'
         uses: actions/configure-pages@v6

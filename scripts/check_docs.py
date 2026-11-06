@@ -9,6 +9,7 @@ cannot:
   * every relative href and image src resolves inside docs/
   * no page still carries a template marker from api_template.html
   * the engine is the user's wasm build, not the wasm-gc one
+  * each skill under docs/skills/ has the frontmatter the registry reads
 
     python3 scripts/check_docs.py
 
@@ -64,6 +65,41 @@ def check_links(page: Path) -> list[str]:
     return problems
 
 
+def check_skills() -> list[str]:
+    """Each skill is one directory named after the library, with a SKILL.md
+    whose frontmatter carries the name and the description an agent decides
+    from. Nothing else about the file is checked here; the snippets in it are
+    compiled against the published module instead."""
+    problems = []
+    skills = sorted(p for p in (DOCS / "skills").glob("*/SKILL.md"))
+    if not skills:
+        return ["docs/skills/ has no skill"]
+    for skill in skills:
+        text = skill.read_text(encoding="utf-8")
+        if not text.startswith("---\n"):
+            problems.append(f"{skill}: no frontmatter")
+            continue
+        end = text.find("\n---\n", 4)
+        if end < 0:
+            problems.append(f"{skill}: frontmatter is not closed")
+            continue
+        head = text[4:end]
+        fields = {}
+        for line in head.splitlines():
+            if ":" in line:
+                key, value = line.split(":", 1)
+                fields[key.strip()] = value.strip()
+        name = fields.get("name", "")
+        if name != skill.parent.name:
+            problems.append(f"{skill}: name {name!r} is not the directory name")
+        description = fields.get("description", "")
+        if len(description) < 80:
+            problems.append(f"{skill}: the description is too short to decide from")
+        if len(text) - end < 400:
+            problems.append(f"{skill}: the body is too short to be useful")
+    return problems
+
+
 def main() -> int:
     if not DOCS.is_dir():
         print("docs/ is missing")
@@ -84,6 +120,8 @@ def main() -> int:
         for needle, why in FORBIDDEN.items():
             if needle in text:
                 problems.append(f"{page.name}: {needle!r} left in ({why})")
+
+    problems += check_skills()
 
     images = sorted(p.name for p in (DOCS / "images").glob("*") if p.is_file())
     referenced = set()
