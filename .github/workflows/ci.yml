@@ -131,6 +131,10 @@ jobs:
       # behind by one step is not there for the next.
       - name: imaptest against our own server
         run: |
+          # Everything this step says, its own trace included, goes to a file
+          # that is kept when it fails: the run log is a large thing to fetch.
+          exec > >(tee "$RUNNER_TEMP/ours.log") 2>&1
+          set -x
           moon build --target native src/examples/imap-server
           ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 &
           server=$!
@@ -169,12 +173,15 @@ jobs:
           moon test --target native -p moonbitstack/moonmail/net 2>&1 | tee "$RUNNER_TEMP/tests.log"
           exit "${PIPESTATUS[0]}"
 
-      - name: keep the test log
+      - name: keep the logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: interop-testlog
-          path: ${{ runner.temp }}/tests.log
+          name: interop-logs
+          path: |
+            ${{ runner.temp }}/ours.log
+            ${{ runner.temp }}/tests.log
+          if-no-files-found: warn
 
       - name: stop them
         if: always()
