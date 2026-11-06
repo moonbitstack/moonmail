@@ -144,8 +144,14 @@ jobs:
             host=127.0.0.1 port=1142 user=tim pass=secret \
             mbox="$RUNNER_TEMP/ours.mbox" msgs=20 clients=2 secs=20 \
             | tee "$RUNNER_TEMP/ours.log"
-          # imaptest reports what it finds on stdout and exits 0 either way.
-          if grep -E '^Error' "$RUNNER_TEMP/ours.log"; then exit 1; fi
+          # imaptest reports what it finds on stdout and exits 0 either way, so
+          # the finding is repeated as an annotation, where it can be read
+          # without the run log.
+          if grep -E '^Error' "$RUNNER_TEMP/ours.log"; then
+            grep -E '^Error' "$RUNNER_TEMP/ours.log" | head -5 |
+              while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          fi
 
       - name: the sockets against them
         env:
