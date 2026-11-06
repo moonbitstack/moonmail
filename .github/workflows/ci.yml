@@ -70,3 +70,69 @@ jobs:
       - name: interfaces are up to date
         run: |
           moon info --target all && git diff --exit-code
+
+  # A real Dovecot and a real Postfix, then the sockets in @moonmail/net against
+  # them: SMTP into Postfix, local(8) into a Maildir, IMAP and POP3 back out of
+  # Dovecot. imaptest is the same Dovecot team's IMAP client, so the mailbox it
+  # fills is what the header fetch test reads back.
+  interop:
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install moon
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: install the reference services
+        run: |
+          echo "postfix postfix/main_mailer_type select Local only" | sudo debconf-set-selections
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            dovecot-imapd dovecot-pop3d dovecot-core postfix
+          dovecot --version
+          postconf -d mail_version
+
+      - name: start them
+        run: sudo scripts/interop/services.sh start | tee -a "$GITHUB_ENV"
+
+      - name: imaptest
+        run: |
+          # Pinned by content: the release tag moves, the binary this workflow
+          # was written against does not.
+          curl -fsSL -o "$RUNNER_TEMP/imaptest" \
+            https://github.com/dovecot/imaptest/releases/download/latest/imaptest-x86_64-ubuntu-24.04
+          echo "a4eb7e8dbf142b392c9f160c3c72c12d45cf544735da2585ccdf8ab333978147  $RUNNER_TEMP/imaptest" \
+            | sha256sum --check
+          chmod +x "$RUNNER_TEMP/imaptest"
+          python3 scripts/interop/write_mbox.py "$RUNNER_TEMP/imaptest.mbox" 20
+          "$RUNNER_TEMP/imaptest" \
+            host=127.0.0.1 port=1143 user=mailtest pass=secret \
+            mbox="$RUNNER_TEMP/imaptest.mbox" msgs=20 clients=6 secs=45 \
+            | tee "$RUNNER_TEMP/imaptest.log"
+          # imaptest reports failures on stdout and still exits 0.
+          if grep -E '^Error' "$RUNNER_TEMP/imaptest.log"; then exit 1; fi
+
+      - name: the sockets against them
+        env:
+          MOONMAIL_IMAPTEST: 20
+        run: moon test --target native -p moonbitstack/moonmail/net
+
+      - name: stop them
+        if: always()
+        run: sudo scripts/interop/services.sh stop
+
+      - name: logs when something went wrong
+        if: failure()
+        run: |
+          sudo cat /var/tmp/moonmail-interop/dovecot.log || true
+          sudo cat /var/tmp/moonmail-interop/postfix.log || true

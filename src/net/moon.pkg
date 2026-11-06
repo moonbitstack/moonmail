@@ -11,7 +11,10 @@ import {
 }
 
 import {
+  "moonbitstack/moonmail",
   "moonbitstack/moonmail/smtp",
+  "moonbitstack/moonmail/imap",
+  "moonbitstack/moonmail/pop3",
   "moonbitstack/moonmail/sasl",
   "moonbitstack/moonnet/tcp",
   "moonbitstack/moontls/tls",
@@ -29,6 +32,11 @@ import {
 
 warnings = "-29"
 
+// The live tests share one mailbox on the reference services, so they run one
+// at a time.
+
+max_concurrent_tests = 1
+
 options(
   targets: {
     "session.mbt": [ "native", "wasm" ],
@@ -38,5 +46,10 @@ options(
     "net_test.mbt": [ "native" ],
     "certs_test.mbt": [ "native" ],
     "mailpit_test.mbt": [ "native" ],
+    "live_test.mbt": [ "native" ],
+    "dovecot_test.mbt": [ "native" ],
+    "pop3_live_test.mbt": [ "native" ],
+    "postfix_test.mbt": [ "native" ],
+    "smtp_live_test.mbt": [ "native" ],
   },
 )

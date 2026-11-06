@@ -1,0 +1,47 @@
+# Postfix 3.10 as a local-only MX: it takes mail for moonmail.test on port 2525,
+# with STARTTLS there and TLS from the first octet on 2465, and hands it to
+# local(8), which writes the Maildir Dovecot reads back. Started by
+# scripts/interop/services.sh with -c, on its own queue, so the Postfix the
+# machine already runs is left alone.
+
+compatibility_level = 3.6
+
+myhostname = mx.moonmail.test
+mydomain = moonmail.test
+myorigin = $mydomain
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+inet_interfaces = 127.0.0.1
+inet_protocols = ipv4
+
+# Only the test harness may relay; everything else is refused at RCPT.
+mynetworks = 127.0.0.0/8
+smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination
+smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination
+
+# local(8) writes $home/Maildir/{new,cur,tmp}; the account is mailtest's.
+home_mailbox = Maildir/
+mailbox_command =
+mail_spool_directory = /var/mail
+
+smtpd_banner = $myhostname ESMTP moonmail interop
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+
+smtpd_tls_cert_file = /var/tmp/moonmail-interop/certs/cert.pem
+smtpd_tls_key_file = /var/tmp/moonmail-interop/certs/key.pem
+smtpd_tls_security_level = may
+smtputf8_enable = yes
+
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+local_recipient_maps = $alias_maps unix:passwd.byname
+
+# The instance this harness owns: its own queue, its own config, its own log.
+config_directory = /var/tmp/moonmail-interop/conf
+queue_directory = /var/tmp/moonmail-interop/queue
+data_directory = /var/tmp/moonmail-interop/data
+meta_directory = /etc/postfix
+shlib_directory = /usr/lib/postfix
+maillog_file = /var/tmp/moonmail-interop/postfix.log
