@@ -42,8 +42,12 @@ stop() {
     kill "$(cat "$base/run/master.pid")" 2>/dev/null || true
   fi
   rm -rf "$base"
+  # userdel refuses an account a process still uses, and a session Dovecot has
+  # only just been told to stop may still own one. Taking the services down is
+  # what this is for; the account is tidying up after it.
   if id "$account" >/dev/null 2>&1; then
-    userdel "$account" 2>/dev/null || true
+    userdel "$account" >/dev/null 2>&1 ||
+      echo "left the account $account behind: a process still uses it" >&2
   fi
 }
 
