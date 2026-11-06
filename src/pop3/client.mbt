@@ -22,7 +22,8 @@ pub extend Refused with Debug::{to_repr}
 ///|
 /// How much a client takes from the server.
 ///
-/// - `line`: the longest line, CRLF excluded; Python `poplib`'s `_MAXLINE`.
+/// - `line`: the longest status line, CRLF excluded; Python `poplib`'s
+///   `_MAXLINE`. A line of a message is not held to it.
 /// - `message`: the largest multi-line response, which is how a message
 ///   arrives; 150 MB, the largest message Exchange Online lets an
 ///   administrator allow.
@@ -437,13 +438,18 @@ pub fn Client::feed(
 
 ///|
 /// The next line, CRLF or LF included.
+///
+/// The line limit is for a status line, which the protocol does bound. A line
+/// of a multi-line response is message content and has no length of its own:
+/// `message` bounds that instead, so a letter written as one long line — a
+/// minified page, a base64 part nobody wrapped — still arrives.
 fn Client::line(self : Client) -> BytesView? raise Refused {
   let mut end = self.at
   while end < self.data.length() && self.data[end] != b'\n' {
     end += 1
   }
   let got = end - self.at
-  if got > self.limits.line + 1 {
+  if !self.reading && got > self.limits.line + 1 {
     raise Exceeded(limit=self.limits.line, got~)
   }
   if end == self.data.length() {
