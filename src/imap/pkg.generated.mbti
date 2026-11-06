@@ -9,6 +9,8 @@ import {
 // Values
 pub let limits : Limits
 
+pub let supported : Array[String]
+
 // Errors
 #derive(Eq, @debug.Debug)
 pub(all) suberror Refused {
@@ -125,6 +127,14 @@ pub fn Response::equal(Self, Self) -> Bool
 pub fn Response::not_equal(Self, Self) -> Bool
 pub fn Response::to_repr(Self) -> @debug.Repr
 
+pub struct Server {
+  // private fields
+}
+pub fn Server::feed(Self, BytesView) -> Unit raise Refused
+pub fn Server::new(store~ : Store, credentials~ : (String, String) -> Bool, clock~ : () -> String, limits? : Limits) -> Self
+pub fn Server::next_write(Self) -> Bytes?
+pub fn Server::state(Self) -> State
+
 #derive(Eq, @debug.Debug)
 pub(all) enum State {
   NotAuthenticated
@@ -145,6 +155,42 @@ pub(all) enum Status {
 pub fn Status::equal(Self, Self) -> Bool
 pub fn Status::not_equal(Self, Self) -> Bool
 pub fn Status::to_repr(Self) -> @debug.Repr
+
+pub struct Store {
+  // private fields
+}
+pub fn Store::clear(Self, String) -> Unit
+pub fn Store::create(Self, String) -> Bool
+pub fn Store::deliver(Self, String, BytesView, flags? : Array[String], date? : String) -> Int32?
+pub fn Store::exists(Self, String) -> Bool
+pub fn Store::expunge(Self, String) -> Array[Int32]
+pub fn Store::flags(Self, String) -> Array[String]
+pub fn Store::messages(Self, String) -> Array[Stored]
+pub fn Store::names(Self) -> Array[String]
+pub fn Store::new() -> Self
+pub fn Store::remove(Self, String) -> Bool
+pub fn Store::rename(Self, String, String) -> Bool
+pub fn Store::set_flags(Self, String, Int32, String, Array[String]) -> Array[String]?
+pub fn Store::subscribe(Self, String) -> Bool
+pub fn Store::subscribed(Self, String) -> Bool
+pub fn Store::summary(Self, String) -> Summary?
+pub fn Store::uidnext(Self, String) -> Int32
+pub fn Store::unsubscribe(Self, String) -> Bool
+
+pub(all) struct Stored {
+  uid : Int32
+  mut flags : Array[String]
+  date : String
+  body : Bytes
+}
+
+pub(all) struct Summary {
+  messages : Int32
+  recent : Int32
+  unseen : Int32
+  uidnext : Int32
+  uidvalidity : Int64
+}
 
 #derive(Eq, @debug.Debug)
 pub(all) enum Value {
