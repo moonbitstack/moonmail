@@ -131,28 +131,38 @@ jobs:
       # behind by one step is not there for the next.
       - name: imaptest against our own server
         run: |
-          # Everything this step says, its own trace included, goes to a file
-          # that is kept when it fails: the run log is a large thing to fetch.
-          exec > >(tee "$RUNNER_TEMP/ours.log") 2>&1
-          set -x
           moon build --target native src/examples/imap-server
-          ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 &
+          # The server's own words go to a file: if it stops, what it said on
+          # the way out is the only thing that explains why.
+          ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 \
+            > "$RUNNER_TEMP/server.log" 2>&1 &
           server=$!
           trap 'kill $server 2>/dev/null' EXIT
           for i in $(seq 30); do
             if (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then break; fi
+            if ! kill -0 "$server" 2>/dev/null; then
+              echo "::error::the server exited before it listened"
+              cat "$RUNNER_TEMP/server.log"
+              exit 1
+            fi
             sleep 1
           done
+          if ! (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then
+            echo "::error::nothing is listening on 1142"
+            cat "$RUNNER_TEMP/server.log"
+            exit 1
+          fi
           python3 scripts/interop/write_mbox.py "$RUNNER_TEMP/ours.mbox" 20
           "$RUNNER_TEMP/imaptest" \
             host=127.0.0.1 port=1142 user=tim pass=secret \
             mbox="$RUNNER_TEMP/ours.mbox" msgs=20 clients=2 secs=20 \
-            | tee "$RUNNER_TEMP/ours.log"
+            > "$RUNNER_TEMP/ours.log" 2>&1
+          tail -20 "$RUNNER_TEMP/ours.log"
           # imaptest reports what it finds on stdout and exits 0 either way, so
           # the finding is repeated as an annotation, where it can be read
           # without the run log.
-          if grep -E '^Error' "$RUNNER_TEMP/ours.log"; then
-            grep -E '^Error' "$RUNNER_TEMP/ours.log" | head -5 |
+          if grep -a -E '^Error' "$RUNNER_TEMP/ours.log"; then
+            grep -a -E '^Error' "$RUNNER_TEMP/ours.log" | head -3 |
               while IFS= read -r line; do echo "::error::$line"; done
             exit 1
           fi
@@ -180,6 +190,7 @@ jobs:
           name: interop-logs
           path: |
             ${{ runner.temp }}/ours.log
+            ${{ runner.temp }}/server.log
             ${{ runner.temp }}/tests.log
           if-no-files-found: warn
 
