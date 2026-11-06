@@ -106,6 +106,14 @@ pub async fn inbox(host : String, security : @net.Security) -> Unit raise {
 Search returns sequence numbers unless `uid=true` is passed; a `FETCH` after a
 sequence-number search has to use `uid=false` to match it.
 
+## The other end of the wire
+
+`@imap.Server` and `@imap.Store` answer IMAP4rev1 from mailboxes in memory:
+`Store::new`, fill it with `deliver`, hand it to `Server::new` with a function
+that checks credentials and one that gives the clock, then feed octets and write
+back what `next_write` returns. It is a reference server for tests and
+conformance runs, not a mail store — nothing outlives the process.
+
 ## Rules worth knowing
 
 - **TLS 1.3 only.** The bundled client does not speak 1.2, and a server that

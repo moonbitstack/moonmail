@@ -70,7 +70,9 @@ moon run src/examples/tour
 - **IMAP** (`@moonmail/imap`) — IMAP4rev2 client with no I/O (RFC 9051) that
   also speaks to IMAP4rev1 servers: the response grammar with literals and
   response codes, pipelined UID commands, `IDLE`, `CONDSTORE`, `LITERAL+`,
-  `SASL-IR`, and modified UTF-7 names toward rev1 servers.
+  `SASL-IR`, and modified UTF-7 names toward rev1 servers. The same package
+  carries a server: `Server` and `Store` answer IMAP4rev1 from mailboxes in
+  memory, which is what a conformance run points a client at.
 - **DKIM** (`@moonmail/dkim`) — RFC 6376 canonicalization (simple and relaxed),
   body hash, and RSA-SHA256 sign and verify.
 
@@ -290,12 +292,39 @@ smtp.rcpt("bob@example.com", notify=[Success, Failure])
 smtp.bdat(chunk[:], last=true)   // LAST ends the transaction
 ```
 
+## A server, for the other end of the wire
+
+A client is half a protocol. `@moonmail/imap` also carries the server side:
+`Store` holds mailboxes, messages, flags and UIDs in memory, and `Server` turns
+octets into answers — the untagged responses a `SELECT` owes, `FETCH` sections,
+`SEARCH`, `COPYUID`, `EXPUNGE`, the `+` before a literal.
+
+```moonbit nocheck
+let store = @imap.Store::new()
+let _ = store.deliver("INBOX", raw[:], date="06-Nov-2026 12:00:00 +0000")
+let server = @imap.Server::new(
+  store~,
+  credentials=(user, password) => user == "tim" && password == "secret",
+  clock=() => "06-Nov-2026 12:00:00 +0000",
+)
+server.feed(octets)
+while server.next_write() is Some(out) {
+  write(out)
+}
+```
+
+It is a reference server, not a mail store: nothing outlives the process and no
+message is written to disk. `moon run src/examples/imap-server -- 1142` puts it
+on a socket with one account, `tim` / `secret`, which is what the conformance
+run in this repository points imaptest at.
+
 ## Conformance
 
 Each package follows its specification as written, and the parts a server can
 answer for are exercised against one: Dovecot 2.4 serves IMAP and POP3 and takes
 the messages Postfix 3.10 delivers, and the Dovecot project's own `imaptest`
-fills a mailbox that is then read back here. Where a reference implementation
+runs against both — filling a mailbox this library then reads, and driving the
+server this library builds. Where a reference implementation
 and the specification disagree, this library follows the specification and the
 case is a test of its own.
 
@@ -303,7 +332,7 @@ case is a test of its own.
 |:--|:--|:--|
 | `moonmail` | RFC 5322, 2045, 2046, 6532 | Writing what was read and reading it again gives the same tree, byte for byte. |
 | `moonmail/smtp` | RFC 5321, 1870, 6152, 6531, 2920, 3030, 3207, 4954, 3461 | Pipelining, chunking and DSN follow what the server announces; a command that needs an extension it did not announce is refused when it is queued, not when it is sent. |
-| `moonmail/imap` | RFC 9051, 2177, 7162, 3501 | Toward a server that announced neither IMAP4rev2 nor `UTF8=ACCEPT`, names are written and read in modified UTF-7. A search for text outside US-ASCII has to name its charset and quote the string — `CHARSET UTF-8 SUBJECT "日本語"` — because eight-bit octets cannot travel in an atom. |
+| `moonmail/imap` | RFC 9051, 2177, 7162, 3501 | Toward a server that announced neither IMAP4rev2 nor `UTF8=ACCEPT`, names are written and read in modified UTF-7. A search for text outside US-ASCII has to name its charset and quote the string — `CHARSET UTF-8 SUBJECT "日本語"` — because eight-bit octets cannot travel in an atom. The server answers IMAP4rev1 and is exercised by imaptest, the Dovecot project's own client. |
 | `moonmail/pop3` | RFC 1939, 2449 | The line limit covers status lines, which the protocol bounds; a line of a message has no length of its own and is bounded by the message limit instead. |
 | `moonmail/dkim` | RFC 6376, 8463 | Both canonicalizations, RSA-SHA256 and Ed25519-SHA256, `l=`, `t=`, `x=` and `h=` checked item by item. |
 | `moonmail/sasl` | RFC 4616, 7677, 7628, 4013 | SCRAM-SHA-256 checks the server's signature before the session is trusted; PLAIN, LOGIN, CRAM-MD5, XOAUTH2 and OAUTHBEARER complete it. |

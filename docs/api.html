@@ -645,7 +645,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
         <li class="rail__item"><a class="rail__tag" href="#dkim" style="--tilt:.6deg"><span class="rail__no">02</span><span class="rail__name">dkim</span><span class="rail__count">7</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#sasl" style="--tilt:-.5deg"><span class="rail__no">03</span><span class="rail__name">sasl</span><span class="rail__count">10</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#smtp" style="--tilt:.55deg"><span class="rail__no">04</span><span class="rail__name">smtp</span><span class="rail__count">12</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#imap" style="--tilt:-.6deg"><span class="rail__no">05</span><span class="rail__name">imap</span><span class="rail__count">10</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#imap" style="--tilt:-.6deg"><span class="rail__no">05</span><span class="rail__name">imap</span><span class="rail__count">15</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#pop3" style="--tilt:.5deg"><span class="rail__no">06</span><span class="rail__name">pop3</span><span class="rail__count">8</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#jmap" style="--tilt:.3deg"><span class="rail__no">07</span><span class="rail__name">jmap</span><span class="rail__count">17</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#net" style="--tilt:-.45deg"><span class="rail__no">08</span><span class="rail__name">net</span><span class="rail__count">6</span></a></li>
@@ -1110,7 +1110,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <span class="chip chip--spec">RFC 9051</span>
               <span class="chip chip--spec">RFC 2177</span>
               <span class="chip chip--spec">RFC 7162</span>
-              <span class="chip chip--count">10 entries</span>
+              <span class="chip chip--count">15 entries</span>
             </div>
           </figcaption>
         </figure>
@@ -1121,6 +1121,10 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
             <code class="sig">let <b>limits</b> : <i>Limits</i></code>
           </article>
           <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>supported</b> : <i>Array</i>[<i>String</i>]</code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Client</b> <span class="k">// private fields</span></code>
             <code class="sig"><span class="k">fn</span> <b>Client::append</b>(<i>Self</i>, <i>String</i>, <i>BytesView</i>, flags? : <i>Array</i>[<i>String</i>], date? : <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
@@ -1161,7 +1165,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
             <code class="sig"><span class="k">fn</span> <b>Client::unselect</b>(<i>Self</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
             <code class="sig"><span class="k">fn</span> <b>Client::unsubscribe</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i> raise <i>Refused</i></code>
           </article>
-          <article class="slip" style="--r:-.16deg">
+          <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">enum</span>
             <code class="sig"><span class="k">enum</span> <b>Code</b></code>
             <ul class="rows rows--one">
@@ -1182,7 +1186,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>Other</b>(<i>String</i>, <i>String</i>?)</code></li>
             </ul>
           </article>
-          <article class="slip" style="--r:.24deg">
+          <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--type">enum</span>
             <code class="sig"><span class="k">enum</span> <b>Event</b></code>
             <ul class="rows rows--one">
@@ -1191,12 +1195,12 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>Sasl</b>(@sasl.<i>Refused</i>)</code></li>
             </ul>
           </article>
-          <article class="slip" style="--r:-.2deg">
+          <article class="slip" style="--r:.14deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Limits</b> { <b>line</b> : <i>Int32</i>; <b>literal</b> : <i>Int32</i> }</code>
             <code class="sig"><span class="k">fn</span> <b>Limits::new</b>(line? : <i>Int32</i>, literal? : <i>Int32</i>) -&gt; <i>Self</i></code>
           </article>
-          <article class="slip" style="--r:.14deg">
+          <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--type">enum</span>
             <code class="sig"><span class="k">enum</span> <b>Response</b></code>
             <ul class="rows rows--one">
@@ -1215,7 +1219,15 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>Other</b>(<i>String</i>, <i>Array</i>[<i>Value</i>])</code></li>
             </ul>
           </article>
-          <article class="slip" style="--r:-.22deg">
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Server</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::feed</b>(<i>Self</i>, <i>BytesView</i>) -&gt; <i>Unit</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::new</b>(store~ : <i>Store</i>, credentials~ : (<i>String</i>, <i>String</i>) -&gt; <i>Bool</i>, clock~ : () -&gt; <i>String</i>, limits? : <i>Limits</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Server::next_write</b>(<i>Self</i>) -&gt; <i>Bytes</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Server::state</b>(<i>Self</i>) -&gt; <i>State</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--type">enum</span>
             <code class="sig"><span class="k">enum</span> <b>State</b></code>
             <ul class="rows rows--one">
@@ -1225,11 +1237,53 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>Logout</b></code></li>
             </ul>
           </article>
-          <article class="slip" style="--r:.18deg">
+          <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">enum</span>
             <code class="sig"><span class="k">enum</span> <b>Status</b> { <b>Ok</b>; <b>No</b>; <b>Bad</b> }</code>
           </article>
-          <article class="slip" style="--r:-.16deg">
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Store</b> <span class="k">// private fields</span></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::clear</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::create</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::deliver</b>(<i>Self</i>, <i>String</i>, <i>BytesView</i>, flags? : <i>Array</i>[<i>String</i>], date? : <i>String</i>) -&gt; <i>Int32</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::exists</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::expunge</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Int32</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::flags</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::messages</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Stored</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::names</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::new</b>() -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::remove</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::rename</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::set_flags</b>(<i>Self</i>, <i>String</i>, <i>Int32</i>, <i>String</i>, <i>Array</i>[<i>String</i>]) -&gt; <i>Array</i>[<i>String</i>]?</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::subscribe</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::subscribed</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::summary</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Summary</i>?</code>
+            <code class="sig"><span class="k">fn</span> <b>Store::uidnext</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Int32</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Store::unsubscribe</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Stored</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>uid</b> : <i>Int32</i></code></li>
+              <li><code><b>mut</b> flags : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>date</b> : <i>String</i></code></li>
+              <li><code><b>body</b> : <i>Bytes</i></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Summary</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>messages</b> : <i>Int32</i></code></li>
+              <li><code><b>recent</b> : <i>Int32</i></code></li>
+              <li><code><b>unseen</b> : <i>Int32</i></code></li>
+              <li><code><b>uidnext</b> : <i>Int32</i></code></li>
+              <li><code><b>uidvalidity</b> : <i>Int64</i></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--type">enum</span>
             <code class="sig"><span class="k">enum</span> <b>Value</b></code>
             <ul class="rows rows--one">
@@ -1243,7 +1297,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
             <code class="sig"><span class="k">fn</span> <b>Value::number</b>(<i>Self</i>) -&gt; <i>Int64</i>?</code>
             <code class="sig"><span class="k">fn</span> <b>Value::text</b>(<i>Self</i>) -&gt; <i>String</i>?</code>
           </article>
-          <article class="slip" style="--r:.24deg">
+          <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--type">suberror</span>
             <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
             <ul class="rows rows--one">
