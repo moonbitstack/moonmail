@@ -129,7 +129,11 @@ jobs:
 
       - name: stop them
         if: always()
-        run: sudo scripts/interop/services.sh stop
+        run: |
+          code=0
+          sudo scripts/interop/services.sh stop || code=$?
+          echo "the reference services came down with $code"
+          exit 0
 
       - name: logs when something went wrong
         if: failure()
