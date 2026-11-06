@@ -131,13 +131,12 @@ jobs:
       # behind by one step is not there for the next.
       - name: imaptest against our own server
         run: |
-          moon build --target native src/examples/imap-server
-          # The server's own words go to a file: if it stops, what it said on
-          # the way out is the only thing that explains why.
-          ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 \
+          # `moon run` builds and starts in one step, so nothing here depends on
+          # where the toolchain puts the binary.
+          moon run --target native src/examples/imap-server -- 1142 127.0.0.1 \
             > "$RUNNER_TEMP/server.log" 2>&1 &
           server=$!
-          trap 'kill $server 2>/dev/null' EXIT
+          trap 'pkill -P $server 2>/dev/null; kill $server 2>/dev/null' EXIT
           for i in $(seq 30); do
             if (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then break; fi
             if ! kill -0 "$server" 2>/dev/null; then
@@ -172,9 +171,9 @@ jobs:
           MOONMAIL_IMAPTEST: 20
           MOONMAIL_IMAP_SERVER: 127.0.0.1:1142
         run: |
-          ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 &
+          moon run --target native src/examples/imap-server -- 1142 127.0.0.1 &
           server=$!
-          trap 'kill $server 2>/dev/null' EXIT
+          trap 'pkill -P $server 2>/dev/null; kill $server 2>/dev/null' EXIT
           for i in $(seq 30); do
             if (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then break; fi
             sleep 1
