@@ -119,6 +119,15 @@ fn Server::announce_flags(self : Server, name : String) -> Unit {
     }
   }
   if grew {
+    // A FLAGS list the client has seen may never shrink: expunging the last
+    // message that carried a keyword takes it out of the mailbox, not out of
+    // what the client knows, and dropping it there is a keyword dropped while
+    // messages still mention it.
+    for flag in self.flags_seen {
+      if !union.contains(flag) {
+        union.push(flag)
+      }
+    }
     self.flags_seen = union.copy()
     self.untagged("FLAGS (" + union.join(" ") + ")")
   }
