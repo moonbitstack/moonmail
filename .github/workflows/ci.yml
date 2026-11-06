@@ -48,7 +48,10 @@ jobs:
       - name: examples run
         if: runner.os == 'Linux'
         run: |
+          # imap-server is a server: it runs until it is killed, so the
+          # interop job is where it is exercised.
           for dir in src/examples/*/; do
+            if [ "$dir" = "src/examples/imap-server/" ]; then continue; fi
             if grep -q 'kind: "executable"' "$dir/moon.pkg" && ! grep -q 'supported_targets = "js"' "$dir/moon.pkg"; then
               moon run "$dir" --target native > /dev/null
             fi
@@ -122,18 +125,46 @@ jobs:
           # imaptest reports failures on stdout and still exits 0.
           if grep -E '^Error' "$RUNNER_TEMP/imaptest.log"; then exit 1; fi
 
+      # The other side of the same tool: the server this library builds, with
+      # imaptest — the Dovecot project's own client — pointed at it.
+      - name: our own IMAP server
+        run: |
+          moon build --target native src/examples/imap-server
+          ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 &
+          for i in $(seq 30); do
+            if (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then break; fi
+            sleep 1
+          done
+
+      - name: imaptest against our own server
+        run: |
+          python3 scripts/interop/write_mbox.py "$RUNNER_TEMP/ours.mbox" 20
+          "$RUNNER_TEMP/imaptest" \
+            host=127.0.0.1 port=1142 user=tim pass=secret \
+            mbox="$RUNNER_TEMP/ours.mbox" msgs=20 clients=2 secs=20 \
+            | tee "$RUNNER_TEMP/ours.log"
+          if grep -E '^Error' "$RUNNER_TEMP/ours.log"; then exit 1; fi
+
       - name: the sockets against them
         env:
           MOONMAIL_IMAPTEST: 20
+          MOONMAIL_IMAP_SERVER: 127.0.0.1:1142
         run: moon test --target native -p moonbitstack/moonmail/net
 
+      # Strict on purpose: a teardown that cannot run is a bug in the harness,
+      # and the trace is uploaded so it can be read without the run log.
       - name: stop them
         if: always()
         run: |
-          code=0
-          sudo scripts/interop/services.sh stop || code=$?
-          echo "the reference services came down with $code"
-          exit 0
+          sudo sh -x scripts/interop/services.sh stop 2>&1 | tee "$RUNNER_TEMP/teardown.log"
+          exit "${PIPESTATUS[0]}"
+
+      - name: keep the teardown trace
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teardown
+          path: ${{ runner.temp }}/teardown.log
 
       - name: logs when something went wrong
         if: failure()

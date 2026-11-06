@@ -51,5 +51,6 @@ options(
     "pop3_live_test.mbt": [ "native" ],
     "postfix_test.mbt": [ "native" ],
     "smtp_live_test.mbt": [ "native" ],
+    "imap_server_test.mbt": [ "native" ],
   },
 )

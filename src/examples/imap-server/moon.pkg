@@ -1,0 +1,18 @@
+// The IMAP server of @moonmail/imap over a socket, for the conformance run:
+// `moon run src/examples/imap-server -- 1144`.
+pkgtype(kind: "executable")
+
+// A server, not a tour: it runs until it is killed, so it is left out of the
+// examples the CI runs to completion.
+
+supported_targets = "native"
+
+import {
+  "moonbitstack/moonmail/imap",
+  "moonbitstack/moonnet/tcp",
+  "moonbitstack/moondate",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+  "moonbitlang/core/encoding/utf8",
+}
