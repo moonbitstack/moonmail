@@ -1,6 +1,6 @@
 name = "moonbitstack/moonmail"
 
-version = "0.1.4"
+version = "0.1.5"
 
 readme = "README.md"
 
@@ -41,13 +41,13 @@ source = "src"
 
 import {
   "moonbitstack/moonbase@0.4.3",
-  "moonbitstack/mooncrypt@0.4.11",
-  "moonbitstack/moonmime@0.2.2",
-  "moonbitstack/moondate@0.1.4",
+  "moonbitstack/mooncrypt@0.4.12",
+  "moonbitstack/moonmime@0.2.3",
+  "moonbitstack/moondate@0.1.5",
   "moonbitstack/moonucd@0.1.3",
-  "moonbitstack/moonnet@0.1.10",
-  "moonbitstack/moontls@0.9.14",
-  "moonbitstack/mooncred@0.6.9",
+  "moonbitstack/moonnet@0.1.11",
+  "moonbitstack/moontls@0.9.15",
+  "moonbitstack/mooncred@0.6.10",
   "moonbitlang/async@0.22.5",
-  "moonbitstack/moonfetch@0.1.5",
+  "moonbitstack/moonfetch@0.1.6",
 }
