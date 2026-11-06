@@ -31,15 +31,30 @@ except OSError:
 PY
 }
 
+# A pid file is only worth acting on while the process it names is still the one
+# that wrote it: a pid left behind by a run that died can belong to anything by
+# the time the next run reads it, and killing that would be much worse than
+# leaving a mail server up.
+owns() {
+  [ -r "/proc/$1/comm" ] && [ "$(cat "/proc/$1/comm")" = "$2" ]
+}
+
 stop() {
+  # Best effort throughout: this runs from a cleanup step that must not turn a
+  # green job red, and every failure here is one of "already gone".
+  set +e
   if [ -f "$base/conf/main.cf" ]; then
-    postfix -c "$base/conf" stop 2>/dev/null || true
-  fi
-  if [ -f "$base/conf/dovecot.conf" ]; then
-    dovecot -c "$base/conf/dovecot.conf" stop 2>/dev/null || true
+    # Postfix writes the number right-aligned, so the octets are what counts.
+    pid=$(tr -cd '0-9' <"$base/queue/pid/master.pid" 2>/dev/null || echo)
+    if [ -n "$pid" ] && owns "$pid" master; then
+      postfix -c "$base/conf" stop 2>/dev/null
+    fi
   fi
   if [ -f "$base/run/master.pid" ]; then
-    kill "$(cat "$base/run/master.pid")" 2>/dev/null || true
+    pid=$(tr -cd '0-9' <"$base/run/master.pid" 2>/dev/null || echo)
+    if [ -n "$pid" ] && owns "$pid" dovecot; then
+      dovecot -c "$base/conf/dovecot.conf" stop 2>/dev/null
+    fi
   fi
   rm -rf "$base"
   # userdel refuses an account a process still uses, and a session Dovecot has
@@ -49,6 +64,7 @@ stop() {
     userdel "$account" >/dev/null 2>&1 ||
       echo "left the account $account behind: a process still uses it" >&2
   fi
+  set -e
 }
 
 start() {
