@@ -372,6 +372,24 @@ def render_package(pkg: dict, items: list[Item], number: int) -> tuple[str, str]
     return block, tag
 
 
+# The hand-written pages carry the module's version in three places: the two
+# postmarks and the manifest a reader copies out of the guide. Filling them here,
+# where the version is already read, is what keeps them from going stale: the
+# docs workflow regenerates and fails on a diff.
+VERSION_SPAN = re.compile(r"(<span data-version>)[^<]*(</span>)")
+
+
+def fill_versions(version: str) -> int:
+    filled = 0
+    for page in sorted((ROOT / "docs").glob("*.html")):
+        text = page.read_text(encoding="utf-8")
+        filled_text, count = VERSION_SPAN.subn(rf"\g<1>{version}\g<2>", text)
+        if count and filled_text != text:
+            page.write_text(filled_text, encoding="utf-8", newline="\n")
+            filled += count
+    return filled
+
+
 def main() -> int:
     template = TEMPLATE.read_text(encoding="utf-8")
     blocks: list[str] = []
@@ -401,7 +419,9 @@ def main() -> int:
         .replace("<!--VERSION-->", version)
     )
     OUT.write_text(page, encoding="utf-8", newline="\n")
+    filled = fill_versions(version)
     print(f"{OUT.relative_to(ROOT)}: {len(PACKAGES)} packages, {counted} slips")
+    print(f"{version} written into {filled} places on the pages")
     return 0
 
 
