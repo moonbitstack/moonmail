@@ -582,7 +582,7 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
       <div class="rail__plumb" aria-hidden="true">
         <svg viewBox="0 0 13 20"><path d="M6.5 0 8 2v10l2 2v6H3v-6l2-2V2Z"/></svg>
       </div>
-      <div class="rail__stamp"><b>moonbitstack/moonmail</b>0.1.0 · MIT</div>
+      <div class="rail__stamp"><b>moonbitstack/moonmail</b>Apache-2.0</div>
     </aside>
 
     <main class="content">
@@ -810,6 +810,26 @@ println(client.pending())</code></pre>
         <div class="out"><span class="out__k">out</span><pre>EHLO test.local
 1</pre></div>
         <p class="step__p">IMAP adds tags — every command returns its number and every <b>Done</b> carries it back. POP3 adds <b>pending</b>, which is all the back-pressure that protocol needs. <code>moonmail/net</code> is the only package that owns a socket; everything above it is pure.</p>
+      </section>
+
+      <!-- 09 -->
+      <section class="step" id="servers">
+        <span class="step__cord" aria-hidden="true"></span>
+        <div class="step__head"><span class="step__no">09</span><h2 class="step__t">Point it at a real server</h2></div>
+        <p class="step__p">A test can feed recorded bytes, but a reply nobody wrote down is the one that teaches you something. The repository carries a harness that starts a Maildir, a <b>Dovecot</b> that serves it over IMAP and POP3, and a <b>Postfix</b> that delivers into it — on ports of their own, under their own configuration, so nothing already running on the machine is touched.</p>
+        <figure class="code">
+          <span class="code__tape" aria-hidden="true"></span>
+          <span class="code__lang">shell</span>
+          <pre><code>sudo scripts/interop/services.sh start
+MOONMAIL_LIVE=127.0.0.1:1143:1993:1111:1995:2525:2465
+
+MOONMAIL_LIVE=$MOONMAIL_LIVE moon test -p moonbitstack/moonmail/net
+sudo scripts/interop/services.sh stop</code></pre>
+        </figure>
+        <p class="step__p">Those seven numbers are the clear and the TLS port of each protocol, in the order IMAP, POP3, SMTP. Set, every one of them has to answer — a missing service fails the test instead of passing it quietly. Unset, the tests that need a server do nothing and the rest of the suite is unchanged.</p>
+        <p class="step__p">With a server up, a whole letter can be followed: the SMTP client hands it to Postfix, local delivery writes the Maildir, and the IMAP and POP3 clients read the same octets back out of Dovecot. The IMAP side is also filled by <b>imaptest</b>, the Dovecot project's own client, and the headers it wrote are fetched back with this library.</p>
+        <div class="out"><span class="out__k">out</span><pre>* OK [CAPABILITY IMAP4rev1 ID ENABLE IDLE SASL-IR LITERAL+ AUTH=PLAIN AUTH=LOGIN] moonmail interop ready</pre></div>
+        <p class="step__p">Two limits worth knowing before you point it at your own provider: the bundled TLS client speaks TLS 1.3 only, and a search for non-ASCII text has to name its charset — <code>CHARSET UTF-8 SUBJECT "日本語"</code> — because eight-bit octets cannot travel in an IMAP atom.</p>
         <div class="next">
           <a href="api.html">
             <span class="next__k">reference</span>
@@ -829,7 +849,7 @@ println(client.pending())</code></pre>
   <footer class="footer">
     <div>
       <div class="footer__mark">MoonMail</div>
-      <p class="footer__note">0.1.0 · MIT · moonbitstack</p>
+      <p class="footer__note">Apache-2.0 · moonbitstack</p>
     </div>
     <nav class="footer__links" aria-label="Footer">
       <a href="index.html">Home</a>

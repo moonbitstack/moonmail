@@ -1,5 +1,13 @@
 # moonmail
 
+<p>
+  <a href="https://moonbitstack.github.io/moonmail/"><b>Home</b></a> ·
+  <a href="https://moonbitstack.github.io/moonmail/guide.html">Guide</a> ·
+  <a href="https://moonbitstack.github.io/moonmail/api.html">API</a> ·
+  <a href="https://moonbitstack.github.io/moonmail/desk.html">Showcase</a> ·
+  <a href="https://mooncakes.io/docs/moonbitstack/moonmail">MoonCakes</a>
+</p>
+
 Email for MoonBit: read an RFC 5322 message into a tree and write it back out,
 the MIME transfer encodings it carries, DKIM signing and verification, the
 SMTP/LMTP, IMAP and POP3 dialogues, and JMAP over HTTP. The protocols are state machines with no
@@ -281,6 +289,29 @@ smtp.mail("alice@example.com", size=1234, body=Binary)
 smtp.rcpt("bob@example.com", notify=[Success, Failure])
 smtp.bdat(chunk[:], last=true)   // LAST ends the transaction
 ```
+
+## Conformance
+
+Each package follows its specification as written, and the parts a server can
+answer for are exercised against one: Dovecot 2.4 serves IMAP and POP3 and takes
+the messages Postfix 3.10 delivers, and the Dovecot project's own `imaptest`
+fills a mailbox that is then read back here. Where a reference implementation
+and the specification disagree, this library follows the specification and the
+case is a test of its own.
+
+| Package | Specification | Worth knowing |
+|:--|:--|:--|
+| `moonmail` | RFC 5322, 2045, 2046, 6532 | Writing what was read and reading it again gives the same tree, byte for byte. |
+| `moonmail/smtp` | RFC 5321, 1870, 6152, 6531, 2920, 3030, 3207, 4954, 3461 | Pipelining, chunking and DSN follow what the server announces; a command that needs an extension it did not announce is refused when it is queued, not when it is sent. |
+| `moonmail/imap` | RFC 9051, 2177, 7162, 3501 | Toward a server that announced neither IMAP4rev2 nor `UTF8=ACCEPT`, names are written and read in modified UTF-7. A search for text outside US-ASCII has to name its charset and quote the string — `CHARSET UTF-8 SUBJECT "日本語"` — because eight-bit octets cannot travel in an atom. |
+| `moonmail/pop3` | RFC 1939, 2449 | The line limit covers status lines, which the protocol bounds; a line of a message has no length of its own and is bounded by the message limit instead. |
+| `moonmail/dkim` | RFC 6376, 8463 | Both canonicalizations, RSA-SHA256 and Ed25519-SHA256, `l=`, `t=`, `x=` and `h=` checked item by item. |
+| `moonmail/sasl` | RFC 4616, 7677, 7628, 4013 | SCRAM-SHA-256 checks the server's signature before the session is trusted; PLAIN, LOGIN, CRAM-MD5, XOAUTH2 and OAUTHBEARER complete it. |
+
+Two limits are the transport's, not the protocols': the TLS client bundled with
+`@moonmail/net` speaks TLS 1.3 only, so a server that offers just 1.2 hangs up in
+the handshake; and a page cannot open a TCP connection at all, which is what
+`@moonmail/jmap` is for.
 
 ## What it is not
 
