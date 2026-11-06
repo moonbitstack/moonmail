@@ -126,23 +126,25 @@ jobs:
           if grep -E '^Error' "$RUNNER_TEMP/imaptest.log"; then exit 1; fi
 
       # The other side of the same tool: the server this library builds, with
-      # imaptest — the Dovecot project's own client — pointed at it.
-      - name: our own IMAP server
+      # imaptest — the Dovecot project's own client — pointed at it. The server
+      # is started and stopped inside each step that uses it: a process left
+      # behind by one step is not there for the next.
+      - name: imaptest against our own server
         run: |
           moon build --target native src/examples/imap-server
           ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 &
+          server=$!
+          trap 'kill $server 2>/dev/null' EXIT
           for i in $(seq 30); do
             if (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then break; fi
             sleep 1
           done
-
-      - name: imaptest against our own server
-        run: |
           python3 scripts/interop/write_mbox.py "$RUNNER_TEMP/ours.mbox" 20
           "$RUNNER_TEMP/imaptest" \
             host=127.0.0.1 port=1142 user=tim pass=secret \
             mbox="$RUNNER_TEMP/ours.mbox" msgs=20 clients=2 secs=20 \
             | tee "$RUNNER_TEMP/ours.log"
+          # imaptest reports what it finds on stdout and exits 0 either way.
           if grep -E '^Error' "$RUNNER_TEMP/ours.log"; then exit 1; fi
 
       - name: the sockets against them
@@ -150,12 +152,13 @@ jobs:
           MOONMAIL_IMAPTEST: 20
           MOONMAIL_IMAP_SERVER: 127.0.0.1:1142
         run: |
-          # Which failure it is matters: a server that stopped is not a wrong
-          # answer, and the annotations should say which one happened.
-          if ! (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then
-            echo "::error::the IMAP server under test is no longer listening on 1142"
-            exit 1
-          fi
+          ./_build/native/debug/build/examples/imap-server/imap-server 1142 127.0.0.1 &
+          server=$!
+          trap 'kill $server 2>/dev/null' EXIT
+          for i in $(seq 30); do
+            if (exec 3<>/dev/tcp/127.0.0.1/1142) 2>/dev/null; then break; fi
+            sleep 1
+          done
           set +e
           moon test --target native -p moonbitstack/moonmail/net 2>&1 | tee "$RUNNER_TEMP/tests.log"
           exit "${PIPESTATUS[0]}"
@@ -167,8 +170,6 @@ jobs:
           name: interop-testlog
           path: ${{ runner.temp }}/tests.log
 
-      # Strict on purpose: a teardown that cannot run is a bug in the harness,
-      # and the trace is uploaded so it can be read without the run log.
       - name: stop them
         if: always()
         run: |
