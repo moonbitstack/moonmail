@@ -74,6 +74,15 @@ jobs:
         run: |
           moon info --target all && git diff --exit-code
 
+      - name: the skills are valid
+        if: runner.os == 'Linux'
+        run: |
+          for dir in docs/skills/*/; do
+            case "$dir" in *CHANGE-ME*) continue ;; esac
+            [ -f "$dir/SKILL.md" ] || continue
+            pipx run --spec skills-ref agentskills validate "$dir"
+          done
+
   # A real Dovecot and a real Postfix, then the sockets in @moonmail/net against
   # them: SMTP into Postfix, local(8) into a Maildir, IMAP and POP3 back out of
   # Dovecot. imaptest is the same Dovecot team's IMAP client, so the mailbox it
