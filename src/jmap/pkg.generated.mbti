@@ -4,22 +4,170 @@ package "moonbitstack/moonmail/jmap"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "moonbitstack/moonmail",
+  "moonbitstack/moonmodel",
 }
 
 // Values
+pub fn address(String, parameters? : Map[String, String?]) -> @json.Json
+
+pub fn address_model() -> @moonmodel.Model
+
+pub fn after(String) -> @json.Json
+
+pub fn all_in_thread_have_keyword(String) -> @json.Json
+
+pub fn all_of(Array[@json.Json]) -> @json.Json
+
+pub fn any_of(Array[@json.Json]) -> @json.Json
+
+pub fn bcc_address(String) -> @json.Json
+
+pub fn before(String) -> @json.Json
+
+pub fn body_contains(String) -> @json.Json
+
+pub fn body_structure(@json.Json) -> EmailBodyPart?
+
+pub fn cc_address(String) -> @json.Json
+
+pub fn child_of(String?) -> @json.Json
+
+pub fn condition(Array[(String, @json.Json)]) -> @json.Json
+
 pub fn created_id(Response, String, String) -> String raise Refused
+
+pub fn delivery_status_model() -> @moonmodel.Model
 
 pub fn discovery_url(String) -> String
 
+pub fn email_address_group_model() -> @moonmodel.Model
+
+pub fn email_address_model() -> @moonmodel.Model
+
+pub fn email_body_of(@moonmail.Message) -> EmailBody
+
+pub fn email_body_part_model() -> @moonmodel.Model
+
+pub fn email_body_value_model() -> @moonmodel.Model
+
+pub fn email_from_message(BytesView, mailbox_ids~ : Array[String], keywords? : Array[String], received_at? : String, blob_id? : String, thread_id? : String, id? : String) -> @json.Json raise Refused
+
+pub fn email_header_model() -> @moonmodel.Model
+
 pub fn email_ids(Response, String) -> Array[String] raise Refused
+
+pub fn email_model() -> @moonmodel.Model
+
+pub fn email_object(Response, String) -> @json.Json raise Refused
+
+pub let email_properties : Array[String]
+
+pub fn email_submission_model() -> @moonmodel.Model
 
 pub fn emails(Response, String) -> Array[Email] raise Refused
 
+pub fn envelope(mail_from~ : @json.Json, rcpt_to~ : Array[@json.Json]) -> @json.Json
+
+pub fn envelope_model() -> @moonmodel.Model
+
+pub fn from_address(String) -> @json.Json
+
+pub fn has_any_role() -> @json.Json
+
+pub fn has_attachment() -> @json.Json
+
+pub fn has_keyword(String) -> @json.Json
+
+pub fn has_property(String, String) -> Bool
+
+pub fn header_contains(name~ : String, value~ : String) -> @json.Json
+
 pub fn identities(Response, String) -> Array[Identity] raise Refused
+
+pub fn identity(String, String, signature? : String) -> @json.Json
+
+pub fn identity_model() -> @moonmodel.Model
+
+pub fn in_mailbox(String) -> @json.Json
+
+pub fn in_mailbox_other_than(Array[String]) -> @json.Json
+
+pub fn mailbox_ids(Response, String) -> Array[String] raise Refused
+
+pub fn mailbox_model() -> @moonmodel.Model
+
+pub fn mailbox_name_contains(String) -> @json.Json
+
+pub fn mailbox_new(name~ : String, parent_id? : String, role? : String, sort_order? : Int32, is_subscribed? : Bool) -> @json.Json
+
+pub let mailbox_properties : Array[String]
+
+pub fn mailbox_rights_model() -> @moonmodel.Model
 
 pub fn mailboxes(Response, String) -> Array[Mailbox] raise Refused
 
+pub fn max_size(Int32) -> @json.Json
+
+pub fn method_names() -> Array[String]
+
+pub fn min_size(Int32) -> @json.Json
+
+pub fn model(String) -> @moonmodel.Model?
+
+pub fn models() -> Array[@moonmodel.Model]
+
+pub fn new_state(Response, String) -> String raise Refused
+
+pub fn none_in_thread_have_keyword(String) -> @json.Json
+
+pub fn none_of(Array[@json.Json]) -> @json.Json
+
+pub fn not_created(Response, String, String) -> @json.Json? raise Refused
+
+pub fn not_keyword(String) -> @json.Json
+
+pub fn preview_of(@moonmail.Message) -> String
+
+pub fn properties(String) -> Array[String]
+
+pub fn request_error_model() -> @moonmodel.Model
+
 pub fn resolve(String, String) -> String raise Refused
+
+pub fn search_snippet_model() -> @moonmodel.Model
+
+pub fn set_error_model() -> @moonmodel.Model
+
+pub fn snippets(Response, String) -> Array[SearchSnippet] raise Refused
+
+pub fn some_in_thread_have_keyword(String) -> @json.Json
+
+pub fn subject_contains(String) -> @json.Json
+
+pub fn submission_new(identity~ : String, email~ : String, envelope? : @json.Json, send_at? : String) -> @json.Json
+
+pub fn submissions(Response, String) -> Array[EmailSubmission] raise Refused
+
+pub fn subscribed() -> @json.Json
+
+pub fn text_search(String) -> @json.Json
+
+pub fn thread_model() -> @moonmodel.Model
+
+pub fn threads(Response, String) -> Array[Thread] raise Refused
+
+pub fn to_address(String) -> @json.Json
+
+pub fn updated_ids(Response, String) -> Array[String] raise Refused
+
+pub fn vacation_response(enabled~ : Bool, from_date? : String, to_date? : String, subject? : String, text_body? : String, html_body? : String) -> @json.Json
+
+pub fn vacation_response_model() -> @moonmodel.Model
+
+pub fn vacation_response_of(Response, String) -> VacationResponse? raise Refused
+
+pub fn with_role(String) -> @json.Json
 
 // Errors
 #derive(Eq, @debug.Debug)
@@ -37,6 +185,16 @@ pub fn Refused::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 #derive(Eq, @debug.Debug)
+pub(all) struct Address {
+  email : String
+  parameters : Map[String, String]
+}
+pub fn Address::equal(Self, Self) -> Bool
+pub fn Address::not_equal(Self, Self) -> Bool
+pub fn Address::parse(@json.Json) -> Self
+pub fn Address::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub(all) struct Call {
   name : String
   args : @json.Json
@@ -45,6 +203,28 @@ pub(all) struct Call {
 pub fn Call::equal(Self, Self) -> Bool
 pub fn Call::not_equal(Self, Self) -> Bool
 pub fn Call::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Comparator {
+  property : String
+  ascending : Bool
+  collation : String?
+}
+pub fn Comparator::equal(Self, Self) -> Bool
+pub fn Comparator::new(property~ : String, ascending? : Bool, collation? : String) -> Self
+pub fn Comparator::not_equal(Self, Self) -> Bool
+pub fn Comparator::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct DeliveryStatus {
+  smtp_reply : String
+  delivered : String
+  displayed : String
+}
+pub fn DeliveryStatus::equal(Self, Self) -> Bool
+pub fn DeliveryStatus::not_equal(Self, Self) -> Bool
+pub fn DeliveryStatus::parse(@json.Json) -> Self
+pub fn DeliveryStatus::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Draft {
   from : String?
@@ -67,16 +247,120 @@ pub(all) struct Email {
 }
 pub fn Email::equal(Self, Self) -> Bool
 pub fn Email::not_equal(Self, Self) -> Bool
+pub fn Email::parse(@json.Json) -> Self
 pub fn Email::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct EmailAddress {
+  name : String?
+  email : String
+}
+pub fn EmailAddress::equal(Self, Self) -> Bool
+pub fn EmailAddress::not_equal(Self, Self) -> Bool
+pub fn EmailAddress::of_header(@moonmail.Mailbox) -> Self
+pub fn EmailAddress::parse(@json.Json) -> Self
+pub fn EmailAddress::to_repr(Self) -> @debug.Repr
+pub fn EmailAddress::to_string(Self) -> String
+
+#derive(Eq, @debug.Debug)
+pub(all) struct EmailBody {
+  structure : EmailBodyPart
+  text : Array[EmailBodyPart]
+  html : Array[EmailBodyPart]
+  attachments : Array[EmailBodyPart]
+}
+pub fn EmailBody::equal(Self, Self) -> Bool
+pub fn EmailBody::not_equal(Self, Self) -> Bool
+pub fn EmailBody::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct EmailBodyPart {
+  part_id : String?
+  blob_id : String?
+  size : Int32
+  headers : Array[EmailHeader]
+  name : String?
+  media_type : String
+  charset : String?
+  disposition : String?
+  cid : String?
+  language : Array[String]
+  location : String?
+  sub_parts : Array[EmailBodyPart]?
+}
+pub fn EmailBodyPart::equal(Self, Self) -> Bool
+pub fn EmailBodyPart::leaves(Self) -> Array[Self]
+pub fn EmailBodyPart::not_equal(Self, Self) -> Bool
+pub fn EmailBodyPart::parse(@json.Json) -> Self
+pub fn EmailBodyPart::to_json(Self) -> @json.Json
+pub fn EmailBodyPart::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct EmailBodyValue {
+  value : String
+  encoding_problem : Bool
+  truncated : Bool
+}
+pub fn EmailBodyValue::equal(Self, Self) -> Bool
+pub fn EmailBodyValue::not_equal(Self, Self) -> Bool
+pub fn EmailBodyValue::parse(@json.Json) -> Self
+pub fn EmailBodyValue::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct EmailHeader {
+  name : String
+  value : String
+}
+pub fn EmailHeader::equal(Self, Self) -> Bool
+pub fn EmailHeader::not_equal(Self, Self) -> Bool
+pub fn EmailHeader::parse(@json.Json) -> Self
+pub fn EmailHeader::to_repr(Self) -> @debug.Repr
+
+pub(all) struct EmailImport {
+  blob_id : String
+  mailbox_ids : Array[String]
+  keywords : Array[String]
+  received_at : String?
+}
+pub fn EmailImport::new(blob_id~ : String, mailbox_ids~ : Array[String], keywords? : Array[String], received_at? : String) -> Self
+
+#derive(Eq, @debug.Debug)
+pub(all) struct EmailSubmission {
+  id : String
+  identity_id : String
+  email_id : String
+  thread_id : String?
+  envelope : Envelope?
+  send_at : String?
+  undo_status : String
+  delivery : Map[String, DeliveryStatus]
+}
+pub fn EmailSubmission::equal(Self, Self) -> Bool
+pub fn EmailSubmission::not_equal(Self, Self) -> Bool
+pub fn EmailSubmission::parse(@json.Json) -> Self
+pub fn EmailSubmission::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Envelope {
+  mail_from : Address
+  rcpt_to : Array[Address]
+}
+pub fn Envelope::equal(Self, Self) -> Bool
+pub fn Envelope::not_equal(Self, Self) -> Bool
+pub fn Envelope::parse(@json.Json) -> Self
+pub fn Envelope::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct Identity {
   id : String
   name : String?
   email : String
+  signature : String
+  may_delete : Bool
 }
 pub fn Identity::equal(Self, Self) -> Bool
 pub fn Identity::not_equal(Self, Self) -> Bool
+pub fn Identity::parse(@json.Json) -> Self
 pub fn Identity::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -90,6 +374,23 @@ pub fn Invocation::not_equal(Self, Self) -> Bool
 pub fn Invocation::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub(all) enum Kind {
+  Mailbox
+  Thread
+  Email
+  SearchSnippet
+  Identity
+  EmailSubmission
+  VacationResponse
+}
+pub fn Kind::capability(Self) -> String
+pub fn Kind::equal(Self, Self) -> Bool
+pub fn Kind::methods(Self) -> Array[String]
+pub fn Kind::name(Self) -> String
+pub fn Kind::not_equal(Self, Self) -> Bool
+pub fn Kind::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub(all) struct Mailbox {
   id : String
   name : String
@@ -97,9 +398,15 @@ pub(all) struct Mailbox {
   parent_id : String?
   total : Int32
   unread : Int32
+  total_threads : Int32
+  unread_threads : Int32
+  sort_order : Int32
+  is_subscribed : Bool
+  rights : Rights?
 }
 pub fn Mailbox::equal(Self, Self) -> Bool
 pub fn Mailbox::not_equal(Self, Self) -> Bool
+pub fn Mailbox::parse(@json.Json) -> Self
 pub fn Mailbox::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -108,23 +415,42 @@ pub(all) struct Request {
   calls : Array[Call]
 }
 pub fn Request::call(Self, String, @json.Json) -> String
+pub fn Request::changes(Self, String, Kind, since_state~ : String, max_changes? : Int32) -> String
+pub fn Request::copy(Self, from_account~ : String, account~ : String, kind~ : Kind, create~ : Map[String, @json.Json], if_from_in_state? : String, if_in_state? : String, on_success_destroy_original? : Bool, destroy_from_if_in_state? : String) -> String
+pub fn Request::echo(Self, @json.Json) -> String
 pub fn Request::email_destroy(Self, String, String) -> String
-pub fn Request::email_get(Self, String, Array[String], Array[String]) -> String
+pub fn Request::email_get(Self, String, Array[String], Array[String], body_properties? : Array[String], fetch_text_body_values? : Bool, fetch_html_body_values? : Bool, fetch_all_body_values? : Bool, max_body_value_bytes? : Int32) -> String
+pub fn Request::email_import(Self, String, Map[String, EmailImport], if_in_state? : String) -> String
 pub fn Request::email_mark_seen(Self, String, String, Bool) -> String
 pub fn Request::email_move(Self, String, String, String) -> String
+pub fn Request::email_parse(Self, String, Array[String], properties? : Array[String], body_properties? : Array[String], fetch_text_body_values? : Bool, fetch_html_body_values? : Bool, fetch_all_body_values? : Bool, max_body_value_bytes? : Int32) -> String
 pub fn Request::email_query(Self, String, String, Int32) -> String
+pub fn Request::email_query_changes(Self, String, since_query_state~ : String, filter? : @json.Json, sort? : Array[Comparator], max_changes? : Int32, up_to_id? : String, calculate_total? : Bool, collapse_threads? : Bool) -> String
+pub fn Request::email_query_filter(Self, String, filter? : @json.Json, sort? : Array[Comparator], position? : Int32, limit? : Int32, calculate_total? : Bool, collapse_threads? : Bool) -> String
 pub fn Request::email_set_draft(Self, String, String, Draft) -> String
 pub fn Request::email_set_update(Self, String, String, Array[(String, @json.Json)]) -> String
-pub fn Request::email_submission_set(Self, String, String, String) -> String
+pub fn Request::email_submission_cancel(Self, String, String) -> String
+pub fn Request::email_submission_set(Self, String, String, String, envelope? : @json.Json, send_at? : String, on_success_update_email? : @json.Json, on_success_destroy_email? : Bool) -> String
 pub fn Request::equal(Self, Self) -> Bool
-pub fn Request::identity_get(Self, String) -> String
-pub fn Request::mailbox_get(Self, String) -> String
+pub fn Request::get(Self, String, Kind, ids? : Array[String], properties? : Array[String]) -> String
+pub fn Request::identity_get(Self, String, ids? : Array[String], properties? : Array[String]) -> String
+pub fn Request::identity_set(Self, String, create? : Map[String, @json.Json], update? : Map[String, @json.Json], destroy? : Array[String], if_in_state? : String) -> String
+pub fn Request::mailbox_get(Self, String, ids? : Array[String], properties? : Array[String]) -> String
+pub fn Request::mailbox_query(Self, String, filter? : @json.Json, sort? : Array[Comparator], position? : Int32, limit? : Int32, calculate_total? : Bool, sort_as_tree? : Bool, filter_as_tree? : Bool) -> String
+pub fn Request::mailbox_set(Self, String, create? : Map[String, @json.Json], update? : Map[String, @json.Json], destroy? : Array[String], if_in_state? : String, on_destroy_remove_emails? : Bool) -> String
 pub fn Request::new() -> Self
 pub fn Request::not_equal(Self, Self) -> Bool
+pub fn Request::query(Self, String, Kind, filter? : @json.Json, sort? : Array[Comparator], position? : Int32, anchor? : String, anchor_offset? : Int32, limit? : Int32, calculate_total? : Bool) -> String
+pub fn Request::query_changes(Self, String, Kind, since_query_state~ : String, filter? : @json.Json, sort? : Array[Comparator], max_changes? : Int32, up_to_id? : String, calculate_total? : Bool) -> String
+pub fn Request::search_snippet_get(Self, String, Array[String], filter? : @json.Json) -> String
+pub fn Request::set(Self, String, Kind, create? : Map[String, @json.Json], update? : Map[String, @json.Json], destroy? : Array[String], if_in_state? : String) -> String
+pub fn Request::thread_get(Self, String, Array[String]) -> String
 pub fn Request::to_json(Self) -> @json.Json
 pub fn Request::to_repr(Self) -> @debug.Repr
 pub fn Request::to_string(Self) -> String
 pub fn Request::using_capability(Self, String) -> Unit
+pub fn Request::vacation_response_get(Self, String) -> String
+pub fn Request::vacation_response_set(Self, String, @json.Json, if_in_state? : String) -> String
 
 #derive(Eq, @debug.Debug)
 pub(all) struct Response {
@@ -137,6 +463,33 @@ pub fn Response::invocation(Self, String) -> Invocation?
 pub fn Response::not_equal(Self, Self) -> Bool
 pub fn Response::parse(String) -> Self raise Refused
 pub fn Response::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Rights {
+  may_read_items : Bool
+  may_add_items : Bool
+  may_remove_items : Bool
+  may_set_seen : Bool
+  may_set_keywords : Bool
+  may_create_child : Bool
+  may_rename : Bool
+  may_delete : Bool
+  may_submit : Bool
+}
+pub fn Rights::equal(Self, Self) -> Bool
+pub fn Rights::not_equal(Self, Self) -> Bool
+pub fn Rights::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct SearchSnippet {
+  email_id : String
+  subject : String?
+  preview : String?
+}
+pub fn SearchSnippet::equal(Self, Self) -> Bool
+pub fn SearchSnippet::not_equal(Self, Self) -> Bool
+pub fn SearchSnippet::parse(@json.Json) -> Self
+pub fn SearchSnippet::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct Session {
@@ -152,6 +505,31 @@ pub fn Session::equal(Self, Self) -> Bool
 pub fn Session::not_equal(Self, Self) -> Bool
 pub fn Session::parse(String, String) -> Self raise Refused
 pub fn Session::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Thread {
+  id : String
+  email_ids : Array[String]
+}
+pub fn Thread::equal(Self, Self) -> Bool
+pub fn Thread::not_equal(Self, Self) -> Bool
+pub fn Thread::parse(@json.Json) -> Self
+pub fn Thread::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct VacationResponse {
+  id : String
+  enabled : Bool
+  from_date : String?
+  to_date : String?
+  subject : String?
+  text_body : String?
+  html_body : String?
+}
+pub fn VacationResponse::equal(Self, Self) -> Bool
+pub fn VacationResponse::not_equal(Self, Self) -> Bool
+pub fn VacationResponse::parse(@json.Json) -> Self
+pub fn VacationResponse::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

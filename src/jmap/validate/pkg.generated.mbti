@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmail/jmap/validate"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "moonbitstack/moonschema",
+}
+
+// Values
+pub fn all_objects(draft? : String) -> @json.Json
+
+pub fn faults(String, @json.Json) -> Array[@moonschema.Fault] raise
+
+pub fn schema(String, draft? : String) -> @json.Json raise
+
+pub fn valid(String, @json.Json) -> Bool raise
+
+// Errors
+#derive(Eq, @debug.Debug)
+pub(all) suberror Refused {
+  Unknown(name~ : String)
+}
+pub fn Refused::equal(Self, Self) -> Bool
+pub fn Refused::not_equal(Self, Self) -> Bool
+pub fn Refused::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -122,3 +122,49 @@ fn first_key(map : Map[String, Json]) -> String? {
   }
   None
 }
+
+///|
+/// A map of records as a JMAP set argument, or none when there is nothing in
+/// it: RFC 8620 writes "no records" as null, and an empty object would say
+/// something else.
+fn objects(values : Map[String, Json]) -> Json? {
+  if values.is_empty() {
+    None
+  } else {
+    Some(Json::object(values))
+  }
+}
+
+///|
+/// A JMAP set-of-strings, which is an object whose keys are the members and
+/// whose values are all true: `mailboxIds` and `keywords` are written this way
+/// (RFC 8621 section 4.1).
+fn flagged(names : Array[String]) -> Json {
+  let values : Map[String, Json] = Map([])
+  for name in names {
+    values[name] = Json::boolean(true)
+  }
+  Json::object(values)
+}
+
+///|
+/// The strings of a JSON array, in order: identifiers and property names, which
+/// JMAP writes as plain strings.
+fn string_list(json : Json, name : String) -> Array[String] {
+  let out : Array[String] = []
+  for entry in list_or_empty(json, name) {
+    match entry {
+      Json::String(value) => out.push(value)
+      _ => ()
+    }
+  }
+  out
+}
+
+///|
+fn list_or_empty(json : Json, name : String) -> Array[Json] {
+  match optional(json, name) {
+    Some(Json::Array(entries)) => entries
+    _ => []
+  }
+}

@@ -50,4 +50,6 @@ import {
   "moonbitstack/mooncred@0.6.10",
   "moonbitlang/async@0.22.5",
   "moonbitstack/moonfetch@0.1.6",
+  "moonbitstack/moonmodel@0.1.3",
+  "moonbitstack/moonschema@0.2.4",
 }

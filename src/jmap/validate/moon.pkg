@@ -1,0 +1,16 @@
+// The objects of RFC 8621, checked: each one written as JSON Schema by the
+// description in `moonmail/jmap` and handed to a reader that knows the
+// specification. This package exists for its dependencies — the description
+// itself has none — so a program that only builds and reads documents never
+// links a validator.
+import {
+  "moonbitstack/moonmail/jmap",
+  "moonbitstack/moonmodel",
+  "moonbitstack/moonmodel/verify",
+  "moonbitstack/moonmodel/json" @mjson,
+  "moonbitstack/moonschema",
+}
+
+import {
+  "moonbitlang/core/json",
+} for "wbtest"

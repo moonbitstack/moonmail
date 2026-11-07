@@ -1,10 +1,18 @@
 // JMAP (RFC 8620) and JMAP for Mail (RFC 8621): the session document, the
-// request and response envelopes, and the method arguments this library
-// builds and reads. Documents in, documents out: the caller owns the socket,
-// the cookie jar and the retry policy, which is what lets the same code run
-// behind fetch() in a browser.
+// request and response envelopes, the objects both carry, and the method
+// arguments this library builds and reads. Documents in, documents out: the
+// caller owns the socket, the cookie jar and the retry policy, which is what
+// lets the same code run behind fetch() in a browser.
 // https://www.rfc-editor.org/rfc/rfc8620
 // https://www.rfc-editor.org/rfc/rfc8621
 import {
   "moonbitlang/core/json",
+  "moonbitstack/moonmail",
+  "moonbitstack/moonmime",
+  "moonbitstack/moondate",
+  "moonbitstack/moonmodel",
 }
+
+import {
+  "moonbitlang/core/encoding/utf8",
+} for "wbtest"
