@@ -53,6 +53,10 @@ pub fn Limits::new(
 /// A piece of a response, as RFC 9051's grammar builds them: `NIL`, a number,
 /// an atom, a string (quoted or literal, as octets), or a parenthesised list.
 /// A fetch key such as `BODY[HEADER.FIELDS (DATE)]<0>` is one atom.
+///
+/// A literal8 (RFC 3516) is `Text` too: it is octets that are not necessarily
+/// text, but they are carried exactly as they arrived, and `text()` is what
+/// asks for an interpretation rather than `Text` being one.
 #derive(Eq, Debug)
 pub(all) enum Value {
   Nil
@@ -144,10 +148,32 @@ pub extend Code with Eq::{equal, not_equal}
 pub extend Code with Debug::{to_repr}
 
 ///|
+/// Which mailboxes a listing covers: `LIST` returns every one the pattern
+/// matches, `LSUB` only those the user subscribed to (RFC 9051 section 6.3.9).
+/// The replies have the same shape, so the two are one value carrying the
+/// command that asked for it rather than one value losing the difference.
+#derive(Eq, Debug)
+pub(all) enum Listing {
+  All
+  Subscribed
+}
+
+///|
+pub extend Listing with Eq::{equal, not_equal}
+
+///|
+pub extend Listing with Debug::{to_repr}
+
+///|
 /// An untagged response (RFC 9051 section 7). `Condition` is an untagged
 /// `OK`, `NO`, `BAD`, `PREAUTH` or `BYE`. A `Fetch` maps each data item's name,
 /// in upper case and as written for `BODY[...]`, to its value. A response this
 /// package does not know comes as `Other`, its name and its values.
+///
+/// `List` is both a `LIST` and an `LSUB`, told apart by `listing`. Its
+/// `extended` is the return data of a LIST-EXTENDED reply (RFC 5258), the
+/// `(childinfo (subscribed))` after the name, as a flat list of names and
+/// values; empty when the reply carries none.
 #derive(Eq, Debug)
 pub(all) enum Response {
   Condition(String, Code?, String)
@@ -156,7 +182,13 @@ pub(all) enum Response {
   Flags(Array[String])
   Exists(Int64)
   Expunge(Int64)
-  List(flags~ : Array[String], delimiter~ : String?, name~ : String)
+  List(
+    listing~ : Listing,
+    flags~ : Array[String],
+    delimiter~ : String?,
+    name~ : String,
+    extended~ : Array[Value]
+  )
   Status(String, Map[String, Int64])
   Esearch(tag~ : String?, uid~ : Bool, items~ : Map[String, Value])
   Search(Array[Int64], modseq~ : Int64?)
@@ -565,8 +597,21 @@ fn untagged(scan : Scan) -> Response raise Refused {
       guard scan.value().text() is Some(mailbox) else {
         raise Malformed("LIST needs a mailbox name")
       }
-      let _ = scan.values()
-      List(flags~, delimiter~, name=mailbox)
+      // Whatever follows the name is the return data of LIST-EXTENDED
+      // (RFC 5258 section 3.1): a parenthesised list of `name value` pairs,
+      // kept flat, the way a FETCH's items are.
+      let tail = scan.values()
+      let extended = match tail {
+        [List(items)] => items
+        _ => tail
+      }
+      List(
+        listing=if name == "LSUB" { Subscribed } else { All },
+        flags~,
+        delimiter~,
+        name=mailbox,
+        extended~,
+      )
     }
     "STATUS" => {
       scan.space()

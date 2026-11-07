@@ -8,10 +8,11 @@
 /// and compares what it parsed with what the script said it would be.
 ///
 /// The comparison is imaptest's own: case does not matter, a `$name` stands for
-/// whatever the server put there, and the two lists whose order means nothing —
-/// the items of a FETCH, the pairs of a STATUS, the flags of a LIST — were put
+/// whatever the server put there, and the three lists whose order means nothing
+/// — the items of a FETCH, the pairs of a STATUS, the flags of a LIST — were put
 /// in a fixed order by the generator so that both sides can be compared as
-/// words.
+/// words. A mailbox name is decoded from modified UTF-7 on both sides for the
+/// same reason: that is what the client presents.
 
 ///|
 /// The reply as one line of words: parentheses stand alone, a quoted string is
@@ -370,7 +371,7 @@ fn words_response(response : Response) -> String {
     Flags(flags) => "FLAGS ( " + flags.join(" ") + " )"
     Exists(count) => count.to_string() + " EXISTS"
     Expunge(count) => count.to_string() + " EXPUNGE"
-    List(flags~, delimiter~, name~) => {
+    List(listing~, flags~, delimiter~, name~, extended~) => {
       let separator = match delimiter {
         Some(delimiter) => delimiter
         None => "NIL"
@@ -391,7 +392,17 @@ fn words_response(response : Response) -> String {
       }
       // An empty name is a quoted empty string on the wire, not nothing.
       let shown = if name == "" { "\"\"" } else { name }
-      "LIST ( " + ordered.join(" ") + " ) " + separator + " " + shown
+      // The return data of LIST-EXTENDED, when the reply carried any.
+      let extra = if extended.is_empty() {
+        ""
+      } else {
+        " (" + extended.map(words_value).join(" ") + ")"
+      }
+      let verb = match listing {
+        All => "LIST"
+        Subscribed => "LSUB"
+      }
+      verb + " ( " + ordered.join(" ") + " ) " + separator + " " + shown + extra
     }
     Status(name, values) => "STATUS " + name + " " + words_counts(values)
     Esearch(tag~, uid~, items~) => {
@@ -462,94 +473,9 @@ fn reply_of(octets : String) -> String raise {
 }
 
 ///|
-/// The replies this client does not read back as written, and why. They are
-/// listed rather than skipped: the test asserts that each of them still fails,
-/// so a fix to the parser shows up here as a vector that has to be taken off
-/// the list, and a new failure cannot hide among them.
-let known_gaps : Array[(String, String, String)] = [
-  (
-    "subscribe", "* lsub", "LSUB is read into the same value as LIST: IMAP4rev2 dropped the command",
-  ),
-  (
-    "subscribe", "* lsub", "LSUB is read into the same value as LIST: IMAP4rev2 dropped the command",
-  ),
-  (
-    "subscribe", "* lsub", "LSUB is read into the same value as LIST: IMAP4rev2 dropped the command",
-  ),
-  (
-    "subscribe", "* lsub", "LSUB is read into the same value as LIST: IMAP4rev2 dropped the command",
-  ),
-  (
-    "subscribe", "* lsub", "LSUB is read into the same value as LIST: IMAP4rev2 dropped the command",
-  ),
-  (
-    "subscribe", "* lsub", "LSUB is read into the same value as LIST: IMAP4rev2 dropped the command",
-  ),
-  (
-    "listext", "* list ( \\haschildren ) $sep $mailbox${sep}test2 (childinfo", "the extended data of a LIST-EXTENDED reply (RFC 5258) is not read",
-  ),
-  (
-    "listext", "* list (  ) $sep $mailbox${sep}test2 (childinfo", "the extended data of a LIST-EXTENDED reply (RFC 5258) is not read",
-  ),
-  (
-    "mutf7", "* list (  ) $sep \"$mailbox${sep}p&AOQA5A-\"", "the name is decoded from modified UTF-7, so it does not read as the wire wrote it",
-  ),
-  (
-    "mutf7", "* status \"$mailbox${sep}p&AOQA5A-\"", "the name is decoded from modified UTF-7, so it does not read as the wire wrote it",
-  ),
-  (
-    "fetch-binary-mime-base64", "* 1 fetch ( binary[1]", "a literal8 (RFC 3516), and two literals on one line, are beyond what a fetch item is read as",
-  ),
-]
-
-///|
-/// What a reply is known as: the script it came from and its first words, which
-/// is enough to tell two apart and short enough to read.
-fn gap_key(script : String, expected : String) -> String {
-  script + "\u{0}" + expected
-}
-
-///|
-/// The known gaps, counted so that two identical replies are two entries.
-fn gap_counts() -> Map[String, Int32] {
-  let counts : Map[String, Int32] = Map([])
-  for entry in known_gaps {
-    let key = gap_key(entry.0, entry.1)
-    let seen = match counts.get(key) {
-      Some(count) => count
-      None => 0
-    }
-    counts[key] = seen + 1
-  }
-  counts
-}
-
-///|
-/// Whether a failing reply is one of the known gaps, taking it off the list.
-fn take_gap(
-  counts : Map[String, Int32],
-  script : String,
-  expected : String,
-) -> Bool {
-  let prefix = script + "\u{0}"
-  for key, count in counts {
-    if count > 0 && key.has_prefix(prefix) {
-      let wanted = key[prefix.length():].to_owned()
-      if expected.has_prefix(wanted) {
-        counts[key] = count - 1
-        return true
-      }
-    }
-  }
-  false
-}
-
-///|
 test "imaptest: every expected reply in the suite parses to what it says" {
-  let gaps = gap_counts()
   let mut total = 0
   let mut passed = 0
-  let mut known = 0
   let failures = []
   for group in imaptest_replies {
     for vector in group {
@@ -560,8 +486,6 @@ test "imaptest: every expected reply in the suite parses to what it says" {
       }
       if same_reply(expected, parsed) {
         passed = passed + 1
-      } else if take_gap(gaps, script, expected) {
-        known = known + 1
       } else if failures.length() < 12 {
         failures.push(script + " @@ " + expected + "  ==>  " + parsed)
       }
@@ -575,14 +499,11 @@ test "imaptest: every expected reply in the suite parses to what it says" {
     passed.to_string() +
     " of " +
     total.to_string() +
-    " read back as written, " +
-    known.to_string() +
-    " known not to be",
+    " read back as written",
   )
   assert_eq(failures.length(), 0)
-  // The counts are written down: a reply that starts passing has to come off
-  // the list, and one that starts failing has to be understood.
+  // The counts are written down, so that a reply which stops parsing shows up
+  // as a number that moved rather than as a test that quietly still passes.
   assert_eq(total, 676)
-  assert_eq(passed, 665)
-  assert_eq(known, known_gaps.length())
+  assert_eq(passed, 676)
 }

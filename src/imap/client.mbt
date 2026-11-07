@@ -788,8 +788,8 @@ fn Client::decoded(self : Client, response : Response) -> Response {
     return response
   }
   match response {
-    List(flags~, delimiter~, name~) =>
-      List(flags~, delimiter~, name=decode_utf7(name))
+    List(listing~, flags~, delimiter~, name~, extended~) =>
+      List(listing~, flags~, delimiter~, name=decode_utf7(name), extended~)
     Status(name, items) => Status(decode_utf7(name), items)
     other => other
   }

@@ -69,14 +69,45 @@ test "imap decodes the untagged responses" {
   assert_eq(
     untagged("* LIST (\\HasNoChildren \\Sent) \"/\" \"Sent Items\""),
     List(
+      listing=All,
       flags=["\\HasNoChildren", "\\Sent"],
       delimiter=Some("/"),
       name="Sent Items",
+      extended=[],
     ),
   )
   assert_eq(
     untagged("* LIST () NIL INBOX"),
-    List(flags=[], delimiter=None, name="INBOX"),
+    List(listing=All, flags=[], delimiter=None, name="INBOX", extended=[]),
+  )
+  // LSUB is the same reply under another command, and the difference is kept.
+  assert_eq(
+    untagged("* LSUB (\\NoSelect) \"/\" \"Lists/Reports\""),
+    List(
+      listing=Subscribed,
+      flags=["\\NoSelect"],
+      delimiter=Some("/"),
+      name="Lists/Reports",
+      extended=[],
+    ),
+  )
+  // LIST-EXTENDED's return data (RFC 5258) follows the name, and is kept.
+  assert_eq(
+    untagged(
+      "* LIST (\\HasChildren) \"/\" \"Lists\" (CHILDINFO (\"SUBSCRIBED\"))",
+    ),
+    List(
+      listing=All,
+      flags=["\\HasChildren"],
+      delimiter=Some("/"),
+      name="Lists",
+      extended=[Atom("CHILDINFO"), List([Text(b"SUBSCRIBED")])],
+    ),
+  )
+  // A literal8 (RFC 3516) is octets, carried the way a literal is.
+  assert_eq(
+    untagged("* 1 FETCH (BINARY[1] ~{5}\r\nabcde)"),
+    Fetch(1L, Map([("BINARY[1]", Text(b"abcde"))])),
   )
   assert_eq(
     untagged("* STATUS blurdybloop (MESSAGES 231 UIDNEXT 44292)"),
@@ -207,6 +238,21 @@ test "imap sends a literal at once or after the continuation" {
 }
 
 ///|
+test "imap reads a literal8 as the octets it carries" {
+  // RFC 3516 exists because these octets are not text: imaptest's
+  // append-binary reply carries a NUL and a byte no UTF-8 sequence has, which
+  // is why it is the one reply the vector file cannot hold.
+  let reply : Bytes = b"* 1 FETCH (BINARY.SIZE[1] 7 BINARY[1] ~{9}\r\n\x00-\xe4\r\n\r\n\r\n)\r\n"
+  let client = opened("IMAP4rev2")
+  guard client.feed(reply) is [Data(Fetch(number, items))] else {
+    fail("not one fetch")
+  }
+  assert_eq(number, 1L)
+  assert_eq(items.get("BINARY.SIZE[1]"), Some(Number(7L)))
+  assert_eq(items.get("BINARY[1]"), Some(Text(b"\x00-\xe4\r\n\r\n\r\n")))
+}
+
+///|
 test "imap writes rev1 mailbox names in modified utf-7" {
   let client = opened("IMAP4rev1")
   let _ = client.login("u", "p")
@@ -219,7 +265,9 @@ test "imap writes rev1 mailbox names in modified utf-7" {
   )
   let events = client.feed(crlf("* LIST () \"/\" \"Entw&APw-rfe &- Tom\""))
   assert_eq(events, [
-    Data(List(flags=[], delimiter=Some("/"), name="Entwürfe & Tom")),
+    Data(
+      List(listing=All, flags=[], delimiter=Some("/"), name="Entwürfe & Tom", extended=[]),
+    ),
   ])
   let rev2 = opened("IMAP4rev2")
   let _ = rev2.login("u", "p")

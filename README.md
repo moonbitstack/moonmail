@@ -384,9 +384,9 @@ Each package follows its specification as written, and the parts a server can
 answer for are exercised against one. Dovecot 2.4 serves IMAP and POP3 and takes
 the messages Postfix 3.10 delivers; the Dovecot project's own `imaptest` fills a
 mailbox this library then reads, and drives the server this library builds. Its
-scripted tests say what a server answers, and all 676 of their replies are
-replayed through this client: 665 are read back as written, and the eleven that
-are not are named in `src/imap/imaptest_wbtest.mbt` with the reason.
+scripted tests say what a server answers, and all 677 of their replies are
+replayed through this client, each read back as written: 676 as vectors and one
+whose octets are not text as bytes.
 
 DKIM is checked in both directions against dkimpy: ten signatures it made are
 verified here, and six this library made are verified by it.
@@ -395,7 +395,7 @@ verified here, and six this library made are verified by it.
 |:--|:--|:--|
 | `moonmail` | RFC 5322, 2045, 2046, 6532 | Writing what was read and reading it again gives the same tree, byte for byte. |
 | `moonmail/smtp` | RFC 5321, 1870, 6152, 6531, 2920, 3030, 3207, 4954, 3461 | Pipelining, chunking and DSN follow what the server announces; a command that needs an extension it did not announce is refused when it is queued, not when it is sent. |
-| `moonmail/imap` | RFC 9051, 2177, 7162, 3501 | Toward a server that announced neither IMAP4rev2 nor `UTF8=ACCEPT`, names are written and read in modified UTF-7. A search for text outside US-ASCII has to name its charset and quote the string. Of imaptest's 676 scripted replies, 665 are read back as written; the eleven that are not are six `LSUB` replies (read into the same value as `LIST`, which IMAP4rev2 dropped), two carrying the extended data of `LIST-EXTENDED` (RFC 5258), two names in modified UTF-7 that come back decoded, and one with two literals in one line. |
+| `moonmail/imap` | RFC 9051, 2177, 7162, 3501 | Toward a server that announced neither IMAP4rev2 nor `UTF8=ACCEPT`, names are written and read in modified UTF-7. A search for text outside US-ASCII has to name its charset and quote the string. Every one of imaptest's 677 scripted replies is read back as written: an `LSUB` is an `LSUB` — `List` carries the command in `listing` — the return data of `LIST-EXTENDED` (RFC 5258) is kept, and a line may hold more than one literal. |
 | `moonmail/pop3` | RFC 1939, 2449 | The line limit covers status lines, which the protocol bounds; a line of a message has no length of its own and is bounded by the message limit instead. |
 | `moonmail/dkim` | RFC 6376, 8463 | Both canonicalizations, RSA-SHA256 and Ed25519-SHA256, `l=`, `t=`, `x=` and `h=` checked item by item, and interoperable with dkimpy in both directions. |
 | `moonmail/sasl` | RFC 4616, 7677, 7628, 4013 | SCRAM-SHA-256 checks the server's signature before the session is trusted; PLAIN, LOGIN, CRAM-MD5, XOAUTH2 and OAUTHBEARER complete it. |

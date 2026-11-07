@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright 2026 Leo Cheng
 # SPDX-License-Identifier: Apache-2.0
-"""Write src/imap/vectors_test.mbt: every expected server reply in imaptest's
+"""Write src/imap/vectors_wbtest.mbt: every expected server reply in imaptest's
 scripted test suite, as a vector the IMAP client has to parse.
 
 imaptest is the Dovecot project's own tester, and its scripted tests are a
 statement of what a server answers: each `*` line in those files is a reply a
 server sends and a client has to understand. That is exactly a reply vector, and
-649 of them cost this repository nothing but the text.
+676 of them cost this repository nothing but the text.
 
     python3 scripts/gen_imap_vectors.py           # write the file
     python3 scripts/gen_imap_vectors.py --check   # fail if it is not current
@@ -16,17 +16,22 @@ The suite is read from a pinned commit of https://github.com/dovecot/imaptest,
 downloaded when it is not already in the cache; what is committed is the vectors,
 not the suite. `--source DIR` reads a checkout instead, for working offline.
 
-Two things are done to a line before it is written down:
+Three things are done to a line before it is written down, so that what the
+script says and what the client presents can be compared as words:
 
 - a `{{{ ... }}}` block becomes the literal a server would actually send —
-  `{octets}` and the data, with the line endings the wire has;
+  `{octets}` and the data, with the line endings the wire has — and a line may
+  hold several of them;
 - the item list of a FETCH, the pairs of a STATUS and the flags of a LIST are
   sorted. Order there means nothing to either implementation — imaptest itself
   compares those lists unordered — so sorting both sides is what lets the test
-  compare them as text at all.
+  compare them as text at all;
+- a mailbox name is decoded from modified UTF-7, because the client does: the
+  octets keep the wire's form and the expectation carries the decoded one.
 """
 
 import argparse
+import base64
 import pathlib
 import re
 import sys
@@ -67,35 +72,75 @@ def source(directory: str | None) -> pathlib.Path:
     return CACHE
 
 
-def expand(text: str) -> str:
-    """One reply line as it goes on the wire, literals and all."""
-    lines = text.split("\n")
-    out = ""
-    index = 0
-    while index < len(lines):
-        line = lines[index]
-        index += 1
-        stripped = line.rstrip("\r")
-        if not (stripped.endswith("{{{") and (len(stripped) == 3 or stripped[-4] in " ~")):
-            out += stripped
-            if index < len(lines):
-                out += "\r\n"
-            continue
-        binary = stripped.endswith("~{{{")
-        head = stripped[: -4] if binary else stripped[: -3]
+def literal_marker(line: str) -> tuple[bool, str] | None:
+    """Whether this line ends by opening a literal, and what comes before it.
+
+    imaptest writes `{{{` at the end of the line to mean "a literal follows",
+    and `~{{{` for a literal8 (RFC 3516). The second element is the line with
+    the marker taken off.
+    """
+    if not line.endswith("{{{"):
+        return None
+    if line.endswith("~{{{"):
+        return True, line[:-4]
+    if len(line) == 3 or line[-4] in " ~":
+        return False, line[:-3]
+    return None
+
+
+def present(
+    stripped: str, lines: list[str], index: int
+) -> tuple[str, str, int]:
+    """The line as the client presents it, the octets a server sends, and where
+    reading resumes.
+
+    imaptest writes a literal as `{{{`, the block of lines, and `}}}`; on the
+    wire it is `{n}`, the octets, and the rest of the same line. A line may hold
+    several literals — `binary[1] {{{…}}} binary[2] {{{…` — so both sides are
+    built in one pass over the same text rather than in two that could drift.
+    """
+    expected = ""
+    octets = ""
+    line = stripped
+    while True:
+        marker = literal_marker(line)
+        if marker is None:
+            expected += line
+            octets += substituted(line)
+            break
+        binary, head = marker
         data = b""
         while index < len(lines) and not lines[index].startswith("}}}"):
-            data += lines[index].encode("utf-8", "surrogateescape") + b"\r\n"
+            data += (
+                lines[index].rstrip("\r").encode("utf-8", "surrogateescape")
+                + b"\r\n"
+            )
             index += 1
-        tail = ""
+        closing = ""
         if index < len(lines):
-            tail = lines[index][3:]
+            closing = lines[index]
             index += 1
-        out += head + ("~" if binary else "") + "{" + str(len(data)) + "}\r\n"
-        out += data.decode("utf-8", "surrogateescape") + tail
-        if index < len(lines):
-            out += "\r\n"
-    return out.rstrip("\r\n")
+        text = data.decode("utf-8", "surrogateescape")
+        # The expectation writes the literal as the string it is, which is what
+        # the client renders for one; the octets carry it as the literal.
+        expected += (
+            substituted(head)
+            + '"'
+            + text.replace("\\", "\\\\").replace('"', '\\"')
+            + '"'
+        )
+        octets += (
+            substituted(head)
+            + ("~" if binary else "")
+            + "{"
+            + str(len(data))
+            + "}\r\n"
+            + text
+        )
+        if not closing.startswith("}}}"):
+            break
+        line = closing[3:].rstrip("\r")
+    return canonical(expected), octets, index
 
 
 def scan_value(text: str, at: int) -> tuple[str, int]:
@@ -213,6 +258,51 @@ def sorted_items(items: list[tuple[str, str]]) -> str:
     return "( " + " ".join(key + (" " + value if value else "") for key, value in ordered) + " )"
 
 
+def decode_mutf7(text: str) -> str:
+    """RFC 3501 section 5.1.3's modified UTF-7, read back."""
+    if "&" not in text:
+        return text
+    out = []
+    at = 0
+    while at < len(text):
+        char = text[at]
+        if char != "&":
+            out.append(char)
+            at += 1
+            continue
+        end = text.find("-", at + 1)
+        if end < 0:
+            out.append(text[at:])
+            break
+        run = text[at + 1 : end]
+        if run == "":
+            out.append("&")
+        else:
+            padded = run.replace(",", "/") + "=" * (-len(run) % 4)
+            try:
+                out.append(base64.b64decode(padded).decode("utf-16-be"))
+            except (ValueError, UnicodeDecodeError):
+                out.append(text[at : end + 1])
+        at = end + 1
+    return "".join(out)
+
+
+def decoded_name(value: str) -> str:
+    """A mailbox name as the client presents it: decoded from modified UTF-7.
+
+    RFC 3501 writes a name that is not ASCII in modified UTF-7, and the client
+    decodes it before handing a reply on, so the expectation carries the
+    decoded form and the octets carry the wire's. Applying it to a name that is
+    already ASCII changes nothing.
+    """
+    if not value:
+        return value
+    quoted = value.startswith('"') and value.endswith('"')
+    text = value[1:-1] if quoted else value
+    text = decode_mutf7(text)
+    return '"' + text + '"' if quoted else text
+
+
 def canonical(line: str) -> str:
     """A reply with the lists whose order means nothing put in a fixed order."""
     text = line.strip()
@@ -233,15 +323,30 @@ def canonical(line: str) -> str:
         return "* " + prefix + " " + sorted_items(items)
     if upper == "STATUS":
         # The mailbox name comes first, then the counts.
-        mailbox, after = scan_key(rest, 0)
+        mailbox, after = scan_value(rest, 0)
         counts = rest[after:].strip()
         if counts.startswith("("):
             items, _ = pairs_of(counts, 1)
-            return "* " + prefix + " " + mailbox + " " + sorted_items(items)
+            return (
+                "* " + prefix + " " + decoded_name(mailbox) + " " + sorted_items(items)
+            )
     if upper in ("LIST", "LSUB") and rest.startswith("("):
         items, after = values_in(rest, 1)
         flags = sorted(items, key=str.lower)
-        return "* " + prefix + " ( " + " ".join(flags) + " ) " + rest[after:].strip()
+        tail = rest[after:].strip()
+        delimiter, at = scan_value(tail, 0)
+        mailbox, after_name = scan_value(tail, at)
+        return (
+            "* "
+            + prefix
+            + " ( "
+            + " ".join(flags)
+            + " ) "
+            + delimiter
+            + " "
+            + decoded_name(mailbox)
+            + tail[after_name:]
+        )
     if upper == "ESEARCH":
         prologue = ""
         if rest.startswith("("):
@@ -336,42 +441,7 @@ def replies(text: str) -> list[tuple[str, str]]:
         # `$!` words are instructions to imaptest's own matcher — "this list is
         # unordered", "allow an extra item" — and not part of the reply.
         stripped = re.sub(r"\$![^\s)]*\s*", "", stripped).rstrip()
-        expected = canonical(stripped)
-        if "{{{" in stripped:
-            block = [stripped]
-            while index < len(lines) and not lines[index].startswith("}}}"):
-                block.append(lines[index].rstrip("\r"))
-                index += 1
-            closing = ""
-            if index < len(lines):
-                closing = lines[index]
-                index += 1
-            head = block[0]
-            binary = head.endswith("~{{{")
-            data = "".join(line + "\r\n" for line in block[1:])
-            tail = closing[3:] if closing.startswith("}}}") else ""
-            # The octets carry a plausible value where the script wrote a
-            # placeholder, and the literal as a server sends it.
-            octets = expand(
-                substituted(head[: -4] if binary else head[: -3])
-                + ("~{{{" if binary else "{{{")
-                + "\n"
-                + "\n".join(block[1:])
-                + "\n"
-                + closing
-            )
-            # The expectation keeps the placeholder and writes the literal as
-            # the string it is, which is what the client renders for one.
-            head_expected = substituted(head[: -4] if binary else head[: -3])
-            expected = canonical(
-                head_expected
-                + '"'
-                + data.replace("\\", "\\\\").replace('"', '\\"')
-                + '"'
-                + tail
-            )
-        else:
-            octets = substituted(stripped)
+        expected, octets, index = present(stripped, lines, index)
         out.append((expected, octets))
     return out
 
@@ -426,14 +496,24 @@ def main() -> int:
         "///|",
         "/// Every expected server reply in imaptest's scripted tests, as they go on",
         "/// the wire: the script a reply came from, and the octets a server sends.",
-        "/// The item lists that may arrive in any order are sorted here, so that the",
-        "/// client's rendering of what it parsed can be compared with them as text.",
+        "/// The three lists whose order means nothing are sorted, and a mailbox name",
+        "/// is decoded from modified UTF-7 as the client decodes it, so that the",
+        "/// client's rendering of what it parsed can be compared with the script as",
+        "/// text.",
         "///",
         f"/// {len(vectors)} replies in all.",
-        "///",
-        f"/// {skipped} replies are made of octets that are not text — binary literal8",
-        f"let imaptest_replies : Array[Array[(String, String, String)]] = [",
     ]
+    if skipped:
+        subject = "1 reply is" if skipped == 1 else f"{skipped} replies are"
+        out += [
+            "///",
+            f"/// {subject} not here: the octets are not text — a literal8 with a",
+            "/// byte no character stands for — and a MoonBit string cannot hold",
+            "/// them. src/imap/client_test.mbt replays that one as bytes.",
+        ]
+    out.append(
+        "let imaptest_replies : Array[Array[(String, String, String)]] = ["
+    )
     for chunk in chunks:
         out.append("  [")
         for name, expected, octets in chunk:

@@ -108,6 +108,15 @@ pub fn Limits::not_equal(Self, Self) -> Bool
 pub fn Limits::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub(all) enum Listing {
+  All
+  Subscribed
+}
+pub fn Listing::equal(Self, Self) -> Bool
+pub fn Listing::not_equal(Self, Self) -> Bool
+pub fn Listing::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub(all) enum Response {
   Condition(String, Code?, String)
   Capability(Array[String])
@@ -115,7 +124,7 @@ pub(all) enum Response {
   Flags(Array[String])
   Exists(Int64)
   Expunge(Int64)
-  List(flags~ : Array[String], delimiter~ : String?, name~ : String)
+  List(listing~ : Listing, flags~ : Array[String], delimiter~ : String?, name~ : String, extended~ : Array[Value])
   Status(String, Map[String, Int64])
   Esearch(tag~ : String?, uid~ : Bool, items~ : Map[String, Value])
   Search(Array[Int64], modseq~ : Int64?)

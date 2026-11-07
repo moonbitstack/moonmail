@@ -7,12 +7,16 @@
 ///|
 /// Every expected server reply in imaptest's scripted tests, as they go on
 /// the wire: the script a reply came from, and the octets a server sends.
-/// The item lists that may arrive in any order are sorted here, so that the
-/// client's rendering of what it parsed can be compared with them as text.
+/// The three lists whose order means nothing are sorted, and a mailbox name
+/// is decoded from modified UTF-7 as the client decodes it, so that the
+/// client's rendering of what it parsed can be compared with the script as
+/// text.
 ///
 /// 676 replies in all.
 ///
-/// 1 replies are made of octets that are not text — binary literal8
+/// 1 reply is not here: the octets are not text — a literal8 with a
+/// byte no character stands for — and a MoonBit string cannot hold
+/// them. src/imap/client_test.mbt replays that one as bytes.
 let imaptest_replies : Array[Array[(String, String, String)]] = [
   [
     ("append", "* 1 exists", "* 1 exists"),
@@ -207,7 +211,7 @@ let imaptest_replies : Array[Array[(String, String, String)]] = [
     ("fetch-binary-mime", "* 1 fetch ( binary[2.2] \"Hello another world\r\n\r\n\" )", "* 1 fetch (binary[2.2] {23}\r\nHello another world\r\n\r\n)"),
     ("fetch-binary-mime", "* 1 fetch ( binary.size[2.2] 21 )", "* 1 fetch (binary.size[2.2] 21)"),
     ("fetch-binary-mime-base64", "* 1 fetch ( binary.size[1] 11 binary.size[5] 30 )", "* 1 fetch (binary.size[1] 11 binary.size[5] 30)"),
-    ("fetch-binary-mime-base64", "* 1 fetch ( binary[1] \"hello world\r\n\" binary[2] {{{ )", "* 1 fetch (binary[1] {13}\r\nhello world\r\n binary[2] {{{"),
+    ("fetch-binary-mime-base64", "* 1 fetch ( binary[1] \"hello world\r\n\" binary[2] \"hello world\r\n\" binary[3] \"hello to you too\r\n\" binary[4] \"hello to everyone!\r\n\" binary[5] \"abcdefg\r\nhijkl\r\nmno\r\npqrstuvqxyz\r\n\" )", "* 1 fetch (binary[1] {13}\r\nhello world\r\n binary[2] {13}\r\nhello world\r\n binary[3] {18}\r\nhello to you too\r\n binary[4] {20}\r\nhello to everyone!\r\n binary[5] ~{34}\r\nabcdefg\r\nhijkl\r\nmno\r\npqrstuvqxyz\r\n)"),
     ("fetch-binary-mime-base64", "* 1 fetch ( binary.size[1] 11 binary[1] \"hello world\r\n\" )", "* 1 fetch (binary.size[1] 11 binary[1] {13}\r\nhello world\r\n)"),
     ("fetch-binary-mime-base64", "* 1 fetch ( binary.size[3] 16 binary[2] \"hello world\r\n\" )", "* 1 fetch (binary.size[3] 16 binary[2] {13}\r\nhello world\r\n)"),
     ("fetch-binary-mime-base64", "* 1 fetch ( binary.size[2] 11 binary.size[3] 16 binary.size[4] 18 )", "* 1 fetch (binary.size[2] 11 binary.size[3] 16 binary.size[4] 18)"),
@@ -376,8 +380,8 @@ let imaptest_replies : Array[Array[(String, String, String)]] = [
     ("multiappend", "* 1 fetch ( body[header.fields (subject)] \"Subject: mail1\r\n\r\n\r\n\" )", "* 1 fetch (body[header.fields (subject)] {20}\r\nSubject: mail1\r\n\r\n\r\n)"),
     ("multiappend", "* 2 fetch ( body[header.fields (subject)] \"Subject: mail2\r\n\r\n\r\n\" )", "* 2 fetch (body[header.fields (subject)] {20}\r\nSubject: mail2\r\n\r\n\r\n)"),
     ("mutf7", "* list (  ) $sep $root", "* list () / \"\""),
-    ("mutf7", "* list (  ) $sep \"$mailbox${sep}p&AOQA5A-\"", "* list () / \"INBOX/p&AOQA5A-\""),
-    ("mutf7", "* status \"$mailbox${sep}p&AOQA5A-\" ( messages 0 )", "* status \"INBOX/p&AOQA5A-\" (messages 0)"),
+    ("mutf7", "* list (  ) $sep \"$mailbox${sep}pää\"", "* list () / \"INBOX/p&AOQA5A-\""),
+    ("mutf7", "* status \"$mailbox${sep}pää\" ( messages 0 )", "* status \"INBOX/p&AOQA5A-\" (messages 0)"),
     ("nil", "* search 1", "* search 1"),
   ],
   [
