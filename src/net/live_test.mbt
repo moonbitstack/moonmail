@@ -2,10 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 ///|
-/// Where the reference services listen: Dovecot for IMAP and POP3, Postfix for
-/// SMTP, each in the clear and under TLS, from `MOONMAIL_LIVE` written as
-/// `host:imap:imaps:pop3:pop3s:smtp:smtps`. Set, every one of them has to
-/// answer; a service that is not there fails the test rather than passing it
+/// Where the reference services listen, from `MOONMAIL_LIVE` written as
+/// `host:imap:imaps:pop3:pop3s:smtp:smtps:sink:sinkpop:sinkapi`:
+///
+/// - Dovecot for IMAP and POP3, each in the clear and under TLS;
+/// - Postfix for SMTP, in the clear and under implicit TLS;
+/// - Mailpit, the sink, taking SMTP on `sink`, handing messages back by POP3 on
+///   `sinkpop`, and listing them over HTTP on `sinkapi`.
+///
+/// One variable, because one harness starts all three: setting it means every
+/// service is there, and a test that cannot reach one fails rather than passing
 /// quietly. Unset, the live tests do nothing.
 #derive(Eq, Debug)
 struct Live {
@@ -16,14 +22,20 @@ struct Live {
   pop3s : Int32
   smtp : Int32
   smtps : Int32
+  sink : Int32
+  sinkpop : Int32
+  sinkapi : Int32
 }
 
 ///|
 fn live() -> Live? raise {
   guard @env.get_env_var("MOONMAIL_LIVE") is Some(spec) else { return None }
   guard spec.split(":").to_array()
-    is [host, imap, imaps, pop3, pop3s, smtp, smtps] else {
-    fail("MOONMAIL_LIVE is host:imap:imaps:pop3:pop3s:smtp:smtps, not " + spec)
+    is [host, imap, imaps, pop3, pop3s, smtp, smtps, sink, sinkpop, sinkapi] else {
+    fail(
+      "MOONMAIL_LIVE is host:imap:imaps:pop3:pop3s:smtp:smtps:sink:sinkpop:sinkapi, not " +
+      spec,
+    )
   }
   Some({
     host: host.to_owned(),
@@ -33,6 +45,9 @@ fn live() -> Live? raise {
     pop3s: @string.parse_int(pop3s),
     smtp: @string.parse_int(smtp),
     smtps: @string.parse_int(smtps),
+    sink: @string.parse_int(sink),
+    sinkpop: @string.parse_int(sinkpop),
+    sinkapi: @string.parse_int(sinkapi),
   })
 }
 

@@ -1,14 +1,17 @@
 #!/bin/sh
 # The reference mail services the live tests talk to: Dovecot for IMAP and POP3,
 # Postfix for SMTP, both on the account `mailtest`, both writing and reading
-# /var/tmp/moonmail-interop/mail/mailtest/Maildir.
+# /var/tmp/moonmail-interop/mail/mailtest/Maildir; and Mailpit, a sink that takes
+# a message by SMTP, hands it back by POP3 and lists it over HTTP, which is how
+# a message can be followed from one protocol to another.
 #
 #   sudo scripts/interop/services.sh start   # and print the MOONMAIL_LIVE line
 #   sudo scripts/interop/services.sh stop    # take them down and remove all trace
 #
-# Both run under this repository's own configuration, on their own queue and
-# base directory, so a Dovecot or Postfix the machine already serves is left
-# alone. Needs dovecot-imapd, dovecot-pop3d and postfix from the distribution.
+# Each runs under this repository's own configuration, on its own queue and base
+# directory, so a Dovecot, Postfix or Mailpit the machine already serves is left
+# alone. Needs dovecot-imapd, dovecot-pop3d and postfix from the distribution,
+# and a `mailpit` binary on PATH: https://github.com/axllent/mailpit/releases.
 set -eu
 
 base=/var/tmp/moonmail-interop
@@ -56,6 +59,12 @@ stop() {
       dovecot -c "$base/conf/dovecot.conf" stop 2>/dev/null
     fi
   fi
+  if [ -f "$base/run/mailpit.pid" ]; then
+    pid=$(tr -cd '0-9' <"$base/run/mailpit.pid" 2>/dev/null || echo)
+    if [ -n "$pid" ] && owns "$pid" mailpit; then
+      kill "$pid" 2>/dev/null
+    fi
+  fi
   rm -rf "$base"
   # userdel refuses an account a process still uses, and a session Dovecot has
   # only just been told to stop may still own one. Taking the services down is
@@ -68,9 +77,9 @@ stop() {
 }
 
 start() {
-  for program in dovecot postfix python3; do
+  for program in dovecot postfix python3 mailpit; do
     command -v "$program" >/dev/null 2>&1 ||
-      fail "$program is not installed; on Debian and Ubuntu: apt-get install dovecot-imapd dovecot-pop3d postfix"
+      fail "$program is not installed; on Debian and Ubuntu: apt-get install dovecot-imapd dovecot-pop3d postfix, and mailpit from its releases"
   done
 
   # A second start replaces what a first one left, rather than adding to it.
@@ -84,7 +93,7 @@ start() {
       --no-create-home --shell /usr/sbin/nologin "$account"
   fi
 
-  install -d -m 0755 "$base" "$base/conf" "$base/certs"
+  install -d -m 0755 "$base" "$base/conf" "$base/certs" "$base/mailpit" "$base/run"
   install -d -m 0755 -o root -g root "$base/queue"
   install -d -m 0755 -o postfix -g postfix "$base/data"
   install -d -o 5000 -g 5000 -m 0700 "$base/mail/$account"
@@ -99,6 +108,23 @@ start() {
 
   python3 "$work/scripts/write_test_certs.py" "$base/certs" 2>/dev/null
 
+  # Mailpit takes mail for any address, hands it back by POP3 to the account the
+  # tests know, and lists it over HTTP. Its database is under the base directory
+  # so that stopping it removes what it kept.
+  echo "tim:secret" >"$base/conf/mailpit-auth.txt"
+  mailpit \
+    --smtp 127.0.0.1:2526 \
+    --smtp-tls-cert "$base/certs/cert.pem" \
+    --smtp-tls-key "$base/certs/key.pem" \
+    --smtp-auth-accept-any \
+    --smtp-auth-allow-insecure \
+    --pop3 127.0.0.1:1110 \
+    --pop3-auth-file "$base/conf/mailpit-auth.txt" \
+    --listen 127.0.0.1:8025 \
+    --database "$base/mailpit/mailpit.db" \
+    >"$base/mailpit.log" 2>&1 &
+  echo $! >"$base/run/mailpit.pid"
+
   dovecot -c "$base/conf/dovecot.conf"
 
   # postfix-check fills in the queue's own directories with the ownership each
@@ -110,7 +136,7 @@ start() {
 
   # A port that answers is the only proof either service is ready.
   waited=0
-  for port in 1143 1993 1111 1995 2525 2465; do
+  for port in 1143 1993 1111 1995 2525 2465 2526 1110 8025; do
     while ! listening "$port"; do
       waited=$((waited + 1))
       if [ "$waited" -gt 120 ]; then
@@ -120,7 +146,7 @@ start() {
     done
   done
 
-  echo "MOONMAIL_LIVE=127.0.0.1:1143:1993:1111:1995:2525:2465"
+  echo "MOONMAIL_LIVE=127.0.0.1:1143:1993:1111:1995:2525:2465:2526:1110:8025"
 }
 
 if [ "$(id -u)" -ne 0 ]; then
