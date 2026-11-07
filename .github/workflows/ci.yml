@@ -57,6 +57,17 @@ jobs:
             fi
           done
 
+      # dkimpy shares no code with this library, so the two directions are what
+      # says RFC 6376 was read the same way twice: its signatures verified here,
+      # which is the vectors the test replays, and this library's verified
+      # there, which is the example signing for it.
+      - name: dkim, both directions with dkimpy
+        if: runner.os == 'Linux'
+        run: |
+          python3 -m pip install --quiet --break-system-packages dkimpy pynacl
+          python3 scripts/gen_dkim_vectors.py --check
+          python3 scripts/dkim_interop.py
+
       - name: lint (fmt is clean)
         run: |
           moon fmt && git diff --exit-code

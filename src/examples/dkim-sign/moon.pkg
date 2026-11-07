@@ -1,0 +1,15 @@
+// Sign a letter with DKIM: `moon run src/examples/dkim-sign -- key.pem letter.eml`.
+// Without arguments it signs a short message with a key of its own, which is
+// what the CI run does.
+pkgtype(kind: "executable")
+
+supported_targets = "native"
+
+import {
+  "moonbitstack/moonmail/dkim",
+  "moonbitstack/mooncred/x509",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+}
