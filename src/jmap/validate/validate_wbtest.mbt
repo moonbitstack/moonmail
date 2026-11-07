@@ -190,3 +190,39 @@ test "validate: the whole vocabulary comes back as one document" {
     _ => fail("the document is an object")
   }
 }
+
+///|
+/// The object this library derives from a real message, checked against the
+/// description of an Email: the two halves of the package have to agree, or the
+/// model is a document nobody writes.
+test "validate: an object derived from a message is an Email" {
+  let raw_text =
+    #|From: Alice <alice@example.com>
+    #|To: Bob <bob@example.com>
+    #|Subject: Lunch?
+    #|Date: Fri, 06 Nov 2026 12:00:00 +0000
+    #|MIME-Version: 1.0
+    #|Content-Type: multipart/mixed; boundary="b1"
+    #|
+    #|--b1
+    #|Content-Type: text/plain; charset=utf-8
+    #|
+    #|Noon works.
+    #|--b1
+    #|Content-Type: image/png
+    #|Content-Disposition: attachment; filename="map.png"
+    #|Content-Transfer-Encoding: base64
+    #|
+    #|iVBORw0KGgo=
+    #|--b1--
+  let raw = @utf8.encode(raw_text.replace_all(old="\n", new="\r\n"))
+  let object = @jmap.email_from_message(
+    raw[:],
+    mailbox_ids=["mb-in"],
+    keywords=["$seen"],
+    received_at="2026-11-06T12:00:01Z",
+  ) catch {
+    _ => fail("the message becomes an object")
+  }
+  assert_true(valid("Email", object) catch { _ => false })
+}

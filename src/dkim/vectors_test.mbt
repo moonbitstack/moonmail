@@ -144,6 +144,32 @@ let dkimpy_vectors : Array[(String, String, String, Bool)] = [
     true,
   ),
   (
+    "trailing empty lines in a relaxed body",
+    (
+      #|DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=example.com;
+      #| i=@example.com; q=dns/txt; s=sel; t=1528637909; h=from : to : subject
+      #| : date : message-id; bh=AZg+NmFoUm/kiKr1zgss0ziAbvvLXgrOacWlulu5Jn0=;
+      #| b=f3pCvI1rwi0h+nw0zhnRp6KT5SEK8yA7cylce3kiCFuckRFUiFtLY3y3sk6NpT9e3h9LU
+      #| qRAz5bh3ceXaVPEWjB7iyUTrb7er7EKXkg5OWvyZENyRXclsPWkYvnSzZz+fQkXmsWl3Qqt
+      #| k3nLIxvFoJtDfed4mDj1aUEuEZxIChtMJeZIsGlGWH3VcOqKiAZulSaRwZPHtgPZoJdEWVk
+      #| k8YlcGdnuUOSpATB16E6+ly5gA1jNyMyjTU2D/1pN0f6WD2hxhfYtRgItZwiH2Xmri7OlsW
+      #| qebL7b5cODphapuIjf5pGUfSP0O/8SW3ns2UAUlUy6QWtzMohyPIIASQw66g==
+      #|From: Alice <alice@example.com>
+      #|To: Bob <bob@example.com>
+      #|Subject: Signed before the blanks
+      #|Date: Fri, 06 Nov 2026 12:00:00 +0000
+      #|Message-ID: <vector@example.com>
+      #|MIME-Version: 1.0
+      #|Content-Type: text/plain; charset=utf-8
+      #|
+      #|Trailing blanks follow.
+      #|
+      #|
+    ),
+    "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzFv4ocnLVzMG5eaNUVLhupnoI/AT11+FHVblspFpa44sZEfYPu3KikynRKsxu5HfgEK3NX5i3OoMUi/1OQXQfXsj6VbLQ0ndTGhsgjvvF3RjOWgqSelCSPvqotqOKwyBO0SiqXByo/VY0KhOO+Af4zQofy02ICeYoW8kPkmpBMBkOx7Tdm8XvsWmHWVRGpBA8W9cgZoFi77yNSIL0dtNdGaVIyeKK4/1e+4I/0cqvTp3Jkm7hdf+0tV519j1k6QGtEt13ampRAdmRRBYqGAAVjh9W51LCIxAGLIXlTnWg6KNGx/UrQtA94xArOuQz1kaFl75+llIYeJNjIC5RVVy3QIDAQAB",
+    true,
+  ),
+  (
     "an empty body",
     (
       #|DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=example.com;

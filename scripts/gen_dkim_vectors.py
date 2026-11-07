@@ -167,6 +167,15 @@ CASES = [
         True,
     ),
     (
+        "trailing empty lines in a relaxed body",
+        "Signed before the blanks",
+        b"Trailing blanks follow.\r\n\r\n\r\n",
+        (b"relaxed", b"relaxed"),
+        b"rsa-sha256",
+        False,
+        True,
+    ),
+    (
         "an empty body",
         "Nothing said",
         b"",

@@ -39,6 +39,6 @@ test "dkimpy's signatures verify here" {
       }
     }
   }
-  assert_eq(passed, 8)
+  assert_eq(passed, 9)
   assert_eq(refused, 1)
 }

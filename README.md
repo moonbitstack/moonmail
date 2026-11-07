@@ -388,7 +388,7 @@ scripted tests say what a server answers, and all 676 of their replies are
 replayed through this client: 665 are read back as written, and the eleven that
 are not are named in `src/imap/imaptest_wbtest.mbt` with the reason.
 
-DKIM is checked in both directions against dkimpy: nine signatures it made are
+DKIM is checked in both directions against dkimpy: ten signatures it made are
 verified here, and six this library made are verified by it.
 
 | Package | Specification | Worth knowing |
