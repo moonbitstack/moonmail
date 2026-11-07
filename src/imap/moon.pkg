@@ -17,3 +17,7 @@ import {
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/string",
 } for "wbtest"
+
+// The vectors are generated, and the generator's own formatting is what CI
+// compares against: `moon fmt` must not rewrap them.
+formatter(ignore: [ "vectors_wbtest.mbt" ])
