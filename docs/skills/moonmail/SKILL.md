@@ -1,15 +1,15 @@
 ---
 name: moonmail
-description: Email in MoonBit — parse and write RFC 5322 messages with MIME parts and attachments, sign and verify DKIM, and run SMTP, IMAP and POP3 against a real server. Use when a program has to read a .eml file, compose a letter with an attachment, or log in to a mailbox and fetch or send mail.
+description: Email in MoonBit — parse and write RFC 5322 messages with MIME parts and attachments, sign and verify DKIM, run SMTP, IMAP and POP3 against a real server, and speak JMAP from a page. Use when a program has to read a .eml file, compose a letter with an attachment, log in to a mailbox and fetch or send mail, or reach a mail server over HTTPS instead of a socket.
 ---
 
 # moonmail
 
-One module, six packages: `moonbitstack/moonmail` for the message model,
-`moonmail/smtp`, `moonmail/imap`, `moonmail/pop3` and `moonmail/sasl` for the
-protocol states, and `moonmail/net` for the sockets. Every protocol package is a
-state machine with no I/O — octets in, events out — so only the last one needs a
-network.
+One module, seven packages: `moonbitstack/moonmail` for the message model,
+`moonmail/smtp`, `moonmail/imap`, `moonmail/pop3`, `moonmail/sasl` and
+`moonmail/jmap` for the protocol states, and `moonmail/net` for the sockets.
+Every protocol package but the last is a state machine with no I/O — octets in,
+events out — so only `net` needs a network.
 
 ```bash
 moon add moonbitstack/moonmail
@@ -37,8 +37,7 @@ pub fn read(raw : Bytes) -> Unit raise {
 ```
 
 An address that will not parse raises `@moonmail.Refused` with the offset it
-stopped at; pass `strict=false` to accept the obsolete forms Python's `email`
-accepts.
+stopped at.
 
 ## Compose and send
 
@@ -46,13 +45,13 @@ accepts.
 inline pictures and `mixed` for attachments. `encode` writes CRLF, folds at 78
 columns, and reads back as the same tree; `@moonmail/net` carries it to a relay.
 
-```moonbit
+```moonbit native
 ///|
 pub async fn send(security : @net.Security, raw_png : Bytes) -> Unit raise {
   let password = "secret"
   let message = @moonmail.Message::new(
     from=@moonmail.Mailbox::new("alice@example.com", name="Alice"),
-    to=[@moonmail.Address::Mailbox(@moonmail.Mailbox::new("bob@example.com"))],
+    to=[@moonmail.Mailbox(@moonmail.Mailbox::new("bob@example.com"))],
     subject="Lunch?",
     text="Noon works.",
     attachments=[@moonmail.Attachment::new("map.png", raw_png)],
@@ -76,7 +75,7 @@ kills the transaction, so a partial rejection is something you can act on.
 queued and `wait` returns the untagged responses that arrived while it ran plus
 its completion.
 
-```moonbit
+```moonbit native
 ///|
 pub async fn inbox(host : String, security : @net.Security) -> Unit raise {
   let password = "secret"
@@ -106,6 +105,53 @@ pub async fn inbox(host : String, security : @net.Security) -> Unit raise {
 Search returns sequence numbers unless `uid=true` is passed; a `FETCH` after a
 sequence-number search has to use `uid=false` to match it.
 
+## Over JMAP, when there is no socket
+
+A page cannot open a TCP connection, so SMTP and IMAP are out of its reach
+whatever the client. `@moonmail/jmap` is the way round it: JSON documents over
+HTTPS, a state machine like the rest — documents in, documents out — so the
+caller owns the fetch, the cookie jar and the retry.
+
+The package covers the whole of RFC 8621 and RFC 8620: the five standard shapes
+(`get`, `changes`, `set`, `query`, `queryChanges`), `copy`, and the methods a
+type adds on top — `Email/import`, `Email/parse`, `SearchSnippet/get`,
+`Core/echo` — for twenty-seven method names in all. `@jmap.method_names()`
+answers the list, and `Kind::Email.methods()` the ones for one type. Every
+object is described once in moonmodel, so its properties and their types are one
+table: `@jmap.properties("Email")`, `@jmap.model("Mailbox")`, and
+`@moonmail/jmap/validate` to check a document against that description.
+
+```moonbit
+///|
+pub fn list(response_json : String) -> Unit raise {
+  let request = @jmap.Request::new()
+  let tag = request.mailbox_get("u-1")
+  let answer = @jmap.Response::parse(response_json)
+  for mailbox in @jmap.mailboxes(answer, tag) {
+    println(mailbox.name + " " + mailbox.unread.to_string() + " unread")
+  }
+}
+```
+
+A request carries only the capabilities its calls use, so reading the inbox still
+works on a server that cannot send. `@jmap.Request::new()` claims `core` and
+`mail`; a submission adds `submission` by itself.
+
+## Sign, and check a signature
+
+```moonbit
+///|
+pub fn check(raw : Bytes, record : String, now : Int64) -> Unit {
+  let verdicts = @dkim.verify(raw[:], _ => Some(record), now=now)
+  for verdict in verdicts {
+    println(verdict.to_repr().to_string())
+  }
+}
+```
+
+`sign` answers the whole `DKIM-Signature` line to put above the fields it
+signed, for an RSA or an Ed25519 key.
+
 ## The other end of the wire
 
 `@imap.Server` and `@imap.Store` answer IMAP4rev1 from mailboxes in memory:
@@ -121,8 +167,11 @@ conformance runs, not a mail store — nothing outlives the process.
 - **Non-ASCII search needs a charset.** `SEARCH` refuses eight-bit octets in an
   atom, so write `CHARSET UTF-8 SUBJECT "日本語"` with the string quoted.
 - **`net` is native and wasm only.** It does not build for js or wasm-gc; the
-  other five packages do.
+  other six packages do.
 - **A page has no socket.** In a browser, reach the server over JMAP with
   `@moonmail/jmap` instead; that package is JSON in and JSON out.
 - **`pop3` bounds status lines, not message lines.** A message written as one
   long line is delivered whole; `Limits::new(message=...)` bounds it.
+- **A JMAP property is only there if it was asked for.** A get answers the
+  properties the request named, so a reader that fails on a missing one is a
+  reader that asked for too much.

@@ -375,6 +375,19 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
   content:"";position:absolute;left:10px;top:-3px;width:9px;height:9px;border-radius:50%;
   border:1.5px solid var(--brass);opacity:.6;
 }
+/* a second package under the same cover: its path, a line, and what it is */
+.thread__more{
+  position:relative;margin:26px 0 14px 34px;padding:10px 0 0;
+  border-top:1px dashed color-mix(in srgb,var(--ink) 26%,transparent);
+}
+.thread__more--path{
+  margin:0;font:600 8px var(--font-mono);letter-spacing:.14em;text-transform:none;
+  color:var(--ink-2);
+}
+.thread__more--blurb{
+  margin:5px 0 0;font-size:12px;line-height:1.6;color:var(--ink-3);
+  overflow-wrap:anywhere;
+}
 .slip{
   position:relative;background:var(--paper);
   padding:16px 40px 15px 34px;margin-bottom:11px;

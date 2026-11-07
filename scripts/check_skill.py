@@ -28,7 +28,9 @@ MODULE = "moonbitstack/moonmail"
 # carry the protocols.
 IMPORTS = (
     MODULE,
+    MODULE + "/dkim",
     MODULE + "/imap",
+    MODULE + "/jmap",
     MODULE + "/sasl",
     MODULE + "/net",
 )
@@ -42,8 +44,11 @@ def version() -> str:
 
 
 def blocks(skill: Path) -> list[str]:
+    """Every MoonBit block, the ones that only build for native included: a
+    block marked `moonbit native` names `@net`, and is compiled here with the
+    native target rather than left out."""
     text = skill.read_text(encoding="utf-8")
-    return re.findall(r"```moonbit\n(.*?)```", text, re.S)
+    return re.findall(r"```moonbit(?: native)?\n(.*?)```", text, re.S)
 
 
 def main() -> int:
@@ -80,7 +85,7 @@ def main() -> int:
             print(f"{MODULE}@{version()} is not on the registry yet; the skill is checked when it is released")
             return 2
         checked = subprocess.run(
-            ["moon", "check", "--deny-warn"],
+            ["moon", "check", "--target", "native", "--deny-warn"],
             cwd=scratch,
             capture_output=True,
             text=True,

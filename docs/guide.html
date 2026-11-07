@@ -556,11 +556,11 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
   </header>
 
   <section class="mast">
-    <p class="kicker">the guide · nine steps</p>
+    <p class="kicker">the guide · ten steps</p>
     <h1>Start with a <em>letter</em><span class="dot">.</span></h1>
     <p class="lede">One message in, one message out, then a signature, a login, a socket you own, and the servers to point it at. Every step shows what you type and what comes back.</p>
     <div class="facts">
-      <span class="fact" style="--r:-1.2deg"><b>9</b><span>steps</span></span>
+      <span class="fact" style="--r:-1.2deg"><b>10</b><span>steps</span></span>
       <span class="fact" style="--r:1deg"><b>1</b><span>dependency</span></span>
       <span class="fact" style="--r:-.6deg"><b>0</b><span>sockets to parse</span></span>
     </div>
@@ -589,7 +589,7 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
     <main class="content">
       <div class="howto">
         <span class="howto__k">before you start</span>
-        <p>Each step is one letter on the desk: what you <b>type</b>, then what comes back. Steps 1–5 need no network at all — they work on bytes you already have.</p>
+        <p>Each step is one letter on the desk: what you <b>type</b>, then what comes back. Steps 1–5 and 9 need no network at all — they work on bytes you already have.</p>
       </div>
 
       <!-- 01 -->
@@ -814,20 +814,45 @@ println(client.pending())</code></pre>
       </section>
 
       <!-- 09 -->
+      <section class="step" id="jmap">
+        <span class="step__cord" aria-hidden="true"></span>
+        <div class="step__head"><span class="step__no">09</span><h2 class="step__t">When there is no socket to open</h2></div>
+        <p class="step__p">A page cannot open a TCP connection — no Web API does it — so SMTP, IMAP and POP3 are out of reach of the tab a letter is written in. <b>JMAP</b> is the way round: the same three jobs as JSON documents over HTTPS, which a page fetches like any other resource.</p>
+        <p class="step__p">The package is the whole of RFC 8620 and RFC 8621: the five standard shapes — <code>get</code>, <code>changes</code>, <code>set</code>, <code>query</code>, <code>queryChanges</code> — plus <code>copy</code>, and the methods a type adds on top. Twenty-seven method names, one builder each, and a <code>Kind</code> in place of a string so that a misspelled type is a compile error rather than an answer from the server.</p>
+        <figure class="code">
+          <span class="code__tape" aria-hidden="true"></span>
+          <span class="code__lang">moonbit</span>
+          <pre><code>let request = @jmap.Request::new()
+let boxes = request.mailbox_get("u-1")
+let newest = request.email_query("u-1", "mb-in", 25)
+let body = request.to_string()        // POST this to the session's apiUrl
+
+let answer = @jmap.Response::parse(reply)
+for mailbox in @jmap.mailboxes(answer, boxes) {
+  println(mailbox.name + ": " + mailbox.unread.to_string() + " unread")
+}</code></pre>
+        </figure>
+        <p class="step__p">The objects are written down once, as <a href="https://github.com/moonbitstack/moonmodel">moonmodel</a> descriptions: what each property is called, what type it holds, whether it may be null. That one table answers the property list, projects to JSON Schema for documentation, and is what <code>@moonmail/jmap/validate</code> checks a document against — so an object RFC 8621 prints passes, and a number where a string belongs does not.</p>
+        <div class="out"><span class="out__k">out</span><pre>Inbox: 3 unread
+Drafts: 0 unread
+Sent: 0 unread</pre></div>
+        <p class="step__p">A message becomes the object a server answers <code>Email/get</code> with, body structure and preview and all, which is how an importer or a server of your own builds one: <code>@jmap.email_from_message(raw, mailbox_ids=["mb-in"])</code>.</p>
+      </section>
+
       <section class="step" id="servers">
         <span class="step__cord" aria-hidden="true"></span>
-        <div class="step__head"><span class="step__no">09</span><h2 class="step__t">Point it at a real server</h2></div>
+        <div class="step__head"><span class="step__no">10</span><h2 class="step__t">Point it at a real server</h2></div>
         <p class="step__p">A test can feed recorded bytes, but a reply nobody wrote down is the one that teaches you something. The repository carries a harness that starts a Maildir, a <b>Dovecot</b> that serves it over IMAP and POP3, and a <b>Postfix</b> that delivers into it — on ports of their own, under their own configuration, so nothing already running on the machine is touched.</p>
         <figure class="code">
           <span class="code__tape" aria-hidden="true"></span>
           <span class="code__lang">shell</span>
           <pre><code>sudo scripts/interop/services.sh start
-MOONMAIL_LIVE=127.0.0.1:1143:1993:1111:1995:2525:2465
+MOONMAIL_LIVE=127.0.0.1:1143:1993:1111:1995:2525:2465:2526:1110:8025
 
 MOONMAIL_LIVE=$MOONMAIL_LIVE moon test -p moonbitstack/moonmail/net
 sudo scripts/interop/services.sh stop</code></pre>
         </figure>
-        <p class="step__p">Those seven numbers are the clear and the TLS port of each protocol, in the order IMAP, POP3, SMTP. Set, every one of them has to answer — a missing service fails the test instead of passing it quietly. Unset, the tests that need a server do nothing and the rest of the suite is unchanged.</p>
+        <p class="step__p">Those numbers are the clear and the TLS port of each protocol — IMAP, POP3, SMTP — and then the sink's three: its SMTP, its POP3 and its HTTP API. The sink is <b>Mailpit</b>, which takes a message by SMTP, lists it over HTTP and hands it back by POP3, so one letter can be followed across three protocols. Set, every one of them has to answer — a missing service fails the test instead of passing it quietly. Unset, the tests that need a server do nothing and the rest of the suite is unchanged.</p>
         <p class="step__p">With a server up, a whole letter can be followed: the SMTP client hands it to Postfix, local delivery writes the Maildir, and the IMAP and POP3 clients read the same octets back out of Dovecot. The IMAP side is also filled by <b>imaptest</b>, the Dovecot project's own client, and the headers it wrote are fetched back with this library.</p>
         <div class="out"><span class="out__k">out</span><pre>* OK [CAPABILITY IMAP4rev1 ID ENABLE IDLE SASL-IR LITERAL+ AUTH=PLAIN AUTH=LOGIN] moonmail interop ready</pre></div>
         <p class="step__p">Two limits worth knowing before you point it at your own provider: the bundled TLS client speaks TLS 1.3 only, and a search for non-ASCII text has to name its charset — <code>CHARSET UTF-8 SUBJECT "日本語"</code> — because eight-bit octets cannot travel in an IMAP atom.</p>

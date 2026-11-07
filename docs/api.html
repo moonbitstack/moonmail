@@ -375,6 +375,19 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
   content:"";position:absolute;left:10px;top:-3px;width:9px;height:9px;border-radius:50%;
   border:1.5px solid var(--brass);opacity:.6;
 }
+/* a second package under the same cover: its path, a line, and what it is */
+.thread__more{
+  position:relative;margin:26px 0 14px 34px;padding:10px 0 0;
+  border-top:1px dashed color-mix(in srgb,var(--ink) 26%,transparent);
+}
+.thread__more--path{
+  margin:0;font:600 8px var(--font-mono);letter-spacing:.14em;text-transform:none;
+  color:var(--ink-2);
+}
+.thread__more--blurb{
+  margin:5px 0 0;font-size:12px;line-height:1.6;color:var(--ink-3);
+  overflow-wrap:anywhere;
+}
 .slip{
   position:relative;background:var(--paper);
   padding:16px 40px 15px 34px;margin-bottom:11px;
@@ -647,7 +660,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
         <li class="rail__item"><a class="rail__tag" href="#smtp" style="--tilt:.55deg"><span class="rail__no">04</span><span class="rail__name">smtp</span><span class="rail__count">12</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#imap" style="--tilt:-.6deg"><span class="rail__no">05</span><span class="rail__name">imap</span><span class="rail__count">15</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#pop3" style="--tilt:.5deg"><span class="rail__no">06</span><span class="rail__name">pop3</span><span class="rail__count">8</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#jmap" style="--tilt:.3deg"><span class="rail__no">07</span><span class="rail__name">jmap</span><span class="rail__count">17</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#jmap" style="--tilt:.3deg"><span class="rail__no">07</span><span class="rail__name">jmap</span><span class="rail__count">111</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#net" style="--tilt:-.45deg"><span class="rail__no">08</span><span class="rail__name">net</span><span class="rail__count">6</span></a></li>
       
       </ul>
@@ -1434,12 +1447,12 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
           <figcaption class="cover__text">
             <span class="cover__path">moonmail/jmap</span>
             <h2 class="cover__name">The protocol that fits in a page</h2>
-            <p class="cover__desc">JMAP as documents: the session, the request envelope, the answers. No socket, which is how a browser can speak it.</p>
+            <p class="cover__desc">JMAP as documents: twenty-seven methods and the objects they carry, described once in moonmodel, and the check that a document is what it claims to be. No socket, which is how a browser can speak it.</p>
             <div class="cover__foot">
               <span class="chip chip--spec">RFC 8620</span>
               <span class="chip chip--spec">RFC 8621</span>
               <span class="chip chip--spec">no I/O</span>
-              <span class="chip chip--count">17 entries</span>
+              <span class="chip chip--count">111 entries</span>
             </div>
           </figcaption>
         </figure>
@@ -1447,37 +1460,344 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
         <div class="thread">
           <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>created_id</b>(<i>Response</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>address</b>(<i>String</i>, parameters? : <i>Map</i>[<i>String</i>, <i>String</i>?]) -&gt; @json.<i>Json</i></code>
           </article>
           <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>discovery_url</b>(<i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>address_model</b>() -&gt; @moonmodel.<i>Model</i></code>
           </article>
           <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>email_ids</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>String</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>after</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
           </article>
           <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>emails</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Email</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>all_in_thread_have_keyword</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
           </article>
           <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>identities</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Identity</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>all_of</b>(<i>Array</i>[@json.<i>Json</i>]) -&gt; @json.<i>Json</i></code>
           </article>
           <article class="slip" style="--r:.14deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>mailboxes</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Mailbox</i>] raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>any_of</b>(<i>Array</i>[@json.<i>Json</i>]) -&gt; @json.<i>Json</i></code>
           </article>
           <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--fn">fn</span>
-            <code class="sig"><span class="k">fn</span> <b>resolve</b>(<i>String</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+            <code class="sig"><span class="k">fn</span> <b>bcc_address</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
           </article>
           <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>before</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>body_contains</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>body_structure</b>(@json.<i>Json</i>) -&gt; <i>EmailBodyPart</i>?</code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>cc_address</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>child_of</b>(<i>String</i>?) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>condition</b>(<i>Array</i>[(<i>String</i>, @json.<i>Json</i>)]) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>created_id</b>(<i>Response</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>delivery_status_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>discovery_url</b>(<i>String</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_address_group_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_address_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_body_of</b>(@moonmail.<i>Message</i>) -&gt; <i>EmailBody</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_body_part_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_body_value_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_from_message</b>(<i>BytesView</i>, mailbox_ids~ : <i>Array</i>[<i>String</i>], keywords? : <i>Array</i>[<i>String</i>], received_at? : <i>String</i>, blob_id? : <i>String</i>, thread_id? : <i>String</i>, id? : <i>String</i>) -&gt; @json.<i>Json</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_header_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_ids</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>String</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_object</b>(<i>Response</i>, <i>String</i>) -&gt; @json.<i>Json</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>email_properties</b> : <i>Array</i>[<i>String</i>]</code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>email_submission_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>emails</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Email</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>envelope</b>(mail_from~ : @json.<i>Json</i>, rcpt_to~ : <i>Array</i>[@json.<i>Json</i>]) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>envelope_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>from_address</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>has_any_role</b>() -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>has_attachment</b>() -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>has_keyword</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>has_property</b>(<i>String</i>, <i>String</i>) -&gt; <i>Bool</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>header_contains</b>(name~ : <i>String</i>, value~ : <i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>identities</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Identity</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>identity</b>(<i>String</i>, <i>String</i>, signature? : <i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>identity_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>in_mailbox</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>in_mailbox_other_than</b>(<i>Array</i>[<i>String</i>]) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailbox_ids</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>String</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailbox_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailbox_name_contains</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailbox_new</b>(name~ : <i>String</i>, parent_id? : <i>String</i>, role? : <i>String</i>, sort_order? : <i>Int32</i>, is_subscribed? : <i>Bool</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">value</span>
+            <code class="sig">let <b>mailbox_properties</b> : <i>Array</i>[<i>String</i>]</code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailbox_rights_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>mailboxes</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Mailbox</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>max_size</b>(<i>Int32</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>method_names</b>() -&gt; <i>Array</i>[<i>String</i>]</code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>min_size</b>(<i>Int32</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>model</b>(<i>String</i>) -&gt; @moonmodel.<i>Model</i>?</code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>models</b>() -&gt; <i>Array</i>[@moonmodel.<i>Model</i>]</code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>new_state</b>(<i>Response</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>none_in_thread_have_keyword</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>none_of</b>(<i>Array</i>[@json.<i>Json</i>]) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>not_created</b>(<i>Response</i>, <i>String</i>, <i>String</i>) -&gt; @json.<i>Json</i>? raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>not_keyword</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>preview_of</b>(@moonmail.<i>Message</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>properties</b>(<i>String</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>request_error_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>resolve</b>(<i>String</i>, <i>String</i>) -&gt; <i>String</i> raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>search_snippet_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>set_error_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>snippets</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>SearchSnippet</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>some_in_thread_have_keyword</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>subject_contains</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>submission_new</b>(identity~ : <i>String</i>, email~ : <i>String</i>, envelope? : @json.<i>Json</i>, send_at? : <i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>submissions</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>EmailSubmission</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>subscribed</b>() -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>text_search</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>thread_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>threads</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>Thread</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>to_address</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>updated_ids</b>(<i>Response</i>, <i>String</i>) -&gt; <i>Array</i>[<i>String</i>] raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>vacation_response</b>(enabled~ : <i>Bool</i>, from_date? : <i>String</i>, to_date? : <i>String</i>, subject? : <i>String</i>, text_body? : <i>String</i>, html_body? : <i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>vacation_response_model</b>() -&gt; @moonmodel.<i>Model</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>vacation_response_of</b>(<i>Response</i>, <i>String</i>) -&gt; <i>VacationResponse</i>? raise <i>Refused</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>with_role</b>(<i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Address</b> { <b>email</b> : <i>String</i>; <b>parameters</b> : <i>Map</i>[<i>String</i>, <i>String</i>] }</code>
+            <code class="sig"><span class="k">fn</span> <b>Address::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Call</b> { <b>name</b> : <i>String</i>; <b>args</b> : @json.<i>Json</i>; <b>tag</b> : <i>String</i> }</code>
           </article>
-          <article class="slip" style="--r:-.16deg">
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Comparator</b> { <b>property</b> : <i>String</i>; <b>ascending</b> : <i>Bool</i>; <b>collation</b> : <i>String</i>? }</code>
+            <code class="sig"><span class="k">fn</span> <b>Comparator::new</b>(property~ : <i>String</i>, ascending? : <i>Bool</i>, collation? : <i>String</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>DeliveryStatus</b> { <b>smtp_reply</b> : <i>String</i>; <b>delivered</b> : <i>String</i>; <b>displayed</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>DeliveryStatus::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Draft</b></code>
             <ul class="rows rows--one">
@@ -1490,7 +1810,7 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
             </ul>
             <code class="sig"><span class="k">fn</span> <b>Draft::new</b>(to~ : <i>Array</i>[<i>String</i>], subject~ : <i>String</i>, text~ : <i>String</i>) -&gt; <i>Self</i></code>
           </article>
-          <article class="slip" style="--r:.24deg">
+          <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Email</b></code>
             <ul class="rows rows--one">
@@ -1501,16 +1821,120 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>preview</b> : <i>String</i></code></li>
               <li><code><b>unread</b> : <i>Bool</i></code></li>
             </ul>
+            <code class="sig"><span class="k">fn</span> <b>Email::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>EmailAddress</b> { <b>name</b> : <i>String</i>?; <b>email</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>EmailAddress::of_header</b>(@moonmail.<i>Mailbox</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>EmailAddress::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>EmailAddress::to_string</b>(<i>Self</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>EmailBody</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>structure</b> : <i>EmailBodyPart</i></code></li>
+              <li><code><b>text</b> : <i>Array</i>[<i>EmailBodyPart</i>]</code></li>
+              <li><code><b>html</b> : <i>Array</i>[<i>EmailBodyPart</i>]</code></li>
+              <li><code><b>attachments</b> : <i>Array</i>[<i>EmailBodyPart</i>]</code></li>
+            </ul>
           </article>
           <article class="slip" style="--r:-.2deg">
             <span class="slip__kind kind--type">struct</span>
-            <code class="sig"><span class="k">struct</span> <b>Identity</b> { <b>id</b> : <i>String</i>; <b>name</b> : <i>String</i>?; <b>email</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">struct</span> <b>EmailBodyPart</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>part_id</b> : <i>String</i>?</code></li>
+              <li><code><b>blob_id</b> : <i>String</i>?</code></li>
+              <li><code><b>size</b> : <i>Int32</i></code></li>
+              <li><code><b>headers</b> : <i>Array</i>[<i>EmailHeader</i>]</code></li>
+              <li><code><b>name</b> : <i>String</i>?</code></li>
+              <li><code><b>media_type</b> : <i>String</i></code></li>
+              <li><code><b>charset</b> : <i>String</i>?</code></li>
+              <li><code><b>disposition</b> : <i>String</i>?</code></li>
+              <li><code><b>cid</b> : <i>String</i>?</code></li>
+              <li><code><b>language</b> : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>location</b> : <i>String</i>?</code></li>
+              <li><code><b>sub_parts</b> : <i>Array</i>[<i>EmailBodyPart</i>]?</code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>EmailBodyPart::leaves</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>Self</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>EmailBodyPart::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>EmailBodyPart::to_json</b>(<i>Self</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>EmailBodyValue</b> { <b>value</b> : <i>String</i>; <b>encoding_problem</b> : <i>Bool</i>; <b>truncated</b> : <i>Bool</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>EmailBodyValue::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>EmailHeader</b> { <b>name</b> : <i>String</i>; <b>value</b> : <i>String</i> }</code>
+            <code class="sig"><span class="k">fn</span> <b>EmailHeader::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>EmailImport</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>blob_id</b> : <i>String</i></code></li>
+              <li><code><b>mailbox_ids</b> : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>keywords</b> : <i>Array</i>[<i>String</i>]</code></li>
+              <li><code><b>received_at</b> : <i>String</i>?</code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>EmailImport::new</b>(blob_id~ : <i>String</i>, mailbox_ids~ : <i>Array</i>[<i>String</i>], keywords? : <i>Array</i>[<i>String</i>], received_at? : <i>String</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>EmailSubmission</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>id</b> : <i>String</i></code></li>
+              <li><code><b>identity_id</b> : <i>String</i></code></li>
+              <li><code><b>email_id</b> : <i>String</i></code></li>
+              <li><code><b>thread_id</b> : <i>String</i>?</code></li>
+              <li><code><b>envelope</b> : <i>Envelope</i>?</code></li>
+              <li><code><b>send_at</b> : <i>String</i>?</code></li>
+              <li><code><b>undo_status</b> : <i>String</i></code></li>
+              <li><code><b>delivery</b> : <i>Map</i>[<i>String</i>, <i>DeliveryStatus</i>]</code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>EmailSubmission::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Envelope</b> { <b>mail_from</b> : <i>Address</i>; <b>rcpt_to</b> : <i>Array</i>[<i>Address</i>] }</code>
+            <code class="sig"><span class="k">fn</span> <b>Envelope::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Identity</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>id</b> : <i>String</i></code></li>
+              <li><code><b>name</b> : <i>String</i>?</code></li>
+              <li><code><b>email</b> : <i>String</i></code></li>
+              <li><code><b>signature</b> : <i>String</i></code></li>
+              <li><code><b>may_delete</b> : <i>Bool</i></code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>Identity::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
           </article>
           <article class="slip" style="--r:.14deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Invocation</b> { <b>name</b> : <i>String</i>; <b>args</b> : @json.<i>Json</i>; <b>tag</b> : <i>String</i> }</code>
           </article>
           <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--type">enum</span>
+            <code class="sig"><span class="k">enum</span> <b>Kind</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>Mailbox</b></code></li>
+              <li><code><b>Thread</b></code></li>
+              <li><code><b>Email</b></code></li>
+              <li><code><b>SearchSnippet</b></code></li>
+              <li><code><b>Identity</b></code></li>
+              <li><code><b>EmailSubmission</b></code></li>
+              <li><code><b>VacationResponse</b></code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>Kind::capability</b>(<i>Self</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Kind::methods</b>(<i>Self</i>) -&gt; <i>Array</i>[<i>String</i>]</code>
+            <code class="sig"><span class="k">fn</span> <b>Kind::name</b>(<i>Self</i>) -&gt; <i>String</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Mailbox</b></code>
             <ul class="rows rows--one">
@@ -1520,35 +1944,80 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>parent_id</b> : <i>String</i>?</code></li>
               <li><code><b>total</b> : <i>Int32</i></code></li>
               <li><code><b>unread</b> : <i>Int32</i></code></li>
+              <li><code><b>total_threads</b> : <i>Int32</i></code></li>
+              <li><code><b>unread_threads</b> : <i>Int32</i></code></li>
+              <li><code><b>sort_order</b> : <i>Int32</i></code></li>
+              <li><code><b>is_subscribed</b> : <i>Bool</i></code></li>
+              <li><code><b>rights</b> : <i>Rights</i>?</code></li>
             </ul>
+            <code class="sig"><span class="k">fn</span> <b>Mailbox::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
           </article>
-          <article class="slip" style="--r:.18deg">
+          <article class="slip" style="--r:-.16deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Request</b> { <b>capabilities</b> : <i>Array</i>[<i>String</i>]; <b>calls</b> : <i>Array</i>[<i>Call</i>] }</code>
             <code class="sig"><span class="k">fn</span> <b>Request::call</b>(<i>Self</i>, <i>String</i>, @json.<i>Json</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::changes</b>(<i>Self</i>, <i>String</i>, <i>Kind</i>, since_state~ : <i>String</i>, max_changes? : <i>Int32</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::copy</b>(<i>Self</i>, from_account~ : <i>String</i>, account~ : <i>String</i>, kind~ : <i>Kind</i>, create~ : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], if_from_in_state? : <i>String</i>, if_in_state? : <i>String</i>, on_success_destroy_original? : <i>Bool</i>, destroy_from_if_in_state? : <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::echo</b>(<i>Self</i>, @json.<i>Json</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_destroy</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
-            <code class="sig"><span class="k">fn</span> <b>Request::email_get</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_get</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], <i>Array</i>[<i>String</i>], body_properties? : <i>Array</i>[<i>String</i>], fetch_text_body_values? : <i>Bool</i>, fetch_html_body_values? : <i>Bool</i>, fetch_all_body_values? : <i>Bool</i>, max_body_value_bytes? : <i>Int32</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_import</b>(<i>Self</i>, <i>String</i>, <i>Map</i>[<i>String</i>, <i>EmailImport</i>], if_in_state? : <i>String</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_mark_seen</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Bool</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_move</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_parse</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], properties? : <i>Array</i>[<i>String</i>], body_properties? : <i>Array</i>[<i>String</i>], fetch_text_body_values? : <i>Bool</i>, fetch_html_body_values? : <i>Bool</i>, fetch_all_body_values? : <i>Bool</i>, max_body_value_bytes? : <i>Int32</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_query</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Int32</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_query_changes</b>(<i>Self</i>, <i>String</i>, since_query_state~ : <i>String</i>, filter? : @json.<i>Json</i>, sort? : <i>Array</i>[<i>Comparator</i>], max_changes? : <i>Int32</i>, up_to_id? : <i>String</i>, calculate_total? : <i>Bool</i>, collapse_threads? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_query_filter</b>(<i>Self</i>, <i>String</i>, filter? : @json.<i>Json</i>, sort? : <i>Array</i>[<i>Comparator</i>], position? : <i>Int32</i>, limit? : <i>Int32</i>, calculate_total? : <i>Bool</i>, collapse_threads? : <i>Bool</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_set_draft</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Draft</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::email_set_update</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>Array</i>[(<i>String</i>, @json.<i>Json</i>)]) -&gt; <i>String</i></code>
-            <code class="sig"><span class="k">fn</span> <b>Request::email_submission_set</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
-            <code class="sig"><span class="k">fn</span> <b>Request::identity_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
-            <code class="sig"><span class="k">fn</span> <b>Request::mailbox_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_submission_cancel</b>(<i>Self</i>, <i>String</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::email_submission_set</b>(<i>Self</i>, <i>String</i>, <i>String</i>, <i>String</i>, envelope? : @json.<i>Json</i>, send_at? : <i>String</i>, on_success_update_email? : @json.<i>Json</i>, on_success_destroy_email? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::get</b>(<i>Self</i>, <i>String</i>, <i>Kind</i>, ids? : <i>Array</i>[<i>String</i>], properties? : <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::identity_get</b>(<i>Self</i>, <i>String</i>, ids? : <i>Array</i>[<i>String</i>], properties? : <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::identity_set</b>(<i>Self</i>, <i>String</i>, create? : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], update? : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], destroy? : <i>Array</i>[<i>String</i>], if_in_state? : <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::mailbox_get</b>(<i>Self</i>, <i>String</i>, ids? : <i>Array</i>[<i>String</i>], properties? : <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::mailbox_query</b>(<i>Self</i>, <i>String</i>, filter? : @json.<i>Json</i>, sort? : <i>Array</i>[<i>Comparator</i>], position? : <i>Int32</i>, limit? : <i>Int32</i>, calculate_total? : <i>Bool</i>, sort_as_tree? : <i>Bool</i>, filter_as_tree? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::mailbox_set</b>(<i>Self</i>, <i>String</i>, create? : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], update? : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], destroy? : <i>Array</i>[<i>String</i>], if_in_state? : <i>String</i>, on_destroy_remove_emails? : <i>Bool</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::new</b>() -&gt; <i>Self</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::query</b>(<i>Self</i>, <i>String</i>, <i>Kind</i>, filter? : @json.<i>Json</i>, sort? : <i>Array</i>[<i>Comparator</i>], position? : <i>Int32</i>, anchor? : <i>String</i>, anchor_offset? : <i>Int32</i>, limit? : <i>Int32</i>, calculate_total? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::query_changes</b>(<i>Self</i>, <i>String</i>, <i>Kind</i>, since_query_state~ : <i>String</i>, filter? : @json.<i>Json</i>, sort? : <i>Array</i>[<i>Comparator</i>], max_changes? : <i>Int32</i>, up_to_id? : <i>String</i>, calculate_total? : <i>Bool</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::search_snippet_get</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>], filter? : @json.<i>Json</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::set</b>(<i>Self</i>, <i>String</i>, <i>Kind</i>, create? : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], update? : <i>Map</i>[<i>String</i>, @json.<i>Json</i>], destroy? : <i>Array</i>[<i>String</i>], if_in_state? : <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::thread_get</b>(<i>Self</i>, <i>String</i>, <i>Array</i>[<i>String</i>]) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::to_json</b>(<i>Self</i>) -&gt; @json.<i>Json</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::to_string</b>(<i>Self</i>) -&gt; <i>String</i></code>
             <code class="sig"><span class="k">fn</span> <b>Request::using_capability</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Unit</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::vacation_response_get</b>(<i>Self</i>, <i>String</i>) -&gt; <i>String</i></code>
+            <code class="sig"><span class="k">fn</span> <b>Request::vacation_response_set</b>(<i>Self</i>, <i>String</i>, @json.<i>Json</i>, if_in_state? : <i>String</i>) -&gt; <i>String</i></code>
           </article>
-          <article class="slip" style="--r:-.16deg">
+          <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Response</b> { <b>invocations</b> : <i>Array</i>[<i>Invocation</i>]; <b>session_state</b> : <i>String</i> }</code>
             <code class="sig"><span class="k">fn</span> <b>Response::answer</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Invocation</i> raise <i>Refused</i></code>
             <code class="sig"><span class="k">fn</span> <b>Response::invocation</b>(<i>Self</i>, <i>String</i>) -&gt; <i>Invocation</i>?</code>
             <code class="sig"><span class="k">fn</span> <b>Response::parse</b>(<i>String</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
           </article>
-          <article class="slip" style="--r:.24deg">
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Rights</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>may_read_items</b> : <i>Bool</i></code></li>
+              <li><code><b>may_add_items</b> : <i>Bool</i></code></li>
+              <li><code><b>may_remove_items</b> : <i>Bool</i></code></li>
+              <li><code><b>may_set_seen</b> : <i>Bool</i></code></li>
+              <li><code><b>may_set_keywords</b> : <i>Bool</i></code></li>
+              <li><code><b>may_create_child</b> : <i>Bool</i></code></li>
+              <li><code><b>may_rename</b> : <i>Bool</i></code></li>
+              <li><code><b>may_delete</b> : <i>Bool</i></code></li>
+              <li><code><b>may_submit</b> : <i>Bool</i></code></li>
+            </ul>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>SearchSnippet</b> { <b>email_id</b> : <i>String</i>; <b>subject</b> : <i>String</i>?; <b>preview</b> : <i>String</i>? }</code>
+            <code class="sig"><span class="k">fn</span> <b>SearchSnippet::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
             <span class="slip__kind kind--type">struct</span>
             <code class="sig"><span class="k">struct</span> <b>Session</b></code>
             <ul class="rows rows--one">
@@ -1562,7 +2031,26 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
             </ul>
             <code class="sig"><span class="k">fn</span> <b>Session::parse</b>(<i>String</i>, <i>String</i>) -&gt; <i>Self</i> raise <i>Refused</i></code>
           </article>
-          <article class="slip" style="--r:-.2deg">
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>Thread</b> { <b>id</b> : <i>String</i>; <b>email_ids</b> : <i>Array</i>[<i>String</i>] }</code>
+            <code class="sig"><span class="k">fn</span> <b>Thread::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">struct</span>
+            <code class="sig"><span class="k">struct</span> <b>VacationResponse</b></code>
+            <ul class="rows rows--one">
+              <li><code><b>id</b> : <i>String</i></code></li>
+              <li><code><b>enabled</b> : <i>Bool</i></code></li>
+              <li><code><b>from_date</b> : <i>String</i>?</code></li>
+              <li><code><b>to_date</b> : <i>String</i>?</code></li>
+              <li><code><b>subject</b> : <i>String</i>?</code></li>
+              <li><code><b>text_body</b> : <i>String</i>?</code></li>
+              <li><code><b>html_body</b> : <i>String</i>?</code></li>
+            </ul>
+            <code class="sig"><span class="k">fn</span> <b>VacationResponse::parse</b>(@json.<i>Json</i>) -&gt; <i>Self</i></code>
+          </article>
+          <article class="slip" style="--r:.24deg">
             <span class="slip__kind kind--type">suberror</span>
             <code class="sig"><span class="k">suberror</span> <b>Refused</b></code>
             <ul class="rows rows--one">
@@ -1573,6 +2061,50 @@ html[data-theme="dark"] .cover__photo img{filter:saturate(.94) brightness(.9) co
               <li><code><b>BadUrl</b>(url~ : <i>String</i>)</code></li>
               <li><code><b>Failed</b>(call~ : <i>String</i>, kind~ : <i>String</i>, description~ : <i>String</i>)</code></li>
             </ul>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>all_objects</b>(draft? : <i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.14deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>faults</b>(<i>String</i>, @json.<i>Json</i>) -&gt; <i>Array</i>[@moonschema.<i>Fault</i>] raise</code>
+          </article>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>schema</b>(<i>String</i>, draft? : <i>String</i>) -&gt; @json.<i>Json</i> raise</code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>valid</b>(<i>String</i>, @json.<i>Json</i>) -&gt; <i>Bool</i> raise</code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b> { <b>Unknown</b>(name~ : <i>String</i>) }</code>
+          </article>
+        <div class="thread__more">
+          <h3 class="thread__more--path">moonmail/jmap/validate</h3>
+          <p class="thread__more--blurb">The descriptions turned into JSON Schema and run against a document.</p>
+        </div>
+          <article class="slip" style="--r:-.22deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>all_objects</b>(draft? : <i>String</i>) -&gt; @json.<i>Json</i></code>
+          </article>
+          <article class="slip" style="--r:.18deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>faults</b>(<i>String</i>, @json.<i>Json</i>) -&gt; <i>Array</i>[@moonschema.<i>Fault</i>] raise</code>
+          </article>
+          <article class="slip" style="--r:-.16deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>schema</b>(<i>String</i>, draft? : <i>String</i>) -&gt; @json.<i>Json</i> raise</code>
+          </article>
+          <article class="slip" style="--r:.24deg">
+            <span class="slip__kind kind--fn">fn</span>
+            <code class="sig"><span class="k">fn</span> <b>valid</b>(<i>String</i>, @json.<i>Json</i>) -&gt; <i>Bool</i> raise</code>
+          </article>
+          <article class="slip" style="--r:-.2deg">
+            <span class="slip__kind kind--type">suberror</span>
+            <code class="sig"><span class="k">suberror</span> <b>Refused</b> { <b>Unknown</b>(name~ : <i>String</i>) }</code>
           </article>
         </div>
       </section>

@@ -105,9 +105,15 @@ PACKAGES = [
         "photo": "meadow",
         "alt": "A green meadow under soft light",
         "tilt": ".3deg",
-        "blurb": "JMAP as documents: the session, the request envelope, the "
-                 "answers. No socket, which is how a browser can speak it.",
+        "blurb": "JMAP as documents: twenty-seven methods and the objects they "
+                 "carry, described once in moonmodel, and the check that a "
+                 "document is what it claims to be. No socket, which is how a "
+                 "browser can speak it.",
         "specs": ["RFC 8620", "RFC 8621", "no I/O"],
+        "also": [
+            ("moonmail/jmap/validate", "src/jmap/validate",
+             "The descriptions turned into JSON Schema and run against a document."),
+        ],
     },
     {
         "dir": "src/net",
@@ -333,12 +339,31 @@ def items_inline(members: list[str]) -> bool:
     return len(members) <= 3 and len(joined) <= 70
 
 
+def render_also(path: str, blurb: str, items: list[Item]) -> str:
+    """A second package under the same card: its own heading, its own entries.
+
+    `moonmail/jmap` and `moonmail/jmap/validate` are one subject — the objects and
+    the check that a document is one — so they share a cover and a rail entry
+    rather than taking two of each.
+    """
+    slips = "\n".join(render_slip(item, i) for i, item in enumerate(items))
+    return (
+        f'        <div class="thread__more">\n'
+        f'          <h3 class="thread__more--path">{esc(path)}</h3>\n'
+        f'          <p class="thread__more--blurb">{esc(blurb)}</p>\n'
+        f'        </div>\n{slips}'
+    )
+
+
 def render_package(pkg: dict, items: list[Item], number: int) -> tuple[str, str]:
     anchor = pkg["anchor"]
     chips = "".join(
         f'\n              <span class="chip chip--spec">{esc(s)}</span>' for s in pkg["specs"]
     )
     slips = "\n".join(render_slip(item, i) for i, item in enumerate(items))
+    for path, directory, blurb in pkg.get("also", []):
+        extra = collect(ROOT / directory)
+        slips = slips + "\n" + render_also(path, blurb, extra)
 
     block = f"""      <section class="pkg" id="{anchor}" data-pkg="{anchor}">
         <div class="pkg__wire" aria-hidden="true"></div>
@@ -398,6 +423,8 @@ def main() -> int:
 
     for number, pkg in enumerate(PACKAGES, start=1):
         items = collect(ROOT / pkg["dir"])
+        for _, directory, _ in pkg.get("also", []):
+            items = items + collect(ROOT / directory)
         counted += len(items)
         block, tag = render_package(pkg, items, number)
         blocks.append(block)
