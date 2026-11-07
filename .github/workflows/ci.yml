@@ -57,6 +57,13 @@ jobs:
             fi
           done
 
+      # imaptest's scripted tests say what a server answers; the replies this
+      # repository replays are generated from a pinned commit of them, so the
+      # file has to stay what that commit says it is.
+      - name: imap reply vectors are current
+        if: runner.os == 'Linux'
+        run: python3 scripts/gen_imap_vectors.py --check
+
       # dkimpy shares no code with this library, so the two directions are what
       # says RFC 6376 was read the same way twice: its signatures verified here,
       # which is the vectors the test replays, and this library's verified

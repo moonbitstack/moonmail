@@ -343,8 +343,12 @@ fn Scan::value(self : Scan) -> Value raise Refused {
       self.at += 1
       let items = []
       while !self.eat(b')') {
-        if items.length() > 0 {
-          self.space()
+        if items.length() > 0 && !self.eat(b' ') {
+          // A list may follow the one before it with no space between them, as
+          // a thread's do: `(1 (2 4)(3))`.
+          guard self.peek() is Some(b'(') else {
+            raise Malformed("expected a space at " + self.at.to_string())
+          }
         }
         if self.eat(b')') {
           break
@@ -409,10 +413,15 @@ fn Scan::value(self : Scan) -> Value raise Refused {
 }
 
 ///|
-/// Values to the end of the line.
+/// Values to the end of the line. RFC 5256 writes a thread's lists one after
+/// another with no space between them — `* THREAD (2)(3)` — so a value that is
+/// a list may follow the one before it directly.
 fn Scan::values(self : Scan) -> Array[Value] raise Refused {
   let out = []
-  while self.eat(b' ') {
+  while !self.at_end() {
+    if !self.eat(b' ') {
+      guard self.peek() is Some(b'(') else { break }
+    }
     if self.at_end() {
       break
     }

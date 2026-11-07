@@ -12,3 +12,8 @@ import {
   "moonbitstack/moonmail/sasl",
   "moonbitlang/core/encoding/utf8",
 }
+
+import {
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/string",
+} for "wbtest"
