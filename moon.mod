@@ -1,6 +1,6 @@
 name = "moonbitstack/moonmail"
 
-version = "0.1.6"
+version = "0.1.7"
 
 readme = "README.md"
 
@@ -40,16 +40,16 @@ description = "Email for MoonBit: the message model, MIME and DKIM, and SMTP, LM
 source = "src"
 
 import {
-  "moonbitstack/moonbase@0.4.3",
-  "moonbitstack/mooncrypt@0.4.12",
-  "moonbitstack/moonmime@0.2.3",
-  "moonbitstack/moondate@0.1.5",
+  "moonbitstack/moonbase@0.4.4",
+  "moonbitstack/mooncrypt@0.4.14",
+  "moonbitstack/moonmime@0.2.4",
+  "moonbitstack/moondate@0.1.6",
   "moonbitstack/moonucd@0.1.4",
-  "moonbitstack/moonnet@0.1.11",
-  "moonbitstack/moontls@0.9.15",
-  "moonbitstack/mooncred@0.6.10",
+  "moonbitstack/moonnet@0.1.12",
+  "moonbitstack/moontls@0.9.16",
+  "moonbitstack/mooncred@0.6.13",
   "moonbitlang/async@0.22.5",
-  "moonbitstack/moonfetch@0.1.6",
-  "moonbitstack/moonmodel@0.1.3",
-  "moonbitstack/moonschema@0.2.4",
+  "moonbitstack/moonfetch@0.1.7",
+  "moonbitstack/moonmodel@0.1.4",
+  "moonbitstack/moonschema@0.2.5",
 }
