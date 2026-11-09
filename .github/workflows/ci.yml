@@ -141,13 +141,15 @@ jobs:
 
       - name: imaptest
         run: |
-          # Pinned by content: the release tag moves, the binary this workflow
-          # was written against does not.
-          curl -fsSL -o "$RUNNER_TEMP/imaptest" \
-            https://github.com/dovecot/imaptest/releases/download/latest/imaptest-x86_64-ubuntu-24.04
-          echo "a4eb7e8dbf142b392c9f160c3c72c12d45cf544735da2585ccdf8ab333978147  $RUNNER_TEMP/imaptest" \
-            | sha256sum --check
-          chmod +x "$RUNNER_TEMP/imaptest"
+          # Dovecot ships imaptest only as a `latest` release rebuilt in place, so
+          # a checksum written here goes stale with each upstream build. The
+          # download is checked against the sums published beside it instead.
+          base=https://github.com/dovecot/imaptest/releases/download/latest
+          bin=imaptest-x86_64-ubuntu-24.04
+          curl -fsSL -o "$RUNNER_TEMP/$bin" "$base/$bin"
+          curl -fsSL -o "$RUNNER_TEMP/SHA256SUMS.txt" "$base/SHA256SUMS.txt"
+          (cd "$RUNNER_TEMP" && grep " $bin\$" SHA256SUMS.txt | sha256sum --check)
+          install -m 0755 "$RUNNER_TEMP/$bin" "$RUNNER_TEMP/imaptest"
           python3 scripts/interop/write_mbox.py "$RUNNER_TEMP/imaptest.mbox" 20
           "$RUNNER_TEMP/imaptest" \
             host=127.0.0.1 port=1143 user=mailtest pass=secret \
