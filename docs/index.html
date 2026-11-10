@@ -5,6 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MoonMail — mail, freshly picked</title>
 <meta name="theme-color" content="#f8f9f4">
+<script>
+/* The first paint follows the system setting. A choice made on this visit is
+   kept for the other pages of it; a reload goes back to following the system. */
+(function () {
+  var root = document.documentElement;
+  var choice = null;
+  try { choice = sessionStorage.getItem('moonmail-theme'); } catch (e) {}
+  var forced = null;
+  try { forced = new URLSearchParams(location.search).get('theme'); } catch (e) {}
+  var system = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  root.setAttribute('data-theme',
+    forced === 'dark' || forced === 'light' ? forced
+    : choice === 'dark' || choice === 'light' ? choice
+    : system);
+})();
+</script>
 <meta name="description" content="Parse, compose, sign and send email. One mailroom in MoonBit.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='6' fill='%232f6b3f'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-style='italic' font-size='38' fill='%23fff' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -909,16 +925,12 @@ html[data-theme="dark"] .ribbon--y{
     meta.setAttribute('content', theme === 'dark' ? '#0e1411' : '#f8f9f4');
   }
 
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
-  var forced = null;
-  try { forced = new URLSearchParams(location.search).get('theme'); } catch (e) {}
-  apply(forced === 'dark' || forced === 'light' ? forced : (saved === 'dark' ? 'dark' : 'light'));
+  apply(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
 
   btn.addEventListener('click', function () {
     var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     apply(next);
-    try { localStorage.setItem(KEY, next); } catch (e) {}
+    try { sessionStorage.setItem(KEY, next); } catch (e) {}
   });
 
   var mark = function () { root.classList.toggle('at-top', window.scrollY <= 4); };
