@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generate docs/api.html from the published package interfaces.
+"""Generate docs/api.html from the published package interfaces, and put the
+counts the pages state where the pages state them.
 
 Every package in the module carries a `pkg.generated.mbti` written by
 `moon info`. This script reads those files — nothing else — and fills the
@@ -9,7 +10,7 @@ reference cannot drift from what the compiler exports.
     python3 scripts/gen_api.py
 
 The output is deterministic: running it twice produces the same bytes, which
-is what the docs workflow checks with `git diff --exit-code docs/api.html`.
+is what the docs workflow checks with `git diff --exit-code docs/`.
 """
 
 from __future__ import annotations
@@ -28,6 +29,7 @@ PACKAGES = [
     {
         "dir": "src",
         "anchor": "root",
+        "kind": "model",
         "path": "moonmail",
         "title": "The message itself",
         "photo": "rainforest",
@@ -40,6 +42,7 @@ PACKAGES = [
     {
         "dir": "src/dkim",
         "anchor": "dkim",
+        "kind": "signing",
         "path": "moonmail/dkim",
         "title": "Sign it, then check the claim",
         "photo": "autumn",
@@ -52,6 +55,7 @@ PACKAGES = [
     {
         "dir": "src/sasl",
         "anchor": "sasl",
+        "kind": "auth",
         "path": "moonmail/sasl",
         "title": "Mechanisms, as a trait",
         "photo": "desert",
@@ -64,6 +68,7 @@ PACKAGES = [
     {
         "dir": "src/smtp",
         "anchor": "smtp",
+        "kind": "protocol",
         "path": "moonmail/smtp",
         "title": "Both ends of the relay",
         "photo": "river",
@@ -76,6 +81,7 @@ PACKAGES = [
     {
         "dir": "src/imap",
         "anchor": "imap",
+        "kind": "protocol",
         "path": "moonmail/imap",
         "title": "Stay in the mailbox",
         "photo": "lake",
@@ -88,6 +94,7 @@ PACKAGES = [
     {
         "dir": "src/pop3",
         "anchor": "pop3",
+        "kind": "protocol",
         "path": "moonmail/pop3",
         "title": "Pick up and go",
         "photo": "bamboo",
@@ -100,6 +107,7 @@ PACKAGES = [
     {
         "dir": "src/jmap",
         "anchor": "jmap",
+        "kind": "protocol",
         "path": "moonmail/jmap",
         "title": "The protocol that fits in a page",
         "photo": "meadow",
@@ -118,6 +126,7 @@ PACKAGES = [
     {
         "dir": "src/net",
         "anchor": "net",
+        "kind": "wire",
         "path": "moonmail/net",
         "title": "The one that touches a socket",
         "photo": "coast",
@@ -397,21 +406,158 @@ def render_package(pkg: dict, items: list[Item], number: int) -> tuple[str, str]
     return block, tag
 
 
-# The hand-written pages carry the module's version in three places: the two
-# postmarks and the manifest a reader copies out of the guide. Filling them here,
-# where the version is already read, is what keeps them from going stale: the
-# docs workflow regenerates and fails on a diff.
-VERSION_SPAN = re.compile(r"(<span data-version>)[^<]*(</span>)")
+# ---------------------------------------------------------------------------
+# The numbers the pages state
+#
+# A count that a reader sees is read out of the repository here and never typed
+# into the markup: the packages from the directories that carry a `moon.pkg`,
+# the mechanisms from the SASL interface, the guide's steps from its own
+# sections, the version from `moon.mod`. A page keeps a placeholder — a
+# `data-value` where a numeral belongs, a `data-word` where running prose wants
+# the number spelled out — and this script fills it. The docs workflow reruns
+# the script and fails on a diff, so a count that drifts is a red build rather
+# than a page that quietly lies.
+# ---------------------------------------------------------------------------
+
+SRC = ROOT / "src"
+GUIDE = ROOT / "docs" / "guide.html"
+
+VALUE = re.compile(r'(<[a-z]+ data-value="([a-z]+)">)[^<]*(</[a-z]+>)')
+WORD = re.compile(r'(<[a-z]+ data-word="([a-z]+)">)[^<]*(</[a-z]+>)')
+
+SPELLED = (
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+    "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+    "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
+)
+
+# One step is one section of the guide. Its short name for the contents rail is
+# written beside it, so the rail is rebuilt from the sections themselves and can
+# no longer lose one or keep a stale number.
+STEP = re.compile(r'<section class="step" id="([^"]+)" data-rail="([^"]+)">')
+STEP_NO = re.compile(r'(<span class="step__no">)\d+(</span>)')
+STEP_MARK = re.compile(r"<!-- \d\d -->")
+RAIL = re.compile(r'(<ul class="rail__list">)(.*?)(</ul>)', re.S)
+RAIL_TILTS = ["-.9deg", ".7deg", "-.5deg", ".9deg", "-.7deg", ".6deg",
+              "-.8deg", ".5deg", "-.6deg", ".8deg"]
+
+# A mechanism is a type the SASL package implements its own trait for.
+MECHANISM = re.compile(r"^pub impl Mechanism for ([A-Za-z0-9_]+)$", re.M)
 
 
-def fill_versions(version: str) -> int:
+def spell(count: int) -> str:
+    """The count as a word, for the places where a numeral would shout."""
+    return SPELLED[count] if 0 <= count < len(SPELLED) else str(count)
+
+
+def fill_numbers(text: str, values: dict[str, str]) -> tuple[str, int]:
+    """Fill every placeholder. A key nothing computes is a bug in the page, so
+    it stops the run instead of leaving the markup as it was."""
     filled = 0
-    for page in sorted((ROOT / "docs").glob("*.html")):
-        text = page.read_text(encoding="utf-8")
-        filled_text, count = VERSION_SPAN.subn(rf"\g<1>{version}\g<2>", text)
-        if count and filled_text != text:
-            page.write_text(filled_text, encoding="utf-8", newline="\n")
-            filled += count
+
+    def value(m: re.Match[str]) -> str:
+        nonlocal filled
+        key = m.group(2)
+        if key not in values:
+            raise SystemExit(f"nothing computes data-value={key!r}")
+        filled += 1
+        return f"{m.group(1)}{values[key]}{m.group(3)}"
+
+    def word(m: re.Match[str]) -> str:
+        nonlocal filled
+        key = m.group(2)
+        if not values.get(key, "").isdigit():
+            raise SystemExit(f"no count is computed for data-word={key!r}")
+        filled += 1
+        return f"{m.group(1)}{spell(int(values[key]))}{m.group(3)}"
+
+    return WORD.sub(word, VALUE.sub(value, text)), filled
+
+
+def module_packages() -> list[str]:
+    """Every package the module publishes: one per directory under src/ that
+    carries a moon.pkg. The example programs are not part of the library."""
+    found: list[str] = []
+    for pkg in sorted(SRC.rglob("moon.pkg")):
+        rel = pkg.parent.relative_to(SRC)
+        if rel.parts and rel.parts[0] == "examples":
+            continue
+        found.append("." if not rel.parts else rel.as_posix())
+    return found
+
+
+def mechanisms() -> int:
+    """How many mechanisms a caller can build."""
+    mbti = (SRC / "sasl" / "pkg.generated.mbti").read_text(encoding="utf-8")
+    return len(MECHANISM.findall(mbti))
+
+
+def version_of_module() -> str:
+    """The version a reader writes in a manifest, from the module file."""
+    mod = ROOT / "moon.mod"
+    m = re.search(r'version\s*=\s*"([^"]+)"', mod.read_text(encoding="utf-8")) if mod.exists() else None
+    if not m:
+        raise SystemExit("moon.mod has no version")
+    return m.group(1)
+
+
+def card_directory(path: str) -> str:
+    """`src/jmap/validate` as the package list spells it: `jmap/validate`."""
+    return path.removeprefix("src").lstrip("/") or "."
+
+
+def check_cards(packages: list[str]) -> None:
+    """A package with no card would be missing from the reference, and a card
+    for a package that is gone would hang an empty thread; both stop the run."""
+    carded = {card_directory(pkg["dir"]) for pkg in PACKAGES}
+    for pkg in PACKAGES:
+        for _, directory, _ in pkg.get("also", []):
+            carded.add(card_directory(directory))
+    missing = sorted(set(packages) - carded)
+    extra = sorted(carded - set(packages))
+    if missing:
+        raise SystemExit("no card in PACKAGES for: " + ", ".join(missing))
+    if extra:
+        raise SystemExit("PACKAGES names a package that is gone: " + ", ".join(extra))
+
+
+def guide_steps() -> list[tuple[str, str]]:
+    """The guide's steps, in the order they are read."""
+    found = STEP.findall(GUIDE.read_text(encoding="utf-8"))
+    if not found:
+        raise SystemExit("docs/guide.html has no step section")
+    return found
+
+
+def number_the_guide(text: str, steps: list[tuple[str, str]]) -> str:
+    """Renumber the steps, the captions above them and the contents rail, so
+    that inserting a step in the middle moves every number by itself."""
+    found = list(STEP.finditer(text))
+    out: list[str] = []
+    cut = 0
+    for index, match in enumerate(found, start=1):
+        end = found[index].start() if index < len(found) else len(text)
+        out.append(STEP_MARK.sub(f"<!-- {index:02d} -->", text[cut:match.start()]))
+        body = STEP_NO.sub(
+            lambda m, n=index: f"{m.group(1)}{n:02d}{m.group(2)}",
+            text[match.start():end],
+            count=1,
+        )
+        out.append(body)
+        cut = end
+    out.append(text[cut:])
+    text = "".join(out)
+
+    items = "\n".join(
+        f'        <li class="rail__item"><a class="rail__tag" href="#{anchor}"'
+        f' style="--tilt:{RAIL_TILTS[(n - 1) % len(RAIL_TILTS)]}">'
+        f'<span class="rail__no">{n:02d}</span>'
+        f'<span class="rail__name">{esc(name)}</span></a></li>'
+        for n, (anchor, name) in enumerate(steps, start=1)
+    )
+    filled, count = RAIL.subn(lambda m: f"{m.group(1)}\n{items}\n      {m.group(3)}", text, count=1)
+    if not count:
+        raise SystemExit("docs/guide.html has no rail list to fill")
     return filled
 
 
@@ -420,6 +566,10 @@ def main() -> int:
     blocks: list[str] = []
     tags: list[str] = []
     counted = 0
+
+    packages = module_packages()
+    check_cards(packages)
+    steps = guide_steps()
 
     for number, pkg in enumerate(PACKAGES, start=1):
         items = collect(ROOT / pkg["dir"])
@@ -430,25 +580,34 @@ def main() -> int:
         blocks.append(block)
         tags.append(tag)
 
-    version = "0.1.0"
-    mod = ROOT / "moon.mod"
-    if mod.exists():
-        m = re.search(r'version\s*=\s*"([^"]+)"', mod.read_text(encoding="utf-8"))
-        if m:
-            version = m.group(1)
+    values = {
+        "packages": str(len(packages)),
+        "protocols": str(sum(1 for pkg in PACKAGES if pkg["kind"] == "protocol")),
+        "sasl": str(mechanisms()),
+        "steps": str(len(steps)),
+        "version": version_of_module(),
+    }
 
     page = (
         template.replace("<!--RAIL-->", "\n" + "\n".join(tags) + "\n      ")
         .replace("<!--MAIN-->", "\n" + "\n\n".join(blocks) + "\n    ")
-        .replace("<!--N_PKG-->", str(len(PACKAGES)))
-        .replace("<!--N_PROTO-->", "3")
-        .replace("<!--N_SASL-->", "6")
-        .replace("<!--VERSION-->", version)
     )
+    page, _ = fill_numbers(page, values)
     OUT.write_text(page, encoding="utf-8", newline="\n")
-    filled = fill_versions(version)
-    print(f"{OUT.relative_to(ROOT)}: {len(PACKAGES)} packages, {counted} slips")
-    print(f"{version} written into {filled} places on the pages")
+
+    filled = 0
+    for path in sorted((ROOT / "docs").glob("*.html")):
+        text = path.read_text(encoding="utf-8")
+        if path == GUIDE:
+            text = number_the_guide(text, steps)
+        text, count = fill_numbers(text, values)
+        if text != path.read_text(encoding="utf-8"):
+            path.write_text(text, encoding="utf-8", newline="\n")
+        filled += count
+
+    print(f"{OUT.relative_to(ROOT)}: {len(packages)} packages, {counted} slips")
+    print(" ".join(f"{key} {value}" for key, value in values.items()))
+    print(f"{filled} counts on the pages")
     return 0
 
 

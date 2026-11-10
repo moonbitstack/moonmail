@@ -556,11 +556,11 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
   </header>
 
   <section class="mast">
-    <p class="kicker">the guide · ten steps</p>
+    <p class="kicker">the guide · <span data-word="steps">ten</span> steps</p>
     <h1>Start with a <em>letter</em><span class="dot">.</span></h1>
     <p class="lede">One message in, one message out, then a signature, a login, a socket you own, and the servers to point it at. Every step shows what you type and what comes back.</p>
     <div class="facts">
-      <span class="fact" style="--r:-1.2deg"><b>10</b><span>steps</span></span>
+      <span class="fact" style="--r:-1.2deg"><b data-value="steps">10</b><span>steps</span></span>
       <span class="fact" style="--r:1deg"><b>1</b><span>dependency</span></span>
       <span class="fact" style="--r:-.6deg"><b>0</b><span>sockets to parse</span></span>
     </div>
@@ -578,7 +578,8 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
         <li class="rail__item"><a class="rail__tag" href="#login" style="--tilt:.6deg"><span class="rail__no">06</span><span class="rail__name">log in</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#send" style="--tilt:-.8deg"><span class="rail__no">07</span><span class="rail__name">send</span></a></li>
         <li class="rail__item"><a class="rail__tag" href="#drive" style="--tilt:.5deg"><span class="rail__no">08</span><span class="rail__name">drive it</span></a></li>
-        <li class="rail__item"><a class="rail__tag" href="#servers" style="--tilt:-.6deg"><span class="rail__no">09</span><span class="rail__name">real servers</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#jmap" style="--tilt:-.6deg"><span class="rail__no">09</span><span class="rail__name">no socket</span></a></li>
+        <li class="rail__item"><a class="rail__tag" href="#servers" style="--tilt:.8deg"><span class="rail__no">10</span><span class="rail__name">real servers</span></a></li>
       </ul>
       <div class="rail__plumb" aria-hidden="true">
         <svg viewBox="0 0 13 20"><path d="M6.5 0 8 2v10l2 2v6H3v-6l2-2V2Z"/></svg>
@@ -589,11 +590,11 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
     <main class="content">
       <div class="howto">
         <span class="howto__k">before you start</span>
-        <p>Each step is one letter on the desk: what you <b>type</b>, then what comes back. Steps 1–5 and 9 need no network at all — they work on bytes you already have.</p>
+        <p>Each step is one letter on the desk: what you <b>type</b>, then what comes back. Every step but the last works on bytes you already have; only the servers at the end want a socket.</p>
       </div>
 
       <!-- 01 -->
-      <section class="step" id="install">
+      <section class="step" id="install" data-rail="install">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">01</span><h2 class="step__t">Add one dependency</h2></div>
         <p class="step__p">The root package carries the message model. Protocol clients are sub-packages of the same module, so one entry is enough; <code>moon add</code> writes it for you.</p>
@@ -608,7 +609,7 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
           <span class="code__lang">moon.mod.json</span>
           <pre><code>{
   "deps": {
-    "moonbitstack/moonmail": "<span data-version>0.1.7</span>"
+    "moonbitstack/moonmail": "<span data-value="version">0.1.7</span>"
   }
 }</code></pre>
         </figure>
@@ -626,7 +627,7 @@ html[data-theme="dark"] .tok-n{color:#d9715a}
       </section>
 
       <!-- 02 -->
-      <section class="step" id="parse">
+      <section class="step" id="parse" data-rail="read">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">02</span><h2 class="step__t">Read a letter</h2></div>
         <p class="step__p">A <code>.eml</code> file is bytes. <b>Message::parse</b> turns them into headers and a tree of parts, undoing transfer encodings as it goes. The readers then hand back typed values, not strings you have to unpick.</p>
@@ -648,7 +649,7 @@ Thanks for signing up — your first letter is inside.
       </section>
 
       <!-- 03 -->
-      <section class="step" id="parts">
+      <section class="step" id="parts" data-rail="look inside">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">03</span><h2 class="step__t">Look inside</h2></div>
         <p class="step__p">A part is a <b>Message</b> too, so walking the tree is a four-line recursion. <b>Body</b> has three cases and nothing else: a leaf, a multipart, or an embedded letter.</p>
@@ -679,7 +680,7 @@ walk(message, 0)</code></pre>
       </section>
 
       <!-- 04 -->
-      <section class="step" id="compose">
+      <section class="step" id="compose" data-rail="write">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">04</span><h2 class="step__t">Write one back</h2></div>
         <p class="step__p"><b>Message::new</b> picks the nesting for you: plain text alone stays flat, text with HTML becomes <b>alternative</b>, and anything with an attachment becomes <b>mixed</b>. You name the parts, not the tree.</p>
@@ -708,7 +709,7 @@ multipart/mixed
       </section>
 
       <!-- 05 -->
-      <section class="step" id="sign">
+      <section class="step" id="sign" data-rail="sign">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">05</span><h2 class="step__t">Sign it</h2></div>
         <p class="step__p">DKIM signs a set of headers and a hash of the body. <b>sign</b> returns one finished <b>DKIM-Signature</b> line; you put it in front of the message you already have, untouched.</p>
@@ -743,7 +744,7 @@ let verdicts = @dkim.verify(
       </section>
 
       <!-- 06 -->
-      <section class="step" id="login">
+      <section class="step" id="login" data-rail="log in">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">06</span><h2 class="step__t">Log in</h2></div>
         <p class="step__p">A mechanism is a value, not a global. Build the one you want and hand it to whichever client you are driving — the same object works on SMTP, IMAP and POP3.</p>
@@ -769,7 +770,7 @@ println(mechanism.name())</code></pre>
       </section>
 
       <!-- 07 -->
-      <section class="step" id="send">
+      <section class="step" id="send" data-rail="send">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">07</span><h2 class="step__t">Send it</h2></div>
         <p class="step__p">The client is a state machine: you queue commands, and <b>next_write</b> hands back bytes only when the protocol allows them. With no PIPELINING announced that is strict turn-taking; with it, a whole envelope goes out at once.</p>
@@ -791,7 +792,7 @@ DATA</pre></div>
       </section>
 
       <!-- 08 -->
-      <section class="step" id="drive">
+      <section class="step" id="drive" data-rail="drive it">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">08</span><h2 class="step__t">Drive it yourself</h2></div>
         <p class="step__p">Every protocol package speaks the same three-call contract — <b>feed</b>, <b>next_write</b>, and a way to see what is still pending. That is why a test needs no socket: you feed recorded bytes and assert on the bytes it wants to write back.</p>
@@ -814,7 +815,7 @@ println(client.pending())</code></pre>
       </section>
 
       <!-- 09 -->
-      <section class="step" id="jmap">
+      <section class="step" id="jmap" data-rail="no socket">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">09</span><h2 class="step__t">When there is no socket to open</h2></div>
         <p class="step__p">A page cannot open a TCP connection — no Web API does it — so SMTP, IMAP and POP3 are out of reach of the tab a letter is written in. <b>JMAP</b> is the way round: the same three jobs as JSON documents over HTTPS, which a page fetches like any other resource.</p>
@@ -839,7 +840,7 @@ Sent: 0 unread</pre></div>
         <p class="step__p">A message becomes the object a server answers <code>Email/get</code> with, body structure and preview and all, which is how an importer or a server of your own builds one: <code>@jmap.email_from_message(raw, mailbox_ids=["mb-in"])</code>.</p>
       </section>
 
-      <section class="step" id="servers">
+      <section class="step" id="servers" data-rail="real servers">
         <span class="step__cord" aria-hidden="true"></span>
         <div class="step__head"><span class="step__no">10</span><h2 class="step__t">Point it at a real server</h2></div>
         <p class="step__p">A test can feed recorded bytes, but a reply nobody wrote down is the one that teaches you something. The repository carries a harness that starts a Maildir, a <b>Dovecot</b> that serves it over IMAP and POP3, and a <b>Postfix</b> that delivers into it — on ports of their own, under their own configuration, so nothing already running on the machine is touched.</p>

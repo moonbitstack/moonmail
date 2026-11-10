@@ -27,8 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 
 # Placeholders left in scripts/api_template.html for the generator to fill.
-MARKERS = ("<!--RAIL-->", "<!--MAIN-->", "<!--N_PKG-->", "<!--N_PROTO-->",
-           "<!--N_SASL-->", "<!--VERSION-->")
+MARKERS = ("<!--RAIL-->", "<!--MAIN-->")
 
 # A couple of strings that must not come back: the engine is the wasm build the
 # reader compiles, not the wasm-gc one, and no page is allowed to ship a stub.
