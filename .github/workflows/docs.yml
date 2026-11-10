@@ -46,6 +46,12 @@ jobs:
           python3 scripts/gen_api.py
           git diff --exit-code -- docs/
 
+      # The generator writes the page; this reads the same interfaces by another
+      # route and looks every exported name up in its package's section, so an
+      # item the generator drops is caught rather than published missing.
+      - name: every exported name is on the page
+        run: python3 scripts/check_api.py
+
       - name: the pages are self-contained
         run: python3 scripts/check_docs.py
 
