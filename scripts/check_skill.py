@@ -31,6 +31,7 @@ IMPORTS = (
     MODULE + "/dkim",
     MODULE + "/imap",
     MODULE + "/jmap",
+    MODULE + "/jmap/validate",
     MODULE + "/sasl",
     MODULE + "/net",
 )

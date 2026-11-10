@@ -5,10 +5,11 @@ description: Email in MoonBit — parse and write RFC 5322 messages with MIME pa
 
 # moonmail
 
-One module, seven packages: `moonbitstack/moonmail` for the message model,
-`moonmail/smtp`, `moonmail/imap`, `moonmail/pop3`, `moonmail/sasl` and
-`moonmail/jmap` for the protocol states, and `moonmail/net` for the sockets.
-Every protocol package but the last is a state machine with no I/O — octets in,
+One module, nine packages: `moonbitstack/moonmail` for the message model,
+`moonmail/dkim`, `moonmail/sasl`, `moonmail/smtp`, `moonmail/imap`,
+`moonmail/pop3` and `moonmail/jmap` with `moonmail/jmap/validate` beside it for
+the protocol states and the objects they carry, and `moonmail/net` for the
+sockets. Every package but the last is a state machine with no I/O — octets in,
 events out — so only `net` needs a network.
 
 ```bash
@@ -105,6 +106,23 @@ pub async fn inbox(host : String, security : @net.Security) -> Unit raise {
 Search returns sequence numbers unless `uid=true` is passed; a `FETCH` after a
 sequence-number search has to use `uid=false` to match it.
 
+POP3 is the short one: log in, read the listing, take a message and leave. `list`
+answers the messages and their octets, `retr` the message itself with the dot
+padding already gone.
+
+```moonbit native
+///|
+pub async fn pop3(host : String, security : @net.Security) -> Unit raise {
+  let pop = @net.Pop3::connect(host, security, port=995)
+  pop.login("alice", "secret")
+  let listing = pop.list()
+  println(listing.length().to_string() + " messages waiting")
+  let letter = pop.retr(1)
+  println(letter.length().to_string() + " octets")
+  pop.quit()
+}
+```
+
 ## Over JMAP, when there is no socket
 
 A page cannot open a TCP connection, so SMTP and IMAP are out of its reach
@@ -123,12 +141,16 @@ table: `@jmap.properties("Email")`, `@jmap.model("Mailbox")`, and
 
 ```moonbit
 ///|
-pub fn list(response_json : String) -> Unit raise {
+pub fn queue(response_json : String) -> Unit raise {
   let request = @jmap.Request::new()
-  let tag = request.mailbox_get("u-1")
+  let boxes = request.mailbox_get("u-1")
+  let found = request.email_query("u-1", "mb-in", 25)
   let answer = @jmap.Response::parse(response_json)
-  for mailbox in @jmap.mailboxes(answer, tag) {
+  for mailbox in @jmap.mailboxes(answer, boxes) {
     println(mailbox.name + " " + mailbox.unread.to_string() + " unread")
+  }
+  for id in @jmap.email_ids(answer, found) {
+    println(id)
   }
 }
 ```
@@ -136,6 +158,22 @@ pub fn list(response_json : String) -> Unit raise {
 A request carries only the capabilities its calls use, so reading the inbox still
 works on a server that cannot send. `@jmap.Request::new()` claims `core` and
 `mail`; a submission adds `submission` by itself.
+
+A server's answer is only as good as the document it carries, which is what the
+validator is for — it reads the same moonmodel description and names the
+properties that do not fit:
+
+```moonbit
+///|
+pub fn checked(answer : @jmap.Response, tag : String) -> Unit raise {
+  let object = @jmap.email_object(answer, tag)
+  if @validate.valid("Email", object) {
+    println("the document is an Email")
+  } else {
+    println(@validate.faults("Email", object).length().to_string() + " faults")
+  }
+}
+```
 
 ## Sign, and check a signature
 
@@ -167,7 +205,7 @@ conformance runs, not a mail store — nothing outlives the process.
 - **Non-ASCII search needs a charset.** `SEARCH` refuses eight-bit octets in an
   atom, so write `CHARSET UTF-8 SUBJECT "日本語"` with the string quoted.
 - **`net` is native and wasm only.** It does not build for js or wasm-gc; the
-  other six packages do.
+  other eight packages do.
 - **A page has no socket.** In a browser, reach the server over JMAP with
   `@moonmail/jmap` instead; that package is JSON in and JSON out.
 - **`pop3` bounds status lines, not message lines.** A message written as one
