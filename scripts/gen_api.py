@@ -435,6 +435,7 @@ SPELLED = (
 # written beside it, so the rail is rebuilt from the sections themselves and can
 # no longer lose one or keep a stale number.
 STEP = re.compile(r'<section class="step" id="([^"]+)" data-rail="([^"]+)">')
+ANY_STEP = re.compile(r'<section class="step"')
 STEP_NO = re.compile(r'(<span class="step__no">)\d+(</span>)')
 STEP_MARK = re.compile(r"<!-- \d\d -->")
 RAIL = re.compile(r'(<ul class="rail__list">)(.*?)(</ul>)', re.S)
@@ -522,10 +523,14 @@ def check_cards(packages: list[str]) -> None:
 
 
 def guide_steps() -> list[tuple[str, str]]:
-    """The guide's steps, in the order they are read."""
-    found = STEP.findall(GUIDE.read_text(encoding="utf-8"))
+    """The guide's steps, in the order they are read. A section without its rail
+    name would drop out of both the count and the rail, so it stops the run."""
+    text = GUIDE.read_text(encoding="utf-8")
+    found = STEP.findall(text)
     if not found:
         raise SystemExit("docs/guide.html has no step section")
+    if len(found) != len(ANY_STEP.findall(text)):
+        raise SystemExit("a step section in docs/guide.html has no data-rail")
     return found
 
 

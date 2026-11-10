@@ -42,6 +42,12 @@ REMOTE = ("http://", "https://", "//", "mailto:", "data:", "#", "javascript:")
 # Paths assembled in script are checked by the image sweep below, not as links.
 SCRIPTED = re.compile(r"<(script|style)\b[^>]*>.*?</\1>", re.S)
 
+# A fact chip shows a count of something in the repository: the packages, the
+# protocols, the mechanisms, the steps, the version. The number is written by
+# scripts/gen_api.py from the source, never typed here, and this is what says so.
+FACT = re.compile(r"<b([^>]*)>([^<]*)</b>\s*<span>([^<]*)</span>")
+COUNTED = {"packages", "protocols", "sasl mechanisms", "steps", "interface"}
+
 
 def markup(page: Path) -> str:
     """The page with script and style removed, so only real attributes remain."""
@@ -61,6 +67,15 @@ def check_links(page: Path) -> list[str]:
         seen.add(clean)
         if not (page.parent / clean).exists():
             problems.append(f"{page.name}: broken link {target}")
+    return problems
+
+
+def check_facts(page: Path) -> list[str]:
+    """A chip that states a count has to take it from the generator."""
+    problems = []
+    for attrs, _, label in FACT.findall(markup(page)):
+        if label.strip() in COUNTED and "data-value" not in attrs:
+            problems.append(f"{page.name}: the {label.strip()} count is typed in, not filled")
     return problems
 
 
@@ -113,6 +128,7 @@ def main() -> int:
     for page in pages:
         text = page.read_text(encoding="utf-8")
         problems += check_links(page)
+        problems += check_facts(page)
         for marker in MARKERS:
             if marker in text:
                 problems.append(f"{page.name}: unfilled template marker {marker}")
