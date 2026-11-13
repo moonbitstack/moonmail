@@ -80,5 +80,5 @@ pub fn Request::to_json(self : Request) -> Json {
 
 ///|
 pub fn Request::to_string(self : Request) -> String {
-  self.to_json().stringify()
+  @moonjson.dumps(self.to_json())
 }

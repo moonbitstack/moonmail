@@ -32,7 +32,7 @@ pub extend Refused with Debug::{to_repr}
 /// Read a JSON document, or refuse it as a whole: a JMAP body that does not
 /// parse has no partial reading worth keeping.
 fn reads(body : String) -> Json raise Refused {
-  @json.parse(body[:]) catch {
+  @moonjson.loads(body, @moonjson.strict) catch {
     _ => raise Refused::Malformed(at="document")
   }
 }

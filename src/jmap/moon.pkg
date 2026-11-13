@@ -6,12 +6,16 @@
 // https://www.rfc-editor.org/rfc/rfc8620
 // https://www.rfc-editor.org/rfc/rfc8621
 import {
-  "moonbitlang/core/json",
   "moonbitstack/moonmail",
   "moonbitstack/moonmime",
   "moonbitstack/moondate",
   "moonbitstack/moonmodel",
+  "moonbitstack/moonjson",
 }
+
+import {
+  "moonbitlang/core/json",
+} for "wbtest"
 
 import {
   "moonbitlang/core/encoding/utf8",

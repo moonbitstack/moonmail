@@ -52,4 +52,5 @@ import {
   "moonbitstack/moonfetch@0.1.8",
   "moonbitstack/moonmodel@0.1.4",
   "moonbitstack/moonschema@0.2.5",
+  "moonbitstack/moonjson@0.5.0",
 }
