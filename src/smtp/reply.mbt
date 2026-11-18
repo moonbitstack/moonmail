@@ -153,7 +153,7 @@ fn Inbox::push(self : Inbox, more : BytesView) -> Unit {
   if more.length() == 0 {
     return
   }
-  let out = Buffer(size_hint=self.data.length() - self.at + more.length())
+  let out = Buffer(capacity=self.data.length() - self.at + more.length())
   out.write_bytes(self.data[self.at:])
   out.write_bytes(more)
   self.data = out.to_bytes()

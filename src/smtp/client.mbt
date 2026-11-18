@@ -792,7 +792,7 @@ fn announced(reply : Reply) -> Map[String, String] {
 /// The message as `DATA` carries it: every line ended by CRLF whatever ended
 /// it, a dot doubled at the start of a line, and the `.` line that closes it.
 fn stuff(message : BytesView) -> Bytes {
-  let out = Buffer(size_hint=message.length() + 16)
+  let out = Buffer(capacity=message.length() + 16)
   let mut start = true
   let mut i = 0
   while i < message.length() {

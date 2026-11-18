@@ -187,7 +187,7 @@ pub(all) enum Response {
     flags~ : Array[String],
     delimiter~ : String?,
     name~ : String,
-    extended~ : Array[Value]
+    extended~ : Array[Value],
   )
   Status(String, Map[String, Int64])
   Esearch(tag~ : String?, uid~ : Bool, items~ : Map[String, Value])

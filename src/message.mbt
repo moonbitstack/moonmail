@@ -606,7 +606,7 @@ fn fits(data : Bytes, eight : Bool) -> Bool {
 ///|
 /// Every line end made CRLF, whatever it was.
 fn crlf(data : Bytes) -> Bytes {
-  let out = Buffer(size_hint=data.length() + 16)
+  let out = Buffer(capacity=data.length() + 16)
   let mut i = 0
   while i < data.length() {
     let b = data[i]
